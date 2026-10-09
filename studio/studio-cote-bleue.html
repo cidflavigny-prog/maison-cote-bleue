@@ -104,7 +104,26 @@ details.add .panel{border:0;border-radius:0}
 .preview{background:var(--surface);border:2px solid var(--line);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:10px;align-items:center}
 .preview canvas{width:100%;max-width:360px;height:auto;border-radius:10px;box-shadow:4px 4px 0 var(--hard);border:2px solid #0B1B3F;background:#DCE8FF}
 .preview.story canvas{max-width:250px}
-.seg{display:grid;grid-template-columns:1fr 1fr;border:2px solid var(--line);border-radius:12px;overflow:hidden}
+.recap{gap:12px}
+.recap-block{display:flex;flex-direction:column;gap:8px;border-top:2px solid var(--surface-2);padding-top:12px}
+.lbl{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.recap-text{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--ink)}
+.recap-full summary{cursor:pointer;font-weight:800;color:var(--brand);min-height:44px;display:flex;align-items:center}
+.recap-full .recap-text{font-size:14px;max-height:60vh;overflow:auto;background:var(--surface-2);border-radius:10px;padding:12px}
+.contacts{display:flex;flex-direction:column;gap:10px}
+.contact{background:var(--surface-2);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.contact .btn{align-self:flex-start;min-height:40px}
+.chip .n{font-size:11px;background:var(--sun);color:#0B1B3F;border-radius:100px;padding:0 6px}
+.chip .n:empty{display:none}
+.chip[aria-pressed="true"] .n{background:var(--sun);color:#0B1B3F}
+.card.selectable{cursor:pointer}
+.card.selected{box-shadow:0 0 0 4px var(--sun),4px 4px 0 var(--hard)}
+.check{display:flex;align-items:center;gap:8px;font-weight:800;font-size:13px}
+.check input{width:22px;height:22px;accent-color:#0F4CDB}
+#btn-select[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.selbar{position:sticky;bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:6;background:var(--surface);border:2px solid var(--line);box-shadow:4px 4px 0 var(--hard);border-radius:var(--r);padding:10px 12px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;font-weight:800}
+.slides .chip{min-height:36px;padding:0 12px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);border:2px solid var(--line);border-radius:12px;overflow:hidden}
 .seg button{min-height:44px;border:0;background:var(--surface);font-weight:800;cursor:pointer}
 .seg button[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink)}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -169,12 +188,37 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
       <h2 id="h-idees">Idées du jour</h2>
       <p class="lead">Ta veille de 6h57 dépose ici chaque info repérée. Choisis-en une, elle part dans l’atelier déjà remplie.</p>
     </div>
-    <div class="chips" role="group" aria-label="Filtrer les idées">
-      <button class="chip" data-filter="nouvelle" aria-pressed="true">À traiter</button>
-      <button class="chip" data-filter="utilisee" aria-pressed="false">Utilisées</button>
-      <button class="chip" data-filter="ecartee" aria-pressed="false">Écartées</button>
+    <div class="panel recap" id="recap" hidden>
+      <div class="week-head"><h3 id="recap-title">Récap du jour</h3><select id="recap-date" aria-label="Choisir un récap" hidden></select></div>
+      <div class="recap-block" id="recap-legende-box">
+        <span class="lbl">Légende du jour</span>
+        <p class="recap-text" id="recap-legende"></p>
+        <div class="row"><button type="button" class="btn" id="recap-copy-leg">Copier</button><button type="button" class="btn ghost" id="recap-use-leg">Utiliser dans l’atelier</button></div>
+      </div>
+      <div class="recap-block" id="recap-contacts-box">
+        <span class="lbl">Commerces à contacter</span>
+        <div id="recap-contacts" class="contacts"></div>
+      </div>
+      <details class="recap-full"><summary>Lire le récap complet</summary><div class="recap-text" id="recap-full"></div></details>
+    </div>
+    <div class="row" style="justify-content:space-between">
+      <div class="chips" role="group" aria-label="Filtrer les idées">
+        <button class="chip" data-filter="nouvelle" aria-pressed="true">À traiter <span class="n" id="n-nouvelle"></span></button>
+        <button class="chip" data-filter="verifier" aria-pressed="false">À vérifier <span class="n" id="n-verifier"></span></button>
+        <button class="chip" data-filter="utilisee" aria-pressed="false">Utilisées</button>
+        <button class="chip" data-filter="ecartee" aria-pressed="false">Écartées</button>
+      </div>
+      <button type="button" class="btn" id="btn-select" aria-pressed="false">Sélectionner</button>
     </div>
     <div class="list" id="idea-list"></div>
+    <div class="selbar" id="selbar" hidden>
+      <span id="sel-count">0 idée</span>
+      <div class="row">
+        <button type="button" class="btn primary" id="sel-liste">Post liste</button>
+        <button type="button" class="btn sun" id="sel-carrousel">Carrousel</button>
+        <button type="button" class="btn ghost" id="sel-cancel">Annuler</button>
+      </div>
+    </div>
     <details class="add" id="add-idea">
       <summary><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Ajouter une idée à la main</summary>
       <form class="panel" id="idea-form">
@@ -204,7 +248,9 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
         <div class="seg" role="group" aria-label="Format">
           <button type="button" id="fmt-post" aria-pressed="true">Post 4:5</button>
           <button type="button" id="fmt-story" aria-pressed="false">Story 9:16</button>
+          <button type="button" id="fmt-carrousel" aria-pressed="false">Carrousel</button>
         </div>
+        <p class="note" id="slide-note" hidden></p>
         <div class="field"><span class="lbl">Type d’info</span><div class="chips" id="p-types" role="group" aria-label="Type d’info"></div></div>
         <div class="field"><span class="lbl">Village</span><div class="chips" id="p-villages" role="group" aria-label="Village"></div></div>
         <div class="two">
@@ -231,7 +277,9 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
       </form>
       <div class="preview-col">
         <div class="preview" id="preview">
+          <div class="chips slides" id="slides" role="group" aria-label="Diapositives du carrousel" hidden></div>
           <canvas id="canvas" width="1080" height="1350" aria-label="Aperçu du visuel"></canvas>
+          <button type="button" class="btn ghost" id="btn-remove-slide" hidden>Retirer cette diapo</button>
           <div class="row" style="justify-content:center">
             <button type="button" class="btn primary" id="btn-export"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Enregistrer l’image</button>
             <button type="button" class="btn sun" id="btn-published">Marquer publié</button>
@@ -338,11 +386,14 @@ function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localSto
 $("today-label").textContent="@maison.cotebleue · "+frDate(todayIso());
 
 /* ---------- État ---------- */
-var S={ideas:[],posts:[],stats:[],sync:null,filter:"nouvelle",db:null,assets:null,downloads:null,sample:null};
+var S={ideas:[],posts:[],stats:[],recaps:[],recapDate:null,sync:null,filter:"nouvelle",selecting:false,sel:{},slide:0,db:null,assets:null,downloads:null,sample:null};
+var D=null;
 var P=blankPost();
 var photoImg=null, photoFile=null;
 
-function blankPost(){return{id:null,format:"post",type:"agenda",village:"cotebleue",pill:TYPES.agenda.pill,sticker:"",titre:"",details:"",legende:"",datePrevue:"",source:"",photoId:null,ideeId:null,statut:"brouillon"}}
+function blankPost(){return{id:null,format:"post",type:"agenda",village:"cotebleue",pill:TYPES.agenda.pill,sticker:"",titre:"",details:"",legende:"",datePrevue:"",source:"",photoId:null,ideeId:null,ideeIds:[],items:[],statut:"brouillon"}}
+function cur(){return P.format==="carrousel"&&S.slide>0&&P.items&&P.items[S.slide-1]?P.items[S.slide-1]:P}
+function isPost(){return P.format!=="story"}
 
 /* ---------- Navigation ---------- */
 var VIEWS=["idees","atelier","calendrier","analyse"];
@@ -390,106 +441,112 @@ function themeOf(type){switch(type){
   case "nouveau":return{bg:BLANC,fg:NUIT,pillBg:BLEU,pillFg:BLANC,pillShadow:NUIT,pillBorder:NUIT,shadow:null,line:NUIT,sub:"#2B3A5E"};
   default:return{bg:BLEU,fg:BLANC,pillBg:BLANC,pillFg:BLEU,pillShadow:NUIT,pillBorder:NUIT,shadow:NUIT,line:NUIT,sub:BLANC}}}
 
-function draw(){if($("v-atelier").hidden&&!draw.force)return;var story=P.format==="story";var W=1080,H=story?1920:1350;if(cv.height!==H){cv.height=H}
+function draw(){if($("v-atelier").hidden&&!draw.force)return;D=cur();var story=P.format==="story";var W=1080,H=story?1920:1350;if(cv.height!==H){cv.height=H}
   $("preview").classList.toggle("story",story);
-  var t=typ(P.type),v=vil(P.village),th=themeOf(P.type);
-  var title=P.titre||t.title, details=P.details!==""?P.details:(P.titre?"":t.details), pillTxt=P.pill||(story&&P.type==="agenda"?t.storyPill:t.pill);
+  var t=typ(D.type),v=vil(D.village),th=themeOf(D.type);
+  var title=D.titre||t.title, details=D.details!==""&&D.details!=null?D.details:(D.titre?"":t.details), pillTxt=D.pill||(story&&D.type==="agenda"?t.storyPill:t.pill);
   ctx.setTransform(1,0,0,1,0,0);ctx.textAlign="left";setLS(0);
   if(story)drawStory(W,H,t,v,th,title,details,pillTxt);else drawPost(W,H,t,v,th,title,details,pillTxt)}
 
+function dPhoto(){return D===P?photoImg:null}
 function drawPost(W,H,t,v,th,title,details,pillTxt){var M=76;
   ctx.fillStyle=th.bg;ctx.fillRect(0,0,W,H);
-  if(P.type==="nouveau"){var band=330;var ph=H-band;
-    if(photoImg)cover(photoImg,0,0,W,ph);else{ctx.fillStyle=CIEL;ctx.fillRect(0,0,W,ph);ctx.fillStyle="#2B3A5E";ctx.font="700 44px "+FB;ctx.textAlign="center";ctx.fillText("[Photo du commerce]",W/2,ph/2);ctx.textAlign="left"}
+  if(D.type==="nouveau"){var band=330;var ph=H-band;
+    if(dPhoto())cover(dPhoto(),0,0,W,ph);else{ctx.fillStyle=CIEL;ctx.fillRect(0,0,W,ph);ctx.fillStyle="#2B3A5E";ctx.font="700 44px "+FB;ctx.textAlign="center";ctx.fillText("[Photo du commerce]",W/2,ph/2);ctx.textAlign="left"}
     pill(64,64,pillTxt,th.pillBg,th.pillFg,th.pillShadow,th.pillBorder,40);
     ctx.fillStyle=NUIT;ctx.fillRect(0,ph,W,10);
     var fit=fitTitle(title,W-2*M-170,150,92,56);drawTitle(fit,M,ph+60,NUIT,null);
-    ctx.font="600 42px "+FB;var sub=[vil(P.village).name,(details||"").replace(/\*\*/g,"").split("\n")[0]].filter(Boolean).join(" · ");var subL=layout(sub,ctx.font,ctx.font,W-2*M-170);drawLines(subL.slice(0,2),M,ph+60+fit.lines.length*fit.size*1.04+14,52,"600 42px "+FB,"800 42px "+FB,"#2B3A5E");
+    ctx.font="600 42px "+FB;var sub=[vil(D.village).name,(details||"").replace(/\*\*/g,"").split("\n")[0]].filter(Boolean).join(" · ");var subL=layout(sub,ctx.font,ctx.font,W-2*M-170);drawLines(subL.slice(0,2),M,ph+60+fit.lines.length*fit.size*1.04+14,52,"600 42px "+FB,"800 42px "+FB,"#2B3A5E");
     logo(W-M-130,ph+(band-130)/2+4,130,v.color);return}
   /* décor 90s */
   var s=5.4;
-  if(P.type==="agenda"){zigzag(W-340,235,s,SOLEIL,20);triangle(W-240,H-330,4.4,CIEL);ring(140,H-290,42,SOLEIL,18)}
-  if(P.type==="pratique"){zigzag(130*s,232*s-36,s,SOLEIL,20)}
-  if(P.type==="question"){ring(W-170,H-330,75,SOLEIL,26)}
+  if(D.type==="agenda"){zigzag(W-330,H-100,s,SOLEIL,20);triangle(W-240,H-330,4.4,CIEL);ring(140,H-290,42,SOLEIL,18)}
+  if(D.type==="pratique"){zigzag(130*s,232*s-36,s,SOLEIL,20)}
+  if(D.type==="question"){ring(W-170,H-330,75,SOLEIL,26)}
   /* en-tête */
   var ph=pill(64,64,pillTxt,th.pillBg,th.pillFg,th.pillShadow,th.pillBorder,40);
-  ctx.font="800 38px "+FB;setLS(38*.14);ctx.fillStyle=th.fg;ctx.textAlign="right";ctx.textBaseline="middle";if(P.type!=="question")ctx.fillText(v.short.toUpperCase(),W-M,64+ph/2);ctx.textAlign="left";setLS(0);
+  ctx.font="800 38px "+FB;setLS(38*.14);ctx.fillStyle=th.fg;ctx.textAlign="right";ctx.textBaseline="middle";if(D.type!=="question")ctx.fillText(v.short.toUpperCase(),W-M,64+ph/2);ctx.textAlign="left";setLS(0);
   /* pied */
   var footH=200, footY=H-footH;
   ctx.fillStyle=th.line;ctx.fillRect(0,footY,W,10);
   logo(M-6,footY+(footH-120)/2+6,120,v.color);
-  ctx.fillStyle=P.type==="question"?NUIT:th.fg;ctx.font="800 50px "+FB;ctx.textBaseline="middle";ctx.fillText("Maison Côte Bleue",M+140,footY+footH/2+4);
+  ctx.fillStyle=D.type==="question"?NUIT:th.fg;ctx.font="800 50px "+FB;ctx.textBaseline="middle";ctx.fillText("Maison Côte Bleue",M+140,footY+footH/2+4);
   /* corps */
   var top=64+ph+40, bottom=footY-50, avail=bottom-top;
   var detFont="400 48px "+FB, detBold="800 48px "+FB, lh=68;
-  var detLines=details?layout(details,detFont,detBold,W-2*M-(P.type==="bonplan"?300:0)):[];
+  var detLines=details?layout(details,detFont,detBold,W-2*M-(D.type==="bonplan"?300:0)):[];
   var detH=detLines.length*lh;
   var fit=fitTitle(title,W-2*M,avail-detH-(detH?40:0),150,72);
   var titleH=fit.lines.length*fit.size*1.04;var blockH=titleH+(detH?40+detH:0);var y=top+Math.max(0,(avail-blockH)/2);
   drawTitle(fit,M,y,th.fg,th.shadow);
   if(detH)drawLines(detLines,M,y+titleH+40,lh,detFont,detBold,th.fg);
-  if(P.type==="bonplan"&&P.sticker)sticker(W-200,footY-190,300,P.sticker)}
+  if(D.type==="bonplan"&&D.sticker)sticker(W-200,footY-190,300,D.sticker)}
 
 function drawStory(W,H,t,v,th,title,details,pillTxt){var M=90;var bg=th.bg,fg=th.fg,shadow=th.shadow,pBg=th.pillBg,pFg=th.pillFg;
-  if(P.type==="agenda"){bg=v.color;fg=BLANC;shadow=v.deep;pBg=BLANC;pFg=v.color}
+  if(D.type==="agenda"){bg=v.color;fg=BLANC;shadow=v.deep;pBg=BLANC;pFg=v.color}
   ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
   var cTop=430,cBottom=H-420;
-  if(P.type==="nouveau"){if(photoImg)cover(photoImg,0,0,W,H);else{ctx.fillStyle=CIEL;ctx.fillRect(0,0,W,H);ctx.fillStyle="#2B3A5E";ctx.font="700 46px "+FB;ctx.textAlign="center";ctx.fillText("[Photo du commerce en plein écran]",W/2,H/2-200);ctx.textAlign="left"}}
+  if(D.type==="nouveau"){if(dPhoto())cover(dPhoto(),0,0,W,H);else{ctx.fillStyle=CIEL;ctx.fillRect(0,0,W,H);ctx.fillStyle="#2B3A5E";ctx.font="700 46px "+FB;ctx.textAlign="center";ctx.fillText("[Photo du commerce en plein écran]",W/2,H/2-200);ctx.textAlign="left"}}
   var s=5.4;
-  if(P.type==="agenda"){zigzag(W-330,330,s,SOLEIL,22);ring(150,H-300,50,SOLEIL,22);triangle(W-260,H-380,s,v.tint)}
-  if(P.type==="pratique"){zigzag(W-330,H-470,s,SOLEIL,22)}
+  if(D.type==="agenda"){zigzag(W-330,330,s,SOLEIL,22);ring(150,H-300,50,SOLEIL,22);triangle(W-260,H-380,s,v.tint)}
+  if(D.type==="pratique"){zigzag(W-330,H-470,s,SOLEIL,22)}
   /* pastille + commune */
   logo(M,270,110,v.color);
   ctx.font="800 40px "+FB;setLS(40*.12);var lab=v.short.toUpperCase();var lw=ctx.measureText(lab).width+56;
-  var lbg=P.type==="nouveau"?BLANC:(P.type==="bonplan"?NUIT:(P.type==="question"?BLEU:BLANC)), lfg=P.type==="bonplan"||P.type==="question"?BLANC:(P.type==="agenda"?v.deep:NUIT);
+  var lbg=D.type==="nouveau"?BLANC:(D.type==="bonplan"?NUIT:(D.type==="question"?BLEU:BLANC)), lfg=D.type==="bonplan"||D.type==="question"?BLANC:(D.type==="agenda"?v.deep:NUIT);
   ctx.fillStyle=lbg;rr(M+136,290,lw,72,36);ctx.fill();ctx.fillStyle=lfg;ctx.textBaseline="middle";ctx.fillText(lab,M+164,328);setLS(0);
-  if(P.type==="nouveau"){var bandH=560,by=H-420-bandH+120;ctx.fillStyle=NUIT;rr(50,by,W-100,bandH-120,36);ctx.fill();
+  if(D.type==="nouveau"){var bandH=560,by=H-420-bandH+120;ctx.fillStyle=NUIT;rr(50,by,W-100,bandH-120,36);ctx.fill();
     pill(M,by-50,pillTxt,BLEU,BLANC,NUIT,NUIT,42);
     var f2=fitTitle(title,W-2*M-40,180,110,60);drawTitle(f2,M+10,by+80,BLANC,null);
     if(details){var dl=layout(details,"600 46px "+FB,"800 46px "+FB,W-2*M-40);drawLines(dl.slice(0,3),M+10,by+80+f2.lines.length*f2.size*1.04+24,62,"600 46px "+FB,"800 46px "+FB,"#DCE8FF")}return}
-  var phH=pill(M,cTop,pillTxt,pBg,pFg,P.type==="pratique"?null:NUIT,P.type==="pratique"?null:NUIT,44);
-  var top=cTop+phH+60,avail=cBottom-top-(P.type==="question"?380:0);
-  var detFont="400 52px "+FB,detBold="800 52px "+FB,lh=74;var detLines=details?layout(details,detFont,detBold,W-2*M-(P.type==="bonplan"?280:0)):[];var detH=detLines.length*lh;
+  var phH=pill(M,cTop,pillTxt,pBg,pFg,D.type==="pratique"?null:NUIT,D.type==="pratique"?null:NUIT,44);
+  var top=cTop+phH+60,avail=cBottom-top-(D.type==="question"?380:0);
+  var detFont="400 52px "+FB,detBold="800 52px "+FB,lh=74;var detLines=details?layout(details,detFont,detBold,W-2*M-(D.type==="bonplan"?280:0)):[];var detH=detLines.length*lh;
   var fit=fitTitle(title,W-2*M,avail-detH-(detH?50:0),170,80);var titleH=fit.lines.length*fit.size*1.04;
-  var y=top+(P.type==="question"?0:Math.max(0,(avail-titleH-(detH?50+detH:0))/2.4));
+  var y=top+(D.type==="question"?0:Math.max(0,(avail-titleH-(detH?50+detH:0))/2.4));
   drawTitle(fit,M,y,fg,shadow);if(detH)drawLines(detLines,M,y+titleH+50,lh,detFont,detBold,fg);
-  if(P.type==="bonplan"&&P.sticker)sticker(W-230,cBottom-200,320,P.sticker);
-  if(P.type==="question"){ring(W-180,cBottom-80,70,SOLEIL,26)}}
+  if(D.type==="bonplan"&&D.sticker)sticker(W-230,cBottom-200,320,D.sticker);
+  if(D.type==="question"){ring(W-180,cBottom-80,70,SOLEIL,26)}}
 
 /* ---------- Formulaire atelier ---------- */
 function buildChips(){var tc=$("p-types");TORDER.forEach(function(k){tc.appendChild(el("button",{type:"button",class:"chip","data-type":k,"aria-pressed":"false",onclick:function(){setType(k)}},[el("span",{class:"pill t-"+k,text:TYPES[k].name,style:"transform:none;font-size:10px;padding:1px 7px"})]))});
-  var vc=$("p-villages");VORDER.forEach(function(k){vc.appendChild(el("button",{type:"button",class:"chip","data-village":k,"aria-pressed":"false",onclick:function(){P.village=k;syncForm();draw()}},[el("span",{class:"dot",style:"background:"+VILLAGES[k].color+";border:2px solid #0B1B3F;width:14px;height:14px"}),VILLAGES[k].short]))});
+  var vc=$("p-villages");VORDER.forEach(function(k){vc.appendChild(el("button",{type:"button",class:"chip","data-village":k,"aria-pressed":"false",onclick:function(){cur().village=k;syncForm();draw()}},[el("span",{class:"dot",style:"background:"+VILLAGES[k].color+";border:2px solid #0B1B3F;width:14px;height:14px"}),VILLAGES[k].short]))});
   ["i-type"].forEach(function(id){TORDER.forEach(function(k){$(id).appendChild(el("option",{value:k,text:TYPES[k].name}))})});
   VORDER.forEach(function(k){$("i-village").appendChild(el("option",{value:k,text:VILLAGES[k].name}))})}
 buildChips();
-function setType(k){var old=P.type;P.type=k;var t=typ(k),ot=typ(old);if(!P.pill||P.pill===ot.pill||P.pill===ot.storyPill)P.pill=P.format==="story"&&k==="agenda"?t.storyPill:t.pill;syncForm();draw()}
-function syncForm(){document.querySelectorAll("#p-types .chip").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.type===P.type))});
-  document.querySelectorAll("#p-villages .chip").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.village===P.village))});
-  $("fmt-post").setAttribute("aria-pressed",String(P.format==="post"));$("fmt-story").setAttribute("aria-pressed",String(P.format==="story"));
-  var t=typ(P.type);$("p-pill").value=P.pill;$("p-sticker").value=P.sticker;$("p-titre").value=P.titre;$("p-titre").placeholder=t.title;$("p-details").value=P.details;$("p-details").placeholder=t.details.replace(/\*\*/g,"");$("p-legende").value=P.legende;$("p-date").value=P.datePrevue||"";$("p-source").value=P.source||"";
-  $("sticker-field").hidden=P.type!=="bonplan";$("photo-field").hidden=P.type!=="nouveau";
-  $("p-titre-label").textContent=P.type==="nouveau"?"Nom du commerce":(P.type==="question"?"Question":"Titre");
+function setType(k){var c=cur();var old=c.type;c.type=k;var t=typ(k),ot=typ(old);if(!c.pill||c.pill===ot.pill||c.pill===ot.storyPill)c.pill=P.format==="story"&&k==="agenda"?t.storyPill:t.pill;syncForm();draw()}
+function syncForm(){var c=cur();if(!P.items)P.items=[];if(S.slide>P.items.length)S.slide=0;document.querySelectorAll("#p-types .chip").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.type===c.type))});
+  document.querySelectorAll("#p-villages .chip").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.village===c.village))});
+  ["post","story","carrousel"].forEach(function(f){$("fmt-"+f).setAttribute("aria-pressed",String(P.format===f))});
+  var car=P.format==="carrousel";$("slides").hidden=!car;$("btn-remove-slide").hidden=!(car&&S.slide>0);$("slide-note").hidden=!car;
+  if(car){$("slide-note").textContent=S.slide===0?"Tu modifies la couverture du carrousel ("+(P.items.length+1)+" images). Touche un numéro au-dessus de l’aperçu pour modifier une diapo.":"Tu modifies la diapo "+S.slide+" sur "+P.items.length+".";var sl=$("slides");sl.textContent="";for(var i=0;i<=P.items.length;i++){(function(i){sl.appendChild(el("button",{type:"button",class:"chip","aria-pressed":String(S.slide===i),text:i===0?"Couverture":String(i),onclick:function(){S.slide=i;syncForm();draw()}}))})(i)}sl.appendChild(el("button",{type:"button",class:"chip",text:"+ Diapo",onclick:function(){P.items.push({type:"agenda",village:"cotebleue",pill:TYPES.agenda.pill,sticker:"",titre:"",details:""});S.slide=P.items.length;syncForm();draw()}}))}
+  $("btn-export").lastChild.textContent=car?"Enregistrer les "+(P.items.length+1)+" images":"Enregistrer l’image";
+  var t=typ(c.type);$("p-pill").value=c.pill||"";$("p-sticker").value=c.sticker||"";$("p-titre").value=c.titre||"";$("p-titre").placeholder=t.title;$("p-details").value=c.details||"";$("p-details").placeholder=t.details.replace(/\*\*/g,"");$("p-legende").value=P.legende;$("p-date").value=P.datePrevue||"";$("p-source").value=P.source||"";
+  $("sticker-field").hidden=c.type!=="bonplan";$("photo-field").hidden=!(c===P&&P.type==="nouveau");
+  $("p-titre-label").textContent=c.type==="nouveau"?"Nom du commerce":(c.type==="question"?"Question":"Titre");
   $("btn-delete").hidden=!P.id;
   var st=P.statut==="publie"?"Publié le "+frDate(P.datePublie):(P.id?"Brouillon enregistré":"Nouveau visuel, pas encore enregistré");$("post-status").textContent=st;
   $("btn-published").textContent=P.statut==="publie"?"Publié":"Marquer publié"}
-$("fmt-post").onclick=function(){P.format="post";if(P.type==="agenda"&&P.pill===TYPES.agenda.storyPill)P.pill=TYPES.agenda.pill;syncForm();draw()};
-$("fmt-story").onclick=function(){P.format="story";if(P.type==="agenda"&&P.pill===TYPES.agenda.pill)P.pill=TYPES.agenda.storyPill;syncForm();draw()};
-[["p-pill","pill"],["p-sticker","sticker"],["p-titre","titre"],["p-details","details"],["p-legende","legende"],["p-date","datePrevue"],["p-source","source"]].forEach(function(p){$(p[0]).addEventListener("input",function(){P[p[1]]=$(p[0]).value;if(p[1]!=="legende"&&p[1]!=="datePrevue"&&p[1]!=="source")draw()})});
+$("fmt-carrousel").onclick=function(){P.format="carrousel";if(!P.items)P.items=[];if(P.type==="agenda"&&P.pill===TYPES.agenda.storyPill)P.pill=TYPES.agenda.pill;S.slide=0;syncForm();draw()};
+$("btn-remove-slide").onclick=function(){if(S.slide<1)return;P.items.splice(S.slide-1,1);S.slide=Math.min(S.slide,P.items.length);syncForm();draw();toast("Diapo retirée")};
+$("fmt-post").onclick=function(){P.format="post";S.slide=0;if(P.type==="agenda"&&P.pill===TYPES.agenda.storyPill)P.pill=TYPES.agenda.pill;syncForm();draw()};
+$("fmt-story").onclick=function(){P.format="story";S.slide=0;if(P.type==="agenda"&&P.pill===TYPES.agenda.pill)P.pill=TYPES.agenda.storyPill;syncForm();draw()};
+[["p-pill","pill"],["p-sticker","sticker"],["p-titre","titre"],["p-details","details"],["p-legende","legende"],["p-date","datePrevue"],["p-source","source"]].forEach(function(p){$(p[0]).addEventListener("input",function(){var tgt=["pill","sticker","titre","details"].indexOf(p[1])>=0?cur():P;tgt[p[1]]=$(p[0]).value;if(p[1]!=="legende"&&p[1]!=="datePrevue"&&p[1]!=="source")draw()})});
 $("p-photo").addEventListener("change",function(){var f=this.files&&this.files[0];if(!f)return;photoFile=f;var img=new Image();img.onload=function(){photoImg=img;draw()};img.src=URL.createObjectURL(f);P.photoId=null});
 syncForm();
 
-function openPost(post){P=Object.assign(blankPost(),JSON.parse(JSON.stringify(post)));photoImg=null;photoFile=null;$("p-photo").value="";
+function openPost(post){P=Object.assign(blankPost(),JSON.parse(JSON.stringify(post)));S.slide=0;photoImg=null;photoFile=null;$("p-photo").value="";
   if(P.photoId){var img=new Image();img.onload=function(){photoImg=img;draw()};img.src="/_blob/"+P.photoId}
   syncForm();show("atelier")}
-$("btn-new").onclick=function(){P=blankPost();photoImg=null;photoFile=null;$("p-photo").value="";syncForm();draw();toast("Nouveau visuel")};
+$("btn-new").onclick=function(){P=blankPost();S.slide=0;photoImg=null;photoFile=null;$("p-photo").value="";syncForm();draw();toast("Nouveau visuel")};
 
 /* ---------- Enregistrement ---------- */
-function postBody(){var b={};["format","type","village","pill","sticker","titre","details","legende","datePrevue","source","photoId","ideeId","statut","datePublie","stats"].forEach(function(k){if(P[k]!==undefined)b[k]=P[k]});b.updatedAt=new Date().toISOString();if(!b.createdAt)b.createdAt=P.createdAt||b.updatedAt;return JSON.parse(JSON.stringify(b))}
+function postBody(){var b={};["format","type","village","pill","sticker","titre","details","legende","datePrevue","source","photoId","ideeId","ideeIds","items","statut","datePublie","stats"].forEach(function(k){if(P[k]!==undefined)b[k]=P[k]});b.updatedAt=new Date().toISOString();if(!b.createdAt)b.createdAt=P.createdAt||b.updatedAt;return JSON.parse(JSON.stringify(b))}
 function savePost(extra){if(!S.db){toast("Base indisponible : rouvre la page");return Promise.reject()}
   var up=Promise.resolve();
   if(photoFile&&!P.photoId&&S.assets){up=S.assets.upload(photoFile).then(function(r){P.photoId=r.id;photoFile=null},function(){toast("La photo n’a pas pu être enregistrée")})}
   return up.then(function(){Object.assign(P,extra||{});var ref=P.id?S.db.collection("posts").doc(P.id):S.db.collection("posts").doc();P.id=ref.id;return ref.set(postBody())}).then(function(){
-    if(P.ideeId){S.db.collection("idees").doc(P.ideeId).update({statut:"utilisee",postId:P.id}).catch(function(){})}
+    var ids=(P.ideeIds||[]).slice();if(P.ideeId&&ids.indexOf(P.ideeId)<0)ids.push(P.ideeId);ids.forEach(function(iid){S.db.collection("idees").doc(iid).update({statut:"utilisee",postId:P.id}).catch(function(){})})
     syncForm()})}
 $("btn-save").onclick=function(){savePost().then(function(){toast("Brouillon enregistré")})};
 var delArmed=false;$("btn-delete").onclick=function(){if(!P.id)return;if(!delArmed){delArmed=true;$("btn-delete").textContent="Confirmer la suppression";setTimeout(function(){delArmed=false;$("btn-delete").textContent="Supprimer"},4000);return}
@@ -497,11 +554,13 @@ var delArmed=false;$("btn-delete").onclick=function(){if(!P.id)return;if(!delArm
 $("btn-published").onclick=function(){if(P.statut==="publie")return;savePost({statut:"publie",datePublie:todayIso()}).then(function(){toast("Bravo, c’est publié. Pense au relevé de stats dans quelques jours.")})};
 
 /* Export image */
-function fileName(){var v=vil(P.village).short.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"-");return "mcb-"+(P.datePrevue||todayIso())+"-"+P.type+"-"+v+(P.format==="story"?"-story":"")+".png"}
-$("btn-export").onclick=function(){draw.force=true;draw();draw.force=false;cv.toBlob(function(blob){if(!blob){toast("Image impossible à générer");return}
-  if(S.downloads){S.downloads.save({filename:fileName(),data:blob}).then(function(r){if(r&&r.status==="saved")toast("Image enregistrée. Ouvre Instagram pour publier.")},function(e){if(e&&e.code==="unavailable")fallbackImg(blob)})}
-  else fallbackImg(blob)},"image/png")};
-function fallbackImg(blob){var fb=$("export-fallback");fb.hidden=false;fb.textContent="";var r=new FileReader();r.onload=function(){fb.appendChild(el("img",{src:r.result,alt:"Visuel à enregistrer",class:"fallback-img"}));fb.appendChild(el("div",{text:"Appuie longuement sur l’image pour l’enregistrer dans ta galerie."}))};r.readAsDataURL(blob)}
+function fileName(){var v=vil(P.village).short.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"-");return "mcb-"+(P.datePrevue||todayIso())+"-"+P.type+"-"+v+(P.format==="story"?"-story":(P.format==="carrousel"?"-carrousel":""))+".png"}
+function renderBlob(){return new Promise(function(res){draw.force=true;draw();draw.force=false;cv.toBlob(res,"image/png")})}
+function saveBlob(blob,name){if(!blob){toast("Image impossible à générer");return Promise.resolve(false)}if(!S.downloads){fallbackImg(blob);return Promise.resolve(false)}return S.downloads.save({filename:name,data:blob}).then(function(r){return!!(r&&r.status==="saved")},function(e){if(e&&e.code==="unavailable")fallbackImg(blob);return false})}
+$("btn-export").onclick=function(){$("export-fallback").textContent="";$("export-fallback").hidden=true;
+  if(P.format!=="carrousel"){renderBlob().then(function(b){return saveBlob(b,fileName())}).then(function(ok){if(ok)toast("Image enregistrée. Ouvre Instagram pour publier.")});return}
+  var keep=S.slide,n=P.items.length+1,i=0,saved=0;(function next(){if(i>=n){S.slide=keep;syncForm();draw();toast(saved?saved+" image(s) enregistrée(s). Dans Instagram, choisis-les dans l’ordre.":"Aucune image enregistrée");return}S.slide=i;renderBlob().then(function(b){return saveBlob(b,fileName().replace(".png","-"+(i+1)+".png"))}).then(function(ok){if(ok)saved++;i++;next()})})()};
+function fallbackImg(blob){var fb=$("export-fallback");fb.hidden=false;var r=new FileReader();r.onload=function(){fb.appendChild(el("img",{src:r.result,alt:"Visuel à enregistrer",class:"fallback-img"}));fb.appendChild(el("div",{text:"Appuie longuement sur l’image pour l’enregistrer dans ta galerie."}))};r.readAsDataURL(blob)}
 $("btn-copy").onclick=function(){var txt=$("p-legende").value;if(!txt){toast("La légende est vide");return}
   var p=navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(txt):Promise.reject();p.then(function(){toast("Légende copiée")},function(){var ta=$("p-legende");ta.focus();ta.select();toast("Texte sélectionné : copie-le avec le menu")})};
 
@@ -515,7 +574,7 @@ $("btn-legende").onclick=function(){if(!S.sample){toast("Claude n’est pas disp
   "Règles : moins de 120 mots ; phrases courtes ; 1 ou 2 emojis maximum ; n’invente aucun fait, aucune date, aucun horaire, aucun prix : utilise uniquement les infos ci-dessous, et si une info manque, ne la remplace pas ; cite la source à la fin si elle est fournie (« Source : … ») ; termine par un appel doux : s’abonner ou écrire en message pour partager une info ou un bon plan ; puis une ligne de 3 à 5 hashtags locaux (ex. #CoteBleue #CarryLeRouet #SaussetLesPins #LaCouronne #Martigues).",
   "Réponds uniquement avec la légende, sans titre ni guillemets.","",
   "Type de post : "+t.name+" (étiquette « "+(P.pill||t.pill)+" »)","Village : "+v.name,"Titre du visuel : "+(P.titre||"(vide)"),"Détails : "+((P.details||"").replace(/\*\*/g,"")||"(aucun)"),
-  P.format==="story"?"Format : story (légende très courte, 1 à 2 phrases, sans hashtags)":"Format : post 4:5",
+  P.format==="story"?"Format : story (légende très courte, 1 à 2 phrases, sans hashtags)":(P.format==="carrousel"?"Format : carrousel ; diapos : "+P.items.map(function(it,k){return(k+1)+". "+(it.titre||"")+" ("+vil(it.village).short+") "+(it.details||"").replace(/\*\*/g,"").replace(/\n/g," · ")}).join(" | "):"Format : post 4:5"),
   P.source?"Source : "+P.source:"",idea&&idea.texte?"Note de veille : "+idea.texte:"",idea&&idea.sourceUrl?"Lien source : "+idea.sourceUrl:""].join("\n");
   legAbort=new AbortController();var btn=$("btn-legende");var label=btn.lastChild.textContent;btn.lastChild.textContent="Arrêter";$("p-legende").value="Claude écrit…";
   S.sample(brief,{signal:legAbort.signal,cache:false,onText:function(u){$("p-legende").value=u.text}}).then(function(r){$("p-legende").value=r.text.trim();P.legende=$("p-legende").value},function(e){if(e&&e.text){$("p-legende").value=e.text;P.legende=e.text}else{$("p-legende").value=P.legende||""}if(e&&e.code==="rate_limited")toast("Trop de demandes, réessaie dans un moment");else if(e&&e.code!=="cancelled")toast("Légende indisponible pour l’instant")}).then(function(){legAbort=null;btn.lastChild.textContent=label})};
@@ -524,26 +583,59 @@ $("btn-legende").onclick=function(){if(!S.sample){toast("Claude n’est pas disp
 document.querySelectorAll("[data-filter]").forEach(function(b){b.addEventListener("click",function(){S.filter=b.dataset.filter;document.querySelectorAll("[data-filter]").forEach(function(x){x.setAttribute("aria-pressed",String(x===b))});renderIdeas()})});
 function whenLabel(quand,ref){if(!quand)return"";var q=parseIso(quand),r=parseIso(ref);var diff=Math.round((q-r)/864e5);if(diff<0)return"";if(diff===0)return"Aujourd’hui";if(diff===1)return"Demain";var wd=q.getDay();if((wd===0||wd===6)&&diff<=6)return"Ce week-end";if(diff<=6)return["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"][wd];return["Dim.","Lun.","Mar.","Mer.","Jeu.","Ven.","Sam."][wd]+" "+q.getDate()+" "+MOIS[q.getMonth()]}
 function planDate(i,format){var t0=todayIso();if(format==="story")return t0;if(i.quand&&i.quand>=t0){var d=parseIso(i.quand);d.setDate(d.getDate()-1);var b=iso(d);return b>=t0?b:t0}return nextFreeDay()}
-function ideaToPost(i,format){var t=typ(i.type);P=blankPost();P.format=format;P.type=TYPES[i.type]?i.type:"agenda";P.village=VILLAGES[i.village]?i.village:"cotebleue";P.datePrevue=planDate(i,format);var wl=P.type==="agenda"?whenLabel(i.quand,P.datePrevue):"";P.pill=wl||(format==="story"&&P.type==="agenda"?t.storyPill:t.pill);P.titre=i.titre||"";P.details=i.details||i.texte||"";P.source=i.sourceNom||"";P.ideeId=i.id;if(i.story&&format==="story")P.legende=i.story;photoImg=null;photoFile=null;$("p-photo").value="";syncForm();show("atelier");$("atelier-lead").textContent="Idée du "+frDate(i.date)+" chargée. Ajuste le titre et les détails, puis enregistre."}
-function setIdea(id,statut){S.db.collection("idees").doc(id).update({statut:statut}).then(function(){toast(statut==="ecartee"?"Idée écartée":"Idée remise à traiter")})}
+function resetPhoto(){photoImg=null;photoFile=null;$("p-photo").value=""}
+function ideaToPost(i,format){var t=typ(i.type);P=blankPost();S.slide=0;P.format=format;P.type=TYPES[i.type]?i.type:"agenda";P.village=VILLAGES[i.village]?i.village:"cotebleue";P.datePrevue=planDate(i,format);var wl=P.type==="agenda"?whenLabel(i.quand,P.datePrevue):"";P.pill=wl||(format==="story"&&P.type==="agenda"?t.storyPill:t.pill);P.titre=i.titre||"";P.details=i.details||i.texte||"";P.source=i.sourceNom||"";P.ideeId=i.id;if(i.story&&format==="story")P.legende=i.story;resetPhoto();syncForm();show("atelier");$("atelier-lead").textContent="Idée du "+frDate(i.date)+" chargée. Ajuste le titre et les détails, puis enregistre."}
+function shortDate(q){if(!q)return"";var d=parseIso(q);return["Dim.","Lun.","Mar.","Mer.","Jeu.","Ven.","Sam."][d.getDay()]+" "+pad(d.getDate())+"/"+pad(d.getMonth()+1)}
+function selectedIdeas(){return S.ideas.filter(function(i){return S.sel[i.id]}).sort(function(a,b){return(a.quand||"9").localeCompare(b.quand||"9")})}
+function groupTitle(list,ref){var wk=list.length&&list.every(function(i){if(!i.quand)return false;var d=parseIso(i.quand).getDay();return(d===0||d===6||d===5)&&whenLabel(i.quand,ref)!==""});var vs={};list.forEach(function(i){vs[i.village||"cotebleue"]=1});var keys=Object.keys(vs);var vk=keys.length===1?keys[0]:"cotebleue";var where=vk==="cotebleue"?"sur la Côte Bleue":(vk==="couronne"?"à la Couronne-Carro":"à "+vil(vk).short);return{pill:wk?"Ce week-end":"Cette semaine",titre:(wk?"Ce week-end ":"Cette semaine ")+where,village:vk}}
+function ideasToGroup(format){var list=selectedIdeas();if(list.length<2){toast("Coche au moins 2 idées");return}
+  P=blankPost();S.slide=0;resetPhoto();var ref=todayIso();var firstQ=list.filter(function(i){return i.quand&&i.quand>=ref}).map(function(i){return i.quand})[0];if(firstQ){var d=parseIso(firstQ);d.setDate(d.getDate()-1);P.datePrevue=iso(d)>=ref?iso(d):ref}else P.datePrevue=nextFreeDay();
+  var g=groupTitle(list,P.datePrevue);P.format=format;P.type="agenda";P.village=g.village;P.pill=g.pill;P.titre=g.titre;P.ideeIds=list.map(function(i){return i.id});
+  P.source=list.map(function(i){return i.sourceNom}).filter(function(x,k,a){return x&&x!=="Idée de la veille"&&a.indexOf(x)===k}).join(", ");
+  P.details=list.slice(0,5).map(function(i){var t=i.titre||"";var vs=vil(i.village).short;if(i.village&&i.village!=="cotebleue"&&t.toLowerCase().indexOf(vs.toLowerCase())<0)t+=" · "+vs;return(i.quand?"**"+shortDate(i.quand)+"** ":"")+t}).join("\n");
+  if(format==="carrousel"){P.items=list.map(function(i){var tt=typ(i.type);return{type:TYPES[i.type]?i.type:"agenda",village:VILLAGES[i.village]?i.village:"cotebleue",pill:(i.type==="agenda"?whenLabel(i.quand,P.datePrevue):"")||tt.pill,sticker:"",titre:i.titre||"",details:i.details||i.texte||"",ideeId:i.id}})}
+  S.selecting=false;S.sel={};renderIdeas();syncForm();show("atelier");
+  $("atelier-lead").textContent=(format==="carrousel"?"Carrousel":"Post liste")+" créé avec "+list.length+" idées. Vérifie chaque ligne, puis enregistre.";if(list.length>5&&format!=="carrousel")toast("Le post liste garde les 5 premières idées")}
+$("btn-select").onclick=function(){S.selecting=!S.selecting;S.sel={};this.setAttribute("aria-pressed",String(S.selecting));this.textContent=S.selecting?"Terminer":"Sélectionner";renderIdeas()};
+$("sel-cancel").onclick=function(){$("btn-select").click()};
+$("sel-liste").onclick=function(){ideasToGroup("post")};
+$("sel-carrousel").onclick=function(){ideasToGroup("carrousel")};
+function setIdea(id,patch,msg){S.db.collection("idees").doc(id).update(patch).then(function(){toast(msg)})}
+function inFilter(i){var st=i.statut||"nouvelle";if(S.filter==="nouvelle")return st==="nouvelle"&&!i.aVerifier;if(S.filter==="verifier")return st==="nouvelle"&&!!i.aVerifier;return st===S.filter}
 function renderIdeas(){var list=$("idea-list");list.textContent="";
-  var items=S.ideas.filter(function(i){return(i.statut||"nouvelle")===S.filter}).sort(function(a,b){return (b.date||"").localeCompare(a.date||"")||(a.quand||"9").localeCompare(b.quand||"9")});
-  var n=S.ideas.filter(function(i){return(i.statut||"nouvelle")==="nouvelle"}).length;$("idea-count").hidden=!n;$("idea-count").textContent=n;
-  if(!items.length){list.appendChild(el("div",{class:"empty"},[el("b",{text:S.filter==="nouvelle"?"Rien à traiter pour l’instant.":"Aucune idée ici."}),el("br"),S.filter==="nouvelle"?"Demain à 6h57, la veille déposera ses infos du jour. Tu peux aussi ajouter une idée à la main ci-dessous.":""]));return}
-  items.forEach(function(i){var t=typ(i.type),v=vil(i.village);
-    var c=el("article",{class:"card"+(i.statut==="utilisee"?" used":"")},[
+  var items=S.ideas.filter(inFilter).sort(function(a,b){return (b.date||"").localeCompare(a.date||"")||(a.quand||"9").localeCompare(b.quand||"9")});
+  var nN=S.ideas.filter(function(i){return(i.statut||"nouvelle")==="nouvelle"&&!i.aVerifier}).length,nV=S.ideas.filter(function(i){return(i.statut||"nouvelle")==="nouvelle"&&i.aVerifier}).length;
+  $("n-nouvelle").textContent=nN||"";$("n-verifier").textContent=nV||"";$("idea-count").hidden=!(nN+nV);$("idea-count").textContent=nN+nV;
+  var nsel=Object.keys(S.sel).filter(function(k){return S.sel[k]}).length;$("selbar").hidden=!S.selecting;$("sel-count").textContent=nsel+(nsel>1?" idées cochées":" idée cochée");
+  if(!items.length){var msg={nouvelle:"Rien à traiter pour l’instant.",verifier:"Aucune info en attente de vérification.",utilisee:"Aucune idée utilisée.",ecartee:"Aucune idée écartée."}[S.filter];list.appendChild(el("div",{class:"empty"},[el("b",{text:msg}),el("br"),S.filter==="nouvelle"?"Chaque matin à 6h57, la veille dépose ses infos ici. Tu peux aussi ajouter une idée à la main ci-dessous.":""]));return}
+  items.forEach(function(i){var t=typ(i.type),v=vil(i.village);var st=i.statut||"nouvelle";
+    var actions;
+    if(S.selecting)actions=[el("label",{class:"check"},[el("input",{type:"checkbox",id:"sel-"+i.id,checked:S.sel[i.id]?"checked":null,onchange:function(e){S.sel[i.id]=e.target.checked;renderIdeas()}}),"Ajouter au récap"])];
+    else if(st==="nouvelle")actions=[el("button",{class:"btn primary",type:"button",text:"Créer le post",onclick:function(){ideaToPost(i,"post")}}),el("button",{class:"btn",type:"button",text:"Story",onclick:function(){ideaToPost(i,"story")}}),
+        i.aVerifier?el("button",{class:"btn ghost",type:"button",text:"C’est vérifié",onclick:function(){setIdea(i.id,{aVerifier:false},"Idée vérifiée, elle passe dans « À traiter »")}}):null,
+        el("button",{class:"btn ghost",type:"button",text:"Écarter",onclick:function(){setIdea(i.id,{statut:"ecartee"},"Idée écartée")}})];
+    else actions=[i.postId?el("button",{class:"btn",type:"button",text:"Voir le post",onclick:function(){var p=S.posts.find(function(x){return x.id===i.postId});if(p)openPost(p)}}):null,el("button",{class:"btn ghost",type:"button",text:"Remettre à traiter",onclick:function(){setIdea(i.id,{statut:"nouvelle"},"Idée remise à traiter")}})];
+    var c=el("article",{class:"card"+(st==="utilisee"?" used":"")+(S.selecting&&S.sel[i.id]?" selected":"")},[
       el("div",{class:"meta"},[el("span",{class:"pill t-"+(TYPES[i.type]?i.type:"agenda"),text:t.name}),el("span",{class:"dot",style:"background:"+v.color}),v.short,i.quand?" · "+frDate(i.quand):"",i.aVerifier?el("span",{class:"verif",text:"À vérifier"}):null]),
       el("h3",{text:i.titre||"(sans titre)"}),
       i.texte?el("p",{text:i.texte}):null,
-      i.story?el("p",{text:"Story : "+i.story,style:"font-size:13px"}):null,
+      i.story&&!S.selecting?el("p",{text:"Story : "+i.story,style:"font-size:13px"}):null,
       (i.sourceNom||i.sourceUrl)?el("div",{class:"src"},["Source : ",i.sourceUrl?el("a",{href:i.sourceUrl,target:"_blank",rel:"noopener",text:i.sourceNom||i.sourceUrl}):i.sourceNom]):null,
-      el("div",{class:"actions"},i.statut==="nouvelle"||!i.statut?[
-        el("button",{class:"btn primary",type:"button",text:"Créer le post",onclick:function(){ideaToPost(i,"post")}}),
-        el("button",{class:"btn",type:"button",text:"Story",onclick:function(){ideaToPost(i,"story")}}),
-        el("button",{class:"btn ghost",type:"button",text:"Écarter",onclick:function(){setIdea(i.id,"ecartee")}})]:[
-        i.postId?el("button",{class:"btn",type:"button",text:"Voir le post",onclick:function(){var p=S.posts.find(function(x){return x.id===i.postId});if(p)openPost(p)}}):null,
-        el("button",{class:"btn ghost",type:"button",text:"Remettre à traiter",onclick:function(){setIdea(i.id,"nouvelle")}})])]);
+      el("div",{class:"actions"},actions)]);
     list.appendChild(c)})}
+/* Récap du jour */
+function richText(node,text){node.textContent="";(text||"").split("**").forEach(function(seg,k){if(!seg)return;node.appendChild(k%2?el("b",{text:seg}):document.createTextNode(seg))})}
+function copyText(txt,okMsg){var p=navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(txt):Promise.reject();return p.then(function(){toast(okMsg)},function(){toast("Copie impossible ici : sélectionne le texte à la main")})}
+function renderRecap(){var box=$("recap");var rs=S.recaps.slice().sort(function(a,b){return b.date.localeCompare(a.date)});if(!rs.length){box.hidden=true;return}box.hidden=false;
+  if(!S.recapDate||!rs.some(function(r){return r.date===S.recapDate}))S.recapDate=rs[0].date;var r=rs.find(function(x){return x.date===S.recapDate});
+  $("recap-title").textContent="Récap du "+frDate(r.date);var sel=$("recap-date");sel.hidden=rs.length<2;sel.textContent="";rs.slice(0,30).forEach(function(x){sel.appendChild(el("option",{value:x.date,text:frDate(x.date),selected:x.date===r.date?"selected":null}))});
+  $("recap-legende-box").hidden=!r.legende;$("recap-legende").textContent=r.legende||"";
+  var cs=$("recap-contacts");cs.textContent="";var contacts=r.contacts||[];$("recap-contacts-box").hidden=!contacts.length;
+  contacts.forEach(function(c){cs.appendChild(el("div",{class:"contact"},[el("b",{text:c.nom||""}),c.raison?el("span",{class:"hint",text:c.raison}):null,el("p",{class:"recap-text",text:c.message||""}),c.message?el("button",{class:"btn",type:"button",text:"Copier le message",onclick:function(){copyText(c.message,"Message copié")}}):null]))});
+  richText($("recap-full"),r.texte||"")}
+$("recap-date").onchange=function(){S.recapDate=this.value;renderRecap()};
+$("recap-copy-leg").onclick=function(){copyText($("recap-legende").textContent,"Légende copiée")};
+$("recap-use-leg").onclick=function(){P.legende=$("recap-legende").textContent;syncForm();show("atelier");toast("Légende du jour placée dans l’atelier")};
 $("i-quand").value="";
 $("idea-form").addEventListener("submit",function(e){e.preventDefault();if(!S.db)return;var body={date:todayIso(),type:$("i-type").value,village:$("i-village").value,titre:$("i-titre").value.trim(),texte:$("i-texte").value.trim(),quand:$("i-quand").value||"",sourceUrl:$("i-source").value.trim(),sourceNom:"",statut:"nouvelle",aVerifier:false,origine:"manuel",createdAt:new Date().toISOString()};
   S.db.collection("idees").add(body).then(function(){e.target.reset();$("add-idea").open=false;toast("Idée ajoutée")},function(){toast("Ajout impossible pour l’instant")})});
@@ -559,7 +651,7 @@ function renderCal(){$("rythme-label").textContent=RYTHME+" posts";var wrap=$("w
   var sg=suggestType();$("next-tip").textContent="";$("next-tip").append("Prochain post conseillé : ",el("b",{text:TYPES[sg].name+" ("+COLORNAME[sg]+")"}),", pour garder le feed varié. Prochain créneau libre : "+(frDate(nextFreeDay())||"à choisir")+".");
   for(var w=0;w<3;w++){var ws=new Date(start);ws.setDate(ws.getDate()+w*7);var we=new Date(ws);we.setDate(we.getDate()+6);
     var days=[],count=0;for(var d=0;d<7;d++){var dd=new Date(ws);dd.setDate(dd.getDate()+d);var di=iso(dd);var ps=S.posts.filter(function(p){return postDay(p)===di});count+=ps.filter(function(p){return p.format!=="story"}).length;
-      days.push(el("div",{class:"day"+(di===today?" today":"")+(ps.length?"":" emptyday")},[el("div",{class:"d",text:frDate(di)})].concat(ps.map(function(p){return el("button",{class:"slot",type:"button",style:slotStyle(p),onclick:function(){openPost(p)}},[(p.format==="story"?"Story · ":"")+(p.titre||typ(p.type).title),el("small",{text:(p.statut==="publie"?"Publié":"Prévu")+" · "+vil(p.village).short})])}))))}
+      days.push(el("div",{class:"day"+(di===today?" today":"")+(ps.length?"":" emptyday")},[el("div",{class:"d",text:frDate(di)})].concat(ps.map(function(p){return el("button",{class:"slot",type:"button",style:slotStyle(p),onclick:function(){openPost(p)}},[(p.format==="story"?"Story · ":(p.format==="carrousel"?"Carrousel · ":""))+(p.titre||typ(p.type).title),el("small",{text:(p.statut==="publie"?"Publié":"Prévu")+" · "+vil(p.village).short})])}))))}
     var meter=el("div",{class:"meter","aria-label":count+" posts sur "+RYTHME});for(var m=0;m<Math.max(RYTHME,count);m++)meter.appendChild(el("span",{class:m<count?"on":""}));
     wrap.appendChild(el("div",{class:"week"},[el("div",{class:"week-head"},[el("h3",{text:w===0?"Cette semaine":(w===1?"Semaine prochaine":"Dans deux semaines")}),el("div",{class:"row"},[el("span",{class:"hint",text:"du "+frDate(iso(ws))+" au "+frDate(iso(we))+" · "+count+"/"+RYTHME}),meter])]),el("div",{class:"days"},days)]))}
   var dr=$("drafts");dr.textContent="";var drafts=S.posts.filter(function(p){return p.statut!=="publie"&&!p.datePrevue});
@@ -626,6 +718,7 @@ else{
     db.collection("idees").orderBy("date","desc").limit(300).onSnapshot(function(s){S.ideas=s.docs.map(function(d){return Object.assign({id:d.id},d.data())});renderIdeas()},function(){setConn(false,"Reconnexion…")});
     db.collection("posts").limit(500).onSnapshot(function(s){S.posts=s.docs.map(function(d){return Object.assign({id:d.id},d.data())});if(P.id){var cur=S.posts.find(function(p){return p.id===P.id});if(cur&&cur.statut!==P.statut){P.statut=cur.statut;P.datePublie=cur.datePublie;syncForm()}}renderCal();renderAna();renderIdeas()});
     db.collection("stats").limit(800).onSnapshot(function(s){S.stats=s.docs.map(function(d){return Object.assign({id:d.id},d.data())}).filter(function(x){return x.date});renderAna()});
+    db.collection("recaps").orderBy("date","desc").limit(30).onSnapshot(function(sn){S.recaps=sn.docs.map(function(d){return Object.assign({id:d.id},d.data())}).filter(function(x){return x.date});renderRecap()});
     db.doc("reglages/meta").onSnapshot(function(s){S.sync=s.exists?s.data():null;renderAna()});
     db.doc("reglages/objectifs").onSnapshot(function(s){if(s.exists){var d=s.data();if(d.rythme)RYTHME=+d.rythme;renderCal()}});
   });
