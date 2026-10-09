@@ -436,7 +436,7 @@ function drawStory(W,H,t,v,th,title,details,pillTxt){var M=90;var bg=th.bg,fg=th
   var cTop=430,cBottom=H-420;
   if(P.type==="nouveau"){if(photoImg)cover(photoImg,0,0,W,H);else{ctx.fillStyle=CIEL;ctx.fillRect(0,0,W,H);ctx.fillStyle="#2B3A5E";ctx.font="700 46px "+FB;ctx.textAlign="center";ctx.fillText("[Photo du commerce en plein écran]",W/2,H/2-200);ctx.textAlign="left"}}
   var s=5.4;
-  if(P.type==="agenda"){zigzag(W-330,330,s,SOLEIL,22);ring(150,H-470,50,SOLEIL,22);triangle(W-260,H-560,s,v.tint)}
+  if(P.type==="agenda"){zigzag(W-330,330,s,SOLEIL,22);ring(150,H-300,50,SOLEIL,22);triangle(W-260,H-380,s,v.tint)}
   if(P.type==="pratique"){zigzag(W-330,H-470,s,SOLEIL,22)}
   /* pastille + commune */
   logo(M,270,110,v.color);
@@ -522,7 +522,9 @@ $("btn-legende").onclick=function(){if(!S.sample){toast("Claude n’est pas disp
 
 /* ---------- Idées ---------- */
 document.querySelectorAll("[data-filter]").forEach(function(b){b.addEventListener("click",function(){S.filter=b.dataset.filter;document.querySelectorAll("[data-filter]").forEach(function(x){x.setAttribute("aria-pressed",String(x===b))});renderIdeas()})});
-function ideaToPost(i,format){var t=typ(i.type);P=blankPost();P.format=format;P.type=TYPES[i.type]?i.type:"agenda";P.village=VILLAGES[i.village]?i.village:"cotebleue";P.pill=format==="story"&&P.type==="agenda"?t.storyPill:t.pill;P.titre=i.titre||"";P.details=i.details||i.texte||"";P.source=i.sourceNom||"";P.ideeId=i.id;P.datePrevue=nextFreeDay();if(i.story&&format==="story")P.legende=i.story;photoImg=null;photoFile=null;$("p-photo").value="";syncForm();show("atelier");$("atelier-lead").textContent="Idée du "+frDate(i.date)+" chargée. Ajuste le titre et les détails, puis enregistre."}
+function whenLabel(quand,ref){if(!quand)return"";var q=parseIso(quand),r=parseIso(ref);var diff=Math.round((q-r)/864e5);if(diff<0)return"";if(diff===0)return"Aujourd’hui";if(diff===1)return"Demain";var wd=q.getDay();if((wd===0||wd===6)&&diff<=6)return"Ce week-end";if(diff<=6)return["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"][wd];return["Dim.","Lun.","Mar.","Mer.","Jeu.","Ven.","Sam."][wd]+" "+q.getDate()+" "+MOIS[q.getMonth()]}
+function planDate(i,format){var t0=todayIso();if(format==="story")return t0;if(i.quand&&i.quand>=t0){var d=parseIso(i.quand);d.setDate(d.getDate()-1);var b=iso(d);return b>=t0?b:t0}return nextFreeDay()}
+function ideaToPost(i,format){var t=typ(i.type);P=blankPost();P.format=format;P.type=TYPES[i.type]?i.type:"agenda";P.village=VILLAGES[i.village]?i.village:"cotebleue";P.datePrevue=planDate(i,format);var wl=P.type==="agenda"?whenLabel(i.quand,P.datePrevue):"";P.pill=wl||(format==="story"&&P.type==="agenda"?t.storyPill:t.pill);P.titre=i.titre||"";P.details=i.details||i.texte||"";P.source=i.sourceNom||"";P.ideeId=i.id;if(i.story&&format==="story")P.legende=i.story;photoImg=null;photoFile=null;$("p-photo").value="";syncForm();show("atelier");$("atelier-lead").textContent="Idée du "+frDate(i.date)+" chargée. Ajuste le titre et les détails, puis enregistre."}
 function setIdea(id,statut){S.db.collection("idees").doc(id).update({statut:statut}).then(function(){toast(statut==="ecartee"?"Idée écartée":"Idée remise à traiter")})}
 function renderIdeas(){var list=$("idea-list");list.textContent="";
   var items=S.ideas.filter(function(i){return(i.statut||"nouvelle")===S.filter}).sort(function(a,b){return (b.date||"").localeCompare(a.date||"")||(a.quand||"9").localeCompare(b.quand||"9")});
