@@ -123,6 +123,13 @@ details.add .panel{border:0;border-radius:0}
 #btn-select[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
 .selbar{position:sticky;bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:6;background:var(--surface);border:2px solid var(--line);box-shadow:4px 4px 0 var(--hard);border-radius:var(--r);padding:10px 12px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;font-weight:800}
 .slides .chip{min-height:36px;padding:0 12px}
+.chipn{font-size:11px;background:var(--sun);color:#0B1B3F;border-radius:100px;padding:0 7px}
+.chipn:empty{display:none}
+.compte{background:var(--surface-2);border-radius:10px;padding:10px 12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+.compte .who{display:flex;flex-direction:column;gap:2px;min-width:0}
+.compte .who b{overflow-wrap:anywhere}
+.compte .btn{min-height:40px;font-size:13px;padding:0 12px}
+.propose{border:2px dashed var(--line)}
 .seg{display:grid;grid-template-columns:repeat(3,1fr);border:2px solid var(--line);border-radius:12px;overflow:hidden}
 .seg button{min-height:44px;border:0;background:var(--surface);font-weight:800;cursor:pointer}
 .seg button[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink)}
@@ -236,6 +243,19 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
         <div class="row"><button class="btn primary" type="submit">Ajouter l’idée</button></div>
       </form>
     </details>
+    <details class="add" id="comptes-box">
+      <summary><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>Comptes Instagram suivis <span class="chipn" id="n-comptes"></span></summary>
+      <div class="panel">
+        <p class="hint" style="margin:0">Chaque matin, la veille lit les derniers posts de ces comptes professionnels publics et en tire des idées. Les comptes personnels ou privés ne sont pas lisibles.</p>
+        <div id="comptes-proposes"></div>
+        <div id="comptes-suivis" class="contacts"></div>
+        <form id="compte-form" class="two">
+          <div class="field"><label for="c-user">Nom du compte</label><input type="text" id="c-user" placeholder="@nom_du_compte" autocapitalize="off" autocorrect="off" spellcheck="false" required></div>
+          <div class="field"><label for="c-village">Village</label><select id="c-village"></select></div>
+          <div class="row"><button class="btn primary" type="submit">Suivre ce compte</button></div>
+        </form>
+      </div>
+    </details>
   </section>
 
   <!-- ATELIER -->
@@ -307,8 +327,9 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
   <section class="view" id="v-analyse" aria-labelledby="h-ana" hidden>
     <div>
       <h2 id="h-ana">Analyse</h2>
-      <p class="source" id="meta-status">Source des chiffres : ta saisie. La connexion Meta arrive à l’étape suivante.</p>
+      <p class="source" id="meta-status">API Meta connectée : les chiffres arrivent chaque matin avec la veille. Tu peux aussi saisir un relevé à la main.</p>
     </div>
+    <div class="note" id="communaute" hidden></div>
     <div class="kpis" id="kpis"></div>
     <div class="panel">
       <div class="week-head"><h3>Abonnés</h3><span class="source">un point par relevé</span></div>
@@ -627,6 +648,21 @@ function renderIdeas(){var list=$("idea-list");list.textContent="";
       (i.sourceNom||i.sourceUrl)?el("div",{class:"src"},["Source : ",i.sourceUrl?el("a",{href:i.sourceUrl,target:"_blank",rel:"noopener",text:i.sourceNom||i.sourceUrl}):i.sourceNom]):null,
       el("div",{class:"actions"},actions)]);
     list.appendChild(c)})}
+
+/* Comptes Instagram suivis */
+function cleanUser(u){return(u||"").trim().replace(/^@/,"").replace(/^https?:\/\/(www\.)?instagram\.com\//i,"").replace(/[\/?#].*$/,"").toLowerCase()}
+function renderComptes(){var all=S.comptes||[];var suivis=all.filter(function(c){return c.statut==="suivi"}).sort(function(a,b){return(a.username||"").localeCompare(b.username||"")});var props=all.filter(function(c){return c.statut==="propose"});
+  $("n-comptes").textContent=(suivis.length||"")+(props.length?" · "+props.length+" à valider":"");
+  var pb=$("comptes-proposes");pb.textContent="";if(props.length){pb.appendChild(el("span",{class:"lbl",text:"Proposés par la veille"}));props.forEach(function(c){pb.appendChild(compteRow(c,true))})}
+  var sb=$("comptes-suivis");sb.textContent="";if(suivis.length)sb.appendChild(el("span",{class:"lbl",text:"Suivis ("+suivis.length+")"}));else sb.appendChild(el("div",{class:"hint",text:"Aucun compte suivi pour l’instant."}));suivis.forEach(function(c){sb.appendChild(compteRow(c,false))})}
+function compteRow(c,prop){var v=vil(c.village);var info=[c.nom,v.short,c.abonnes!=null?nf(c.abonnes)+" abonnés":"",c.dernierPost?"dernier post "+frDate(c.dernierPost.slice(0,10)):""].filter(Boolean).join(" · ");
+  return el("div",{class:"compte"+(prop?" propose":"")},[el("div",{class:"who"},[el("a",{href:"https://www.instagram.com/"+c.username+"/",target:"_blank",rel:"noopener"},[el("b",{text:"@"+c.username})]),el("span",{class:"hint",text:info}),c.raison&&prop?el("span",{class:"hint",text:c.raison}):null]),
+    el("div",{class:"row"},prop?[el("button",{class:"btn primary",type:"button",text:"Suivre",onclick:function(){setCompte(c.username,{statut:"suivi"},"@"+c.username+" ajouté")}}),el("button",{class:"btn ghost",type:"button",text:"Ignorer",onclick:function(){setCompte(c.username,{statut:"ignore"},"Proposition ignorée")}})]:[el("button",{class:"btn ghost",type:"button",text:"Ne plus suivre",onclick:function(){setCompte(c.username,{statut:"ignore"},"@"+c.username+" n’est plus suivi")}})])])}
+function setCompte(u,patch,msg){if(!S.db)return;S.db.collection("comptes").doc(u).update(patch).then(function(){toast(msg)},function(){toast("Modification impossible pour l’instant")})}
+VORDER.forEach(function(k){$("c-village").appendChild(el("option",{value:k,text:VILLAGES[k].name}))});
+$("compte-form").addEventListener("submit",function(e){e.preventDefault();if(!S.db)return;var u=cleanUser($("c-user").value);if(!/^[a-z0-9._]{1,30}$/.test(u)){toast("Nom de compte invalide");return}
+  var ref=S.db.collection("comptes").doc(u);var body={username:u,village:$("c-village").value,statut:"suivi",ajouteLe:new Date().toISOString(),origine:"manuel"};
+  ref.get().then(function(sn){return sn.exists?ref.update({statut:"suivi",village:body.village}):ref.set(body)}).then(function(){$("c-user").value="";toast("@"+u+" sera lu par la veille dès demain")},function(){toast("Ajout impossible pour l’instant")})});
 /* Récap du jour */
 function richText(node,text){node.textContent="";(text||"").split("**").forEach(function(seg,k){if(!seg)return;node.appendChild(k%2?el("b",{text:seg}):document.createTextNode(seg))})}
 function copyText(txt,okMsg){var p=navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(txt):Promise.reject();return p.then(function(){toast(okMsg)},function(){toast("Copie impossible ici : sélectionne le texte à la main")})}
@@ -701,7 +737,7 @@ function renderAna(){var stats=S.stats.slice().sort(function(a,b){return a.date.
   var tb=$("pub-rows");tb.textContent="";var sorted=pubs.slice().sort(function(a,b){return(b.datePublie||"").localeCompare(a.datePublie||"")});
   if(!sorted.length){tb.appendChild(el("tr",{},[el("td",{colspan:"8",text:"Aucun post publié. Dans l’atelier, « Marquer publié » l’ajoute ici."})]))}
   sorted.forEach(function(p){var e2=eng(p);var tr=el("tr",{},[el("td",{text:frDate(p.datePublie)}),el("td",{text:(p.titre||typ(p.type).title).slice(0,34)}),el("td",{text:typ(p.type).name}),el("td",{text:vil(p.village).short}),el("td",{class:"n",text:p.stats&&p.stats.portee?nf(e2.reach):"–"}),el("td",{class:"n",text:p.stats?nf(e2.inter):"–"}),el("td",{class:"n",text:pct(e2.rate)}),el("td",{},[el("button",{class:"btn ghost",type:"button",text:"Chiffres",onclick:function(){toggleStatRow(tr,p)}})])]);tb.appendChild(tr)})
-  var sy=S.sync;$("meta-status").textContent=sy&&sy.at?("Source : API Meta, dernière mise à jour "+frDate(sy.at.slice(0,10))+(sy.ok===false?" (échec : "+(sy.message||"erreur")+")":"")+". Les relevés à la main restent possibles."):"Source des chiffres : ta saisie. La connexion Meta arrive à l’étape suivante."}
+  var sy=S.sync;var cm=$("communaute");cm.hidden=!(sy&&sy.communaute);if(sy&&sy.communaute){cm.textContent="";cm.append(el("b",{text:"Ta communauté cette semaine. "}),sy.communaute)}$("meta-status").textContent=sy&&sy.at?("Source : API Meta, dernière mise à jour "+frDate(sy.at.slice(0,10))+(sy.ok===false?" (échec : "+(sy.message||"erreur")+")":"")+". Les relevés à la main restent possibles."):"API Meta connectée : les chiffres arrivent chaque matin avec la veille. Tu peux aussi saisir un relevé à la main."}
 function toggleStatRow(tr,p){var nx=tr.nextSibling;if(nx&&nx.classList&&nx.classList.contains("statrow")){nx.remove();return}
   var s=p.stats||{};var f=el("form",{class:"statform"});var fields=[["portee","Portée"],["likes","J’aime"],["commentaires","Commentaires"],["enregistrements","Enregistrements"],["partages","Partages"]];
   fields.forEach(function(x){var id="st-"+p.id+"-"+x[0];f.appendChild(el("div",{class:"field"},[el("label",{for:id,text:x[1]}),el("input",{type:"number",min:"0",inputmode:"numeric",id:id,value:s[x[0]]!=null?s[x[0]]:""})]))});
@@ -723,6 +759,7 @@ else{
     db.collection("posts").limit(500).onSnapshot(function(s){S.posts=s.docs.map(function(d){return Object.assign({id:d.id},d.data())});if(P.id){var cur=S.posts.find(function(p){return p.id===P.id});if(cur&&cur.statut!==P.statut){P.statut=cur.statut;P.datePublie=cur.datePublie;syncForm()}}renderCal();renderAna();renderIdeas()});
     db.collection("stats").limit(800).onSnapshot(function(s){S.stats=s.docs.map(function(d){return Object.assign({id:d.id},d.data())}).filter(function(x){return x.date});renderAna()});
     db.collection("recaps").orderBy("date","desc").limit(30).onSnapshot(function(sn){S.recaps=sn.docs.map(function(d){return Object.assign({id:d.id},d.data())}).filter(function(x){return x.date});renderRecap()});
+    db.collection("comptes").limit(300).onSnapshot(function(sn){S.comptes=sn.docs.map(function(d){return Object.assign({id:d.id},d.data())});renderComptes()});
     db.doc("reglages/meta").onSnapshot(function(s){S.sync=s.exists?s.data():null;renderAna()});
     db.doc("reglages/objectifs").onSnapshot(function(s){if(s.exists){var d=s.data();if(d.rythme)RYTHME=+d.rythme;renderCal()}});
   });

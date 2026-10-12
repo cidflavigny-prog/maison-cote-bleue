@@ -18,6 +18,14 @@ Source du dashboard de création publié sur claude.ai : https://claude.ai/artif
 | `posts` | `format, type, village, pill, sticker, titre, details, legende, datePrevue, source, photoId, ideeId, ideeIds, items[], statut, datePublie, stats{portee, likes, commentaires, enregistrements, partages, source}` |
 | `recaps` | un document par jour (`AAAA-MM-JJ`) : `date, texte, legende, contacts[{nom, raison, message}]` |
 | `stats` | un document par jour (`AAAA-MM-JJ`) : `abonnes, messages, source` |
+| `comptes` | un document par compte Instagram pro (`username`) : `nom, village, statut (suivi/propose/ignore), abonnes, dernierPost, raison` |
 | `reglages` | `objectifs` (rythme, objectif d'abonnés), `meta` (dernière synchro API Meta) |
 
 Types : `agenda, bonplan, nouveau, pratique, question`. Villages : `couronne, sausset, carry, redonne, cotebleue`.
+
+### Routines du matin
+
+- **6h40 – Instagram Maison Côte Bleue** (environnement cloud « Maison cote bleue ») : API Meta (`graph.facebook.com`, jeton de page stocké comme secret réseau, jamais dans le code) → abonnés, stats des posts, résumé commentaires/mentions, lecture des comptes suivis (Business Discovery), propositions de comptes. Compte Instagram `17841462383522173`, page `1307148845825864`.
+- **6h57 – Veille quotidienne** : recherche web, récap du jour, idées, ménage des événements passés, section « Ta communauté Instagram ».
+
+Révoquer l'accès Meta : Facebook → Paramètres → Intégrations professionnelles → Studio Côte Bleue → Supprimer.
