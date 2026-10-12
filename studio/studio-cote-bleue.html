@@ -186,7 +186,7 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
   <section class="view" id="v-idees" aria-labelledby="h-idees">
     <div>
       <h2 id="h-idees">Idées du jour</h2>
-      <p class="lead">Ta veille de 6h57 dépose ici chaque info repérée. Choisis-en une, elle part dans l’atelier déjà remplie.</p>
+      <p class="lead">Ta veille de 6h57 dépose ici chaque info repérée. Choisis-en une, elle part dans l’atelier déjà remplie. Une idée disparaît d’elle-même le lendemain de son événement.</p>
     </div>
     <div class="panel recap" id="recap" hidden>
       <div class="week-head"><h3 id="recap-title">Récap du jour</h3><select id="recap-date" aria-label="Choisir un récap" hidden></select></div>
@@ -230,6 +230,7 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
         <div class="field"><label for="i-texte">Détails</label><textarea id="i-texte" placeholder="Dimanche 12 octobre, 8h-13h, place du port"></textarea></div>
         <div class="two">
           <div class="field"><label for="i-quand">Date de l’info</label><input type="date" id="i-quand"></div>
+          <div class="field"><label for="i-fin">Jusqu’au (si plusieurs jours)</label><input type="date" id="i-fin"></div>
           <div class="field"><label for="i-source">Source (lien)</label><input type="url" id="i-source" placeholder="https://"></div>
         </div>
         <div class="row"><button class="btn primary" type="submit">Ajouter l’idée</button></div>
@@ -601,10 +602,13 @@ $("sel-cancel").onclick=function(){$("btn-select").click()};
 $("sel-liste").onclick=function(){ideasToGroup("post")};
 $("sel-carrousel").onclick=function(){ideasToGroup("carrousel")};
 function setIdea(id,patch,msg){S.db.collection("idees").doc(id).update(patch).then(function(){toast(msg)})}
-function inFilter(i){var st=i.statut||"nouvelle";if(S.filter==="nouvelle")return st==="nouvelle"&&!i.aVerifier;if(S.filter==="verifier")return st==="nouvelle"&&!!i.aVerifier;return st===S.filter}
+function ideaEnd(i){return i.fin||i.quand||""}
+function isPast(i){var e=ideaEnd(i);return!!e&&e<todayIso()}
+var purging={};function purgePast(){if(!S.db)return;S.ideas.filter(isPast).forEach(function(i){if(purging[i.id])return;purging[i.id]=1;S.db.collection("idees").doc(i.id).delete().catch(function(){purging[i.id]=0})})}
+function inFilter(i){if(isPast(i))return false;var st=i.statut||"nouvelle";if(S.filter==="nouvelle")return st==="nouvelle"&&!i.aVerifier;if(S.filter==="verifier")return st==="nouvelle"&&!!i.aVerifier;return st===S.filter}
 function renderIdeas(){var list=$("idea-list");list.textContent="";
   var items=S.ideas.filter(inFilter).sort(function(a,b){return (b.date||"").localeCompare(a.date||"")||(a.quand||"9").localeCompare(b.quand||"9")});
-  var nN=S.ideas.filter(function(i){return(i.statut||"nouvelle")==="nouvelle"&&!i.aVerifier}).length,nV=S.ideas.filter(function(i){return(i.statut||"nouvelle")==="nouvelle"&&i.aVerifier}).length;
+  var live=S.ideas.filter(function(i){return!isPast(i)});var nN=live.filter(function(i){return(i.statut||"nouvelle")==="nouvelle"&&!i.aVerifier}).length,nV=live.filter(function(i){return(i.statut||"nouvelle")==="nouvelle"&&i.aVerifier}).length;
   $("n-nouvelle").textContent=nN||"";$("n-verifier").textContent=nV||"";$("idea-count").hidden=!(nN+nV);$("idea-count").textContent=nN+nV;
   var nsel=Object.keys(S.sel).filter(function(k){return S.sel[k]}).length;$("selbar").hidden=!S.selecting;$("sel-count").textContent=nsel+(nsel>1?" idées cochées":" idée cochée");
   if(!items.length){var msg={nouvelle:"Rien à traiter pour l’instant.",verifier:"Aucune info en attente de vérification.",utilisee:"Aucune idée utilisée.",ecartee:"Aucune idée écartée."}[S.filter];list.appendChild(el("div",{class:"empty"},[el("b",{text:msg}),el("br"),S.filter==="nouvelle"?"Chaque matin à 6h57, la veille dépose ses infos ici. Tu peux aussi ajouter une idée à la main ci-dessous.":""]));return}
@@ -616,7 +620,7 @@ function renderIdeas(){var list=$("idea-list");list.textContent="";
         el("button",{class:"btn ghost",type:"button",text:"Écarter",onclick:function(){setIdea(i.id,{statut:"ecartee"},"Idée écartée")}})];
     else actions=[i.postId?el("button",{class:"btn",type:"button",text:"Voir le post",onclick:function(){var p=S.posts.find(function(x){return x.id===i.postId});if(p)openPost(p)}}):null,el("button",{class:"btn ghost",type:"button",text:"Remettre à traiter",onclick:function(){setIdea(i.id,{statut:"nouvelle"},"Idée remise à traiter")}})];
     var c=el("article",{class:"card"+(st==="utilisee"?" used":"")+(S.selecting&&S.sel[i.id]?" selected":"")},[
-      el("div",{class:"meta"},[el("span",{class:"pill t-"+(TYPES[i.type]?i.type:"agenda"),text:t.name}),el("span",{class:"dot",style:"background:"+v.color}),v.short,i.quand?" · "+frDate(i.quand):"",i.aVerifier?el("span",{class:"verif",text:"À vérifier"}):null]),
+      el("div",{class:"meta"},[el("span",{class:"pill t-"+(TYPES[i.type]?i.type:"agenda"),text:t.name}),el("span",{class:"dot",style:"background:"+v.color}),v.short,i.quand?" · "+frDate(i.quand)+(i.fin&&i.fin!==i.quand?" → "+frDate(i.fin):""):(i.fin?" · jusqu’au "+frDate(i.fin):""),i.aVerifier?el("span",{class:"verif",text:"À vérifier"}):null]),
       el("h3",{text:i.titre||"(sans titre)"}),
       i.texte?el("p",{text:i.texte}):null,
       i.story&&!S.selecting?el("p",{text:"Story : "+i.story,style:"font-size:13px"}):null,
@@ -637,7 +641,7 @@ $("recap-date").onchange=function(){S.recapDate=this.value;renderRecap()};
 $("recap-copy-leg").onclick=function(){copyText($("recap-legende").textContent,"Légende copiée")};
 $("recap-use-leg").onclick=function(){P.legende=$("recap-legende").textContent;syncForm();show("atelier");toast("Légende du jour placée dans l’atelier")};
 $("i-quand").value="";
-$("idea-form").addEventListener("submit",function(e){e.preventDefault();if(!S.db)return;var body={date:todayIso(),type:$("i-type").value,village:$("i-village").value,titre:$("i-titre").value.trim(),texte:$("i-texte").value.trim(),quand:$("i-quand").value||"",sourceUrl:$("i-source").value.trim(),sourceNom:"",statut:"nouvelle",aVerifier:false,origine:"manuel",createdAt:new Date().toISOString()};
+$("idea-form").addEventListener("submit",function(e){e.preventDefault();if(!S.db)return;var body={date:todayIso(),type:$("i-type").value,village:$("i-village").value,titre:$("i-titre").value.trim(),texte:$("i-texte").value.trim(),quand:$("i-quand").value||"",fin:$("i-fin").value||"",sourceUrl:$("i-source").value.trim(),sourceNom:"",statut:"nouvelle",aVerifier:false,origine:"manuel",createdAt:new Date().toISOString()};
   S.db.collection("idees").add(body).then(function(){e.target.reset();$("add-idea").open=false;toast("Idée ajoutée")},function(){toast("Ajout impossible pour l’instant")})});
 
 /* ---------- Calendrier ---------- */
@@ -715,7 +719,7 @@ var C=window.claude;
 if(!C||!C.use){setConn(false,"Hors ligne")}
 else{
   C.use("db").then(function(db){if(!db){setConn(false,"Base indisponible");return}S.db=db;setConn(true,"Synchronisé");
-    db.collection("idees").orderBy("date","desc").limit(300).onSnapshot(function(s){S.ideas=s.docs.map(function(d){return Object.assign({id:d.id},d.data())});renderIdeas()},function(){setConn(false,"Reconnexion…")});
+    db.collection("idees").orderBy("date","desc").limit(300).onSnapshot(function(s){S.ideas=s.docs.map(function(d){return Object.assign({id:d.id},d.data())});renderIdeas();if(!s.metadata||!s.metadata.fromCache)purgePast()},function(){setConn(false,"Reconnexion…")});
     db.collection("posts").limit(500).onSnapshot(function(s){S.posts=s.docs.map(function(d){return Object.assign({id:d.id},d.data())});if(P.id){var cur=S.posts.find(function(p){return p.id===P.id});if(cur&&cur.statut!==P.statut){P.statut=cur.statut;P.datePublie=cur.datePublie;syncForm()}}renderCal();renderAna();renderIdeas()});
     db.collection("stats").limit(800).onSnapshot(function(s){S.stats=s.docs.map(function(d){return Object.assign({id:d.id},d.data())}).filter(function(x){return x.date});renderAna()});
     db.collection("recaps").orderBy("date","desc").limit(30).onSnapshot(function(sn){S.recaps=sn.docs.map(function(d){return Object.assign({id:d.id},d.data())}).filter(function(x){return x.date});renderRecap()});
