@@ -1,31 +1,49 @@
 # Maison Côte Bleue
 
-## Studio Côte Bleue (`studio/studio-cote-bleue.html`)
+Média local Instagram de la Côte Bleue (La Couronne-Carro, Sausset-les-Pins, Carry-le-Rouet, La Redonne).
+Direction artistique v1 : piste « Mistral », Fredoka + Nunito, une couleur par village, touche années 90.
 
-Source du dashboard de création publié sur claude.ai : https://claude.ai/artifact/PHdBhtBXs2sjmZ9g7TrFkd
+## Studio Côte Bleue
 
-- **Idées** : la routine « Veille quotidienne Maison Côte Bleue » (6h57) dépose chaque info dans la collection `idees`.
-- **Idées** : une idée est supprimée le lendemain de son événement (`fin` sinon `quand`) ; filtres À traiter / À vérifier / Utilisées / Écartées, sélection multiple pour un post liste ou un carrousel, et récap du jour (légende, commerces à contacter, texte complet).
-- **Atelier** : gabarits de la DA v1 (piste « Mistral », Fredoka + Nunito) en post 4:5 (1080×1350), story 9:16 (1080×1920) et carrousel ; gabarits DA v1 « Agenda semaine », « Agenda week-end », « Agenda du jour », story agenda par village et « Happening » (teaser + compte à rebours) ; légende proposée par Claude, en tutoiement.
-- **Calendrier** : 3 posts par semaine, alternance bleu / jaune / photo / nuit / blanc.
-- **Analyse** : abonnés, portée, engagement par type et par village, messages reçus.
+Page de travail publiée sur claude.ai (privée) : https://claude.ai/artifact/PHdBhtBXs2sjmZ9g7TrFkd
+
+- **Semaine** : les rendez-vous fixes et leur état (à créer, prêt à vérifier, publié).
+  - chaque soir 18h : story météo du lendemain ;
+  - dimanche : agenda de la semaine suivante (post), plus une story « Ça bouge à … » pour chaque village qui a au moins 3 événements ;
+  - jeudi : agenda du week-end (post + story).
+- **Idées** : infos déposées par la veille, filtres À traiter / À vérifier / Utilisées / Écartées, sélection → agenda, récap du jour, comptes Instagram suivis.
+- **Atelier** : gabarits de la DA (agenda semaine, week-end, du jour, météo, événement, bon plan, nouveauté, info pratique, question, happening) en post 4:5 (1080×1350) et story 9:16 (1080×1920), photos encadrées (contour marine, ombre dure, fond de couleur conservé), légende proposée par Claude.
+- **Stats** : abonnés, portée, engagement par gabarit et par village (API Meta).
+
+### Code
+
+`studio/src/` contient les sources, `python3 studio/build.py` reconstruit `studio/studio-cote-bleue.html`, qui est publié tel quel.
+
+| Fichier | Rôle |
+| --- | --- |
+| `src/gabarits.js` | Marque, dates, rendu canvas de tous les gabarits |
+| `src/interface.js` | Écrans, base de données, ménage automatique |
+| `src/body.html`, `src/styles.css` | Structure et styles de la page |
 
 ### Données (base de l'artifact)
 
-| Collection | Contenu |
-| --- | --- |
-| `idees` | `date, type, village, titre, texte, details, quand, fin, story, sourceNom, sourceUrl, aVerifier, statut, origine, createdAt` |
-| `posts` | `format, type, village, pill, sticker, titre, details, legende, datePrevue, source, photoId, ideeId, ideeIds, items[], rows[{date, village, titre, infos, ideeId}], compteur, visuel, villages[], statut, datePublie, stats{portee, likes, commentaires, enregistrements, partages, source}` |
-| `recaps` | un document par jour (`AAAA-MM-JJ`) : `date, texte, legende, contacts[{nom, raison, message}]` |
-| `stats` | un document par jour (`AAAA-MM-JJ`) : `abonnes, messages, source` |
-| `comptes` | un document par compte Instagram pro (`username`) : `nom, village, statut (suivi/propose/ignore), abonnes, dernierPost, raison` |
-| `reglages` | `objectifs` (rythme, objectif d'abonnés), `meta` (dernière synchro API Meta) |
+| Collection | Contenu | Ménage |
+| --- | --- | --- |
+| `idees` | `date, type, village, titre, texte, details, quand, fin, story, sourceNom, sourceUrl, aVerifier, statut, origine` | supprimée le lendemain de `fin` (sinon `quand`) ; sans date : après 14 jours |
+| `posts` | `format, type, village, pill, sticker, titre, details, legende, datePrevue, source, photoId, rows[{date, village, titre, infos, ideeId, photoId}], compteur, visuel, villages[], meteoDate, statut, datePublie, stats, auto` | brouillon dont la date est passée depuis 7 jours |
+| `recaps` | un document par jour : `texte, legende, contacts[]` | seul celui du jour est gardé |
+| `meteo` | un document par jour (`AAAA-MM-JJ`) : `villages{code, tmin, tmax}, mer{eau, vagues, vent, rafales, dir}` | supprimé le jour passé |
+| `stats` | un document par jour : `abonnes, messages` | — |
+| `comptes` | comptes Instagram pros : `statut (suivi/propose/ignore), village, abonnes, dernierPost` | — |
+| `reglages` | `objectifs`, `meta` (bilan des routines) | — |
 
-Types : `agenda, bonplan, nouveau, pratique, question`. Villages : `couronne, sausset, carry, redonne, cotebleue`.
+## Routines
 
-### Routines du matin
+| Heure | Routine | Environnement |
+| --- | --- | --- |
+| 6h40 | Instagram : abonnés, stats des posts, communauté, comptes suivis | « Maison cote bleue » (jeton Meta en secret réseau pour `graph.facebook.com`) |
+| 6h57 | Veille : recherche web, récap, idées, ménage, brouillons d'agenda le dimanche et le jeudi | Cowork |
+| 17h30 | Météo de demain (Open-Meteo) → story du soir | « Maison cote bleue » (domaines `api.open-meteo.com` et `marine-api.open-meteo.com` à autoriser) |
 
-- **6h40 – Instagram Maison Côte Bleue** (environnement cloud « Maison cote bleue ») : API Meta (`graph.facebook.com`, jeton de page stocké comme secret réseau, jamais dans le code) → abonnés, stats des posts, résumé commentaires/mentions, lecture des comptes suivis (Business Discovery), propositions de comptes. Compte Instagram `17841462383522173`, page `1307148845825864`.
-- **6h57 – Veille quotidienne** : recherche web, récap du jour, idées, ménage des événements passés, section « Ta communauté Instagram » ; brouillon agenda semaine le lundi, agenda week-end (post + story) le vendredi.
-
+Compte Instagram `17841462383522173`, page Facebook `1307148845825864`.
 Révoquer l'accès Meta : Facebook → Paramètres → Intégrations professionnelles → Studio Côte Bleue → Supprimer.

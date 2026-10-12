@@ -1,0 +1,205 @@
+<div class="wrap">
+  <header class="top">
+    <svg width="44" height="44" viewBox="0 0 52 52" aria-hidden="true"><circle cx="28" cy="28" r="22" fill="#0B1B3F"/><circle cx="24" cy="24" r="22" fill="#0F4CDB" stroke="#0B1B3F" stroke-width="2"/><circle cx="24" cy="24" r="13" fill="#FFC93C"/><path d="M12 25c4-4 8 4 12 0s8 4 12 0" fill="none" stroke="#0F4CDB" stroke-width="3" stroke-linecap="round"/></svg>
+    <div class="grow">
+      <div class="name">Studio Côte Bleue</div>
+      <div class="sub" id="today-label">@maison.cotebleue</div>
+    </div>
+    <span class="badge" id="conn"><span class="dot" style="background:#93A3C8"></span>Connexion…</span>
+  </header>
+
+  <!-- SEMAINE -->
+  <section class="view" id="v-semaine" aria-labelledby="h-sem">
+    <div>
+      <h2 id="h-sem">Ma semaine</h2>
+      <p class="lead">Tes rendez-vous fixes : la météo de demain en story chaque soir à 18h, l’agenda de la semaine le dimanche, l’agenda du week-end le jeudi. Touche un rendez-vous pour l’ouvrir dans l’atelier.</p>
+    </div>
+    <div class="weeknav">
+      <h3 id="week-title">Cette semaine</h3>
+      <div class="row"><button type="button" class="btn" id="week-prev" aria-label="Semaine précédente">‹</button><button type="button" class="btn" id="week-now">Aujourd’hui</button><button type="button" class="btn" id="week-next" aria-label="Semaine suivante">›</button></div>
+    </div>
+    <div class="note" id="week-note" hidden></div>
+    <div class="daylist" id="days"></div>
+    <div class="field"><h3>Brouillons sans date</h3><div class="list" id="drafts"></div></div>
+  </section>
+
+  <!-- IDÉES -->
+  <section class="view" id="v-idees" aria-labelledby="h-idees" hidden>
+    <div>
+      <h2 id="h-idees">Idées</h2>
+      <p class="lead">La veille dépose ici chaque info repérée, et la retire le lendemain de l’événement. Les agendas se remplissent à partir de ces idées.</p>
+    </div>
+    <div class="panel recap" id="recap" hidden>
+      <div class="week-head"><h3 id="recap-title">Récap du jour</h3></div>
+      <div class="recap-block" id="recap-legende-box">
+        <span class="lbl">Légende du jour</span>
+        <p class="recap-text" id="recap-legende"></p>
+        <div class="row"><button type="button" class="btn" id="recap-copy-leg">Copier</button><button type="button" class="btn ghost" id="recap-use-leg">Utiliser dans l’atelier</button></div>
+      </div>
+      <div class="recap-block" id="recap-contacts-box">
+        <span class="lbl">Commerces à contacter</span>
+        <div id="recap-contacts" class="contacts"></div>
+      </div>
+      <details class="recap-full"><summary>Lire le récap complet</summary><div class="recap-text" id="recap-full"></div></details>
+    </div>
+    <div class="row" style="justify-content:space-between">
+      <div class="chips" role="group" aria-label="Filtrer les idées">
+        <button class="chip" data-filter="nouvelle" aria-pressed="true">À traiter <span class="n" id="n-nouvelle"></span></button>
+        <button class="chip" data-filter="verifier" aria-pressed="false">À vérifier <span class="n" id="n-verifier"></span></button>
+        <button class="chip" data-filter="utilisee" aria-pressed="false">Utilisées</button>
+        <button class="chip" data-filter="ecartee" aria-pressed="false">Écartées</button>
+      </div>
+      <button type="button" class="btn" id="btn-select" aria-pressed="false">Sélectionner</button>
+    </div>
+    <div class="list" id="idea-list"></div>
+    <div class="selbar" id="selbar" hidden>
+      <span id="sel-count">0 idée</span>
+      <div class="row">
+        <button type="button" class="btn primary" id="sel-agenda">Créer l’agenda</button>
+        <button type="button" class="btn ghost" id="sel-cancel">Annuler</button>
+      </div>
+    </div>
+    <details class="add" id="add-idea">
+      <summary><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Ajouter une idée à la main</summary>
+      <form class="panel" id="idea-form">
+        <div class="two">
+          <div class="field"><label for="i-type">Type</label><select id="i-type"></select></div>
+          <div class="field"><label for="i-village">Village</label><select id="i-village"></select></div>
+        </div>
+        <div class="field"><label for="i-titre">Titre</label><input type="text" id="i-titre" required placeholder="Marché de producteurs dimanche"></div>
+        <div class="field"><label for="i-texte">Détails</label><textarea id="i-texte" placeholder="Dimanche 12 octobre, 8h-13h, place du port"></textarea></div>
+        <div class="two">
+          <div class="field"><label for="i-quand">Date de l’événement</label><input type="date" id="i-quand"></div>
+          <div class="field"><label for="i-fin">Jusqu’au (si plusieurs jours)</label><input type="date" id="i-fin"></div>
+        </div>
+        <div class="field"><label for="i-source">Source (lien)</label><input type="url" id="i-source" placeholder="https://"></div>
+        <div class="row"><button class="btn primary" type="submit">Ajouter l’idée</button></div>
+      </form>
+    </details>
+    <details class="add" id="comptes-box">
+      <summary><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>Comptes Instagram suivis <span class="chipn" id="n-comptes"></span></summary>
+      <div class="panel">
+        <p class="hint" style="margin:0">Chaque matin, la veille lit les derniers posts de ces comptes professionnels publics et en tire des idées. Les comptes personnels ou privés ne sont pas lisibles.</p>
+        <div id="comptes-proposes"></div>
+        <div id="comptes-suivis" class="contacts"></div>
+        <form id="compte-form" class="two">
+          <div class="field"><label for="c-user">Nom du compte</label><input type="text" id="c-user" placeholder="@nom_du_compte" autocapitalize="off" autocorrect="off" spellcheck="false" required></div>
+          <div class="field"><label for="c-village">Village</label><select id="c-village"></select></div>
+          <div class="row"><button class="btn primary" type="submit">Suivre ce compte</button></div>
+        </form>
+      </div>
+    </details>
+  </section>
+
+  <!-- ATELIER -->
+  <section class="view" id="v-atelier" aria-labelledby="h-atelier" hidden>
+    <div>
+      <h2 id="h-atelier">Atelier</h2>
+      <p class="lead" id="atelier-lead">Choisis un gabarit, l’image se dessine aux couleurs de la marque. Enregistre-la, copie la légende, publie depuis Instagram.</p>
+    </div>
+    <div class="studio">
+      <form class="panel" id="post-form" autocomplete="off">
+        <div class="field"><span class="lbl">Rendez-vous</span><div class="chips" id="p-types-rdv" role="group" aria-label="Gabarits des rendez-vous"></div></div>
+        <div class="field"><span class="lbl">Posts ponctuels</span><div class="chips" id="p-types" role="group" aria-label="Gabarits ponctuels"></div></div>
+        <div class="seg" role="group" aria-label="Format" style="grid-template-columns:1fr 1fr">
+          <button type="button" id="fmt-post" aria-pressed="true">Post 4:5</button>
+          <button type="button" id="fmt-story" aria-pressed="false">Story 9:16</button>
+        </div>
+        <div class="field" id="village-field"><span class="lbl" id="village-label">Village</span><div class="chips" id="p-villages" role="group" aria-label="Village"></div></div>
+        <div class="two">
+          <div class="field"><label for="p-pill">Étiquette</label><input type="text" id="p-pill" maxlength="24"></div>
+          <div class="field" id="sticker-field"><label for="p-sticker">Autocollant</label><input type="text" id="p-sticker" maxlength="8" placeholder="-20 %"></div>
+        </div>
+        <div class="field" id="titre-field"><label for="p-titre" id="p-titre-label">Titre</label><input type="text" id="p-titre" maxlength="80"></div>
+        <div class="field" id="list-fields" hidden>
+          <span class="lbl">Événements</span>
+          <p class="hint" id="rows-period" style="margin:0"></p>
+          <div id="rows" class="contacts"></div>
+          <div class="row"><button type="button" class="btn" id="btn-add-row">+ Ajouter une ligne</button><button type="button" class="btn sun" id="btn-pick">Choisir dans les idées</button></div>
+          <div id="picker" class="contacts" hidden></div>
+        </div>
+        <div class="field" id="teaser-fields" hidden>
+          <div class="two">
+            <div class="field"><label for="t-compteur">Compte à rebours</label><input type="text" id="t-compteur" maxlength="5" placeholder="J-4"></div>
+            <div class="field"><label for="t-visuel">Visuel</label><select id="t-visuel"><option value="logo">Logo soleil</option><option value="villages">Icônes des villages</option><option value="aucun">Texte seul</option></select></div>
+          </div>
+          <div class="field"><span class="lbl">Villages dévoilés</span><div class="chips" id="t-villages"></div></div>
+        </div>
+        <div class="field" id="meteo-fields" hidden>
+          <p class="note" id="meteo-info" style="margin:0"></p>
+        </div>
+        <div class="field" id="details-field"><label for="p-details" id="p-details-label">Détails</label><textarea id="p-details" rows="3"></textarea><span class="hint">Une ligne par info. Entoure de **deux étoiles** ce qui doit être en gras, par exemple **18h**.</span></div>
+        <div class="field" id="photo-field">
+          <label for="p-photo">Photo (encadrée, le fond garde sa couleur)</label>
+          <div class="photo-row"><input type="file" id="p-photo" accept="image/*"><button type="button" class="btn ghost" id="btn-photo-rm" hidden>Retirer la photo</button></div>
+          <span class="hint">Photo envoyée par le commerçant ou prise par toi.</span>
+        </div>
+        <div class="field">
+          <label for="p-legende">Légende</label>
+          <textarea id="p-legende" rows="6" placeholder="La légende Instagram, avec hashtags."></textarea>
+          <div class="row"><button type="button" class="btn sun" id="btn-legende"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg><span>Proposer une légende</span></button><button type="button" class="btn" id="btn-copy">Copier la légende</button></div>
+        </div>
+        <div class="two">
+          <div class="field"><label for="p-date">Date de publication</label><input type="date" id="p-date"></div>
+          <div class="field"><label for="p-source">Source citée</label><input type="text" id="p-source" placeholder="Mairie de Carry-le-Rouet"></div>
+        </div>
+        <div class="row">
+          <button type="button" class="btn" id="btn-save">Enregistrer le brouillon</button>
+          <button type="button" class="btn" id="btn-new">Nouveau</button>
+          <button type="button" class="btn ghost" id="btn-delete" hidden>Supprimer</button>
+        </div>
+      </form>
+      <div class="preview-col">
+        <div class="preview" id="preview">
+          <canvas id="canvas" width="1080" height="1350" aria-label="Aperçu du visuel"></canvas>
+          <div class="row" style="justify-content:center">
+            <button type="button" class="btn primary" id="btn-export"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Enregistrer l’image</button>
+            <button type="button" class="btn sun" id="btn-published">Marquer publié</button>
+          </div>
+          <div id="export-fallback" hidden class="hint" style="text-align:center"></div>
+          <div class="hint" id="post-status" style="text-align:center"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="view" id="v-stats" aria-labelledby="h-ana" hidden>
+    <div>
+      <h2 id="h-ana">Stats</h2>
+      <p class="source" id="meta-status">API Meta connectée : les chiffres arrivent chaque matin.</p>
+    </div>
+    <div class="note" id="communaute" hidden></div>
+    <div class="kpis" id="kpis"></div>
+    <div class="panel">
+      <div class="week-head"><h3>Abonnés</h3><span class="source">un point par jour</span></div>
+      <div id="chart-abonnes"></div>
+    </div>
+    <div class="grid2">
+      <div class="panel"><h3>Engagement par gabarit</h3><div class="hbars" id="by-type"></div><span class="hint">Interactions ÷ portée, moyenne des posts publiés.</span></div>
+      <div class="panel"><h3>Engagement par village</h3><div class="hbars" id="by-village"></div><span class="hint">Même calcul, regroupé par village.</span></div>
+    </div>
+    <details class="add">
+      <summary><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Noter les messages reçus</summary>
+      <form class="panel" id="stat-form">
+        <div class="two">
+          <div class="field"><label for="s-date">Date</label><input type="date" id="s-date"></div>
+          <div class="field"><label for="s-messages">Messages reçus (infos, bons plans)</label><input type="number" id="s-messages" min="0" inputmode="numeric"></div>
+        </div>
+        <div class="row"><button class="btn primary" type="submit">Enregistrer</button></div>
+      </form>
+    </details>
+    <div class="field">
+      <h3>Posts publiés</h3>
+      <div class="tablebox"><table><thead><tr><th>Date</th><th>Post</th><th>Gabarit</th><th>Village</th><th class="n">Portée</th><th class="n">Interactions</th><th class="n">Taux</th></tr></thead><tbody id="pub-rows"></tbody></table></div>
+    </div>
+  </section>
+</div>
+
+<nav class="tabs" aria-label="Sections">
+  <button data-view="semaine" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Semaine</button>
+  <button data-view="idees"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.8V16h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0 0 12 3z"/></svg><span>Idées<span class="count" id="idea-count" hidden></span></span></button>
+  <button data-view="atelier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 15l3-3 2 2 3-3"/><circle cx="9" cy="8" r="1.5"/></svg>Atelier</button>
+  <button data-view="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Stats</button>
+</nav>
+<div class="toast" id="toast" hidden role="status"></div>
