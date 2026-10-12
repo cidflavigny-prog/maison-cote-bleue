@@ -187,3 +187,7 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
 .chipgroup{display:flex;flex-direction:column;gap:6px}
 .photo-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .rowed .photo-row{grid-column:1/-1}
+
+.tagrow{display:flex;flex-wrap:wrap;gap:8px}
+.tagchip{font:inherit;font-size:13px;font-weight:700;border:0;border-radius:100px;padding:8px 12px;background:var(--surface-2);color:inherit;cursor:pointer;min-height:36px}
+#reseaux-body{display:flex;flex-direction:column;gap:10px}

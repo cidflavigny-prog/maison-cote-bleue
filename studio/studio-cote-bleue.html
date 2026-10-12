@@ -190,6 +190,10 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
 .chipgroup{display:flex;flex-direction:column;gap:6px}
 .photo-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .rowed .photo-row{grid-column:1/-1}
+
+.tagrow{display:flex;flex-wrap:wrap;gap:8px}
+.tagchip{font:inherit;font-size:13px;font-weight:700;border:0;border-radius:100px;padding:8px 12px;background:var(--surface-2);color:inherit;cursor:pointer;min-height:36px}
+#reseaux-body{display:flex;flex-direction:column;gap:10px}
 </style>
 
 <div class="wrap">
@@ -253,6 +257,10 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
         <button type="button" class="btn ghost" id="sel-cancel">Annuler</button>
       </div>
     </div>
+    <details class="add" id="reseaux-box">
+      <summary><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 9h14M5 15h14M10 4 8 20M16 4l-2 16"/></svg>Veille réseaux du jour <span class="chipn" id="n-reseaux"></span></summary>
+      <div class="panel" id="reseaux-body"></div>
+    </details>
     <details class="add" id="add-idea">
       <summary><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Ajouter une idée à la main</summary>
       <form class="panel" id="idea-form">
@@ -271,15 +279,15 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
       </form>
     </details>
     <details class="add" id="comptes-box">
-      <summary><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>Comptes Instagram suivis <span class="chipn" id="n-comptes"></span></summary>
+      <summary><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>Comptes à suivre et à contacter <span class="chipn" id="n-comptes"></span></summary>
       <div class="panel">
-        <p class="hint" style="margin:0">Chaque matin, la veille lit les derniers posts de ces comptes professionnels publics et en tire des idées. Les comptes personnels ou privés ne sont pas lisibles.</p>
+        <p class="hint" style="margin:0">Tous les deux jours, la recherche de comptes propose des pages Instagram et Facebook du coin : abonne-toi depuis l’application, envoie le message préparé si besoin, puis note-le ici.</p>
         <div id="comptes-proposes"></div>
         <div id="comptes-suivis" class="contacts"></div>
         <form id="compte-form" class="two">
           <div class="field"><label for="c-user">Nom du compte</label><input type="text" id="c-user" placeholder="@nom_du_compte" autocapitalize="off" autocorrect="off" spellcheck="false" required></div>
           <div class="field"><label for="c-village">Village</label><select id="c-village"></select></div>
-          <div class="row"><button class="btn primary" type="submit">Suivre ce compte</button></div>
+          <div class="row"><button class="btn primary" type="submit">Ajouter aux comptes suivis</button></div>
         </form>
       </div>
     </details>
@@ -653,7 +661,7 @@ function copyText(txt,okMsg,fallbackEl){var p=navigator.clipboard&&navigator.cli
 $("today-label").textContent="@maison.cotebleue · "+frDate(todayIso());
 
 /* ---------- État ---------- */
-var S={ideas:[],posts:[],stats:[],recaps:[],comptes:[],meteo:{},sync:null,filter:"nouvelle",selecting:false,sel:{},weekOff:0,db:null,assets:null,downloads:null,sample:null};
+var S={ideas:[],posts:[],stats:[],recaps:[],comptes:[],reseaux:null,meteo:{},sync:null,filter:"nouvelle",selecting:false,sel:{},weekOff:0,db:null,assets:null,downloads:null,sample:null};
 function blankPost(){return{id:null,format:"post",type:"agenda",village:"cotebleue",pill:"",sticker:"",titre:"",details:"",legende:"",datePrevue:"",source:"",photoId:null,ideeIds:[],rows:[],compteur:"",visuel:"logo",villages:[],meteoDate:"",statut:"brouillon"}}
 var P=blankPost();
 function draw(force){if($("v-atelier").hidden&&!force)return;$("preview").classList.toggle("story",P.format==="story"||P.type==="meteo"||P.type==="jour");render(P,S.meteo[P.meteoDate])}
@@ -741,15 +749,29 @@ $("recap-use-leg").onclick=function(){P.legende=$("recap-legende").textContent;s
 /* Comptes suivis */
 function cleanUser(u){return(u||"").trim().replace(/^@/,"").replace(/^https?:\/\/(www\.)?instagram\.com\//i,"").replace(/[\/?#].*$/,"").toLowerCase()}
 function setCompte(u,patch,msg){if(!S.db)return;S.db.collection("comptes").doc(u).update(patch).then(function(){toast(msg)},function(){toast("Modification impossible pour l’instant")})}
-function compteRow(c,prop){var v=vil(c.village);var info=[c.nom,v.short,c.abonnes!=null?nf(c.abonnes)+" abonnés":"",c.dernierPost?"dernier post "+frDate(c.dernierPost.slice(0,10)):""].filter(Boolean).join(" · ");
-  return el("div",{class:"compte"+(prop?" propose":"")},[el("div",{class:"who"},[el("a",{href:"https://www.instagram.com/"+c.username+"/",target:"_blank",rel:"noopener"},[el("b",{text:"@"+c.username})]),el("span",{class:"hint",text:info}),c.raison&&prop?el("span",{class:"hint",text:c.raison}):null]),
-    el("div",{class:"row"},prop?[el("button",{class:"btn primary",type:"button",text:"Suivre",onclick:function(){setCompte(c.username,{statut:"suivi"},"@"+c.username+" ajouté")}}),el("button",{class:"btn ghost",type:"button",text:"Ignorer",onclick:function(){setCompte(c.username,{statut:"ignore"},"Proposition ignorée")}})]:[el("button",{class:"btn ghost",type:"button",text:"Ne plus suivre",onclick:function(){setCompte(c.username,{statut:"ignore"},"@"+c.username+" n’est plus suivi")}})])])}
-function renderComptes(){var suivis=S.comptes.filter(function(c){return c.statut==="suivi"}).sort(function(a,b){return(a.username||"").localeCompare(b.username||"")}),props=S.comptes.filter(function(c){return c.statut==="propose"});
-  $("n-comptes").textContent=(suivis.length||"")+(props.length?" · "+props.length+" à valider":"");
-  var pb=$("comptes-proposes");pb.textContent="";if(props.length){pb.appendChild(el("span",{class:"lbl",text:"Proposés par la veille"}));props.forEach(function(c){pb.appendChild(compteRow(c,true))})}
+function compteUrl(c){return c.url||(c.plateforme==="facebook"?"https://www.facebook.com/"+c.username:"https://www.instagram.com/"+c.username+"/")}
+function compteRow(c,prop){var v=vil(c.village),fb=c.plateforme==="facebook";var info=[fb?"Facebook":"Instagram",c.nom,c.village?v.short:"",c.abonnes!=null?nf(c.abonnes)+" abonnés":"",c.dernierPost?"dernier post "+frDate(c.dernierPost.slice(0,10)):""].filter(Boolean).join(" · ");
+  var todo=[];if(prop&&c.action!=="contacter")todo.push("à suivre");if(c.message&&!c.contacteLe)todo.push("message à envoyer");
+  var kids=[el("div",{class:"who"},[el("a",{href:compteUrl(c),target:"_blank",rel:"noopener"},[el("b",{text:(fb?"":"@")+(c.nom&&fb?c.nom:c.username)})]),el("span",{class:"hint",text:info}),c.raison&&prop?el("span",{class:"hint",text:c.raison}):null,todo.length?el("span",{class:"hint",text:"À faire : "+todo.join(" et ")}):null])];
+  if(c.message&&!c.contacteLe){var ta=el("p",{class:"recap-text",text:c.message});kids.push(el("div",{class:"contact",style:"width:100%"},[el("span",{class:"lbl",text:"Message proposé"}),ta,el("div",{class:"row"},[el("button",{class:"btn",type:"button",text:"Copier le message",onclick:function(){copyText(c.message,"Message copié")}}),el("button",{class:"btn ghost",type:"button",text:"Message envoyé",onclick:function(){setCompte(c.id||c.username,{contacteLe:todayIso()},"C’est noté")}})])]))}
+  var id=c.id||c.username;
+  kids.push(el("div",{class:"row"},prop?[el("button",{class:"btn primary",type:"button",text:c.action==="contacter"?"Fait":"Je suis abonnée",onclick:function(){setCompte(id,{statut:"suivi",suiviLe:todayIso()},"C’est noté")}}),el("button",{class:"btn ghost",type:"button",text:"Ignorer",onclick:function(){setCompte(id,{statut:"ignore"},"Proposition ignorée")}})]:[el("button",{class:"btn ghost",type:"button",text:"Retirer",onclick:function(){setCompte(id,{statut:"ignore"},"Compte retiré")}})]));
+  return el("div",{class:"compte"+(prop?" propose":"")},kids)}
+/* Veille réseaux */
+function renderReseaux(){var r=S.reseaux,b=$("reseaux-body");b.textContent="";$("n-reseaux").textContent=r&&r.date===todayIso()?"nouveau":"";
+  if(!r){b.appendChild(el("p",{class:"hint",style:"margin:0",text:"La veille réseaux passe chaque matin vers 6h30 : hashtags du moment, sujets qui font parler et publications à repartager."}));return}
+  b.appendChild(el("span",{class:"hint",text:"Mise à jour du "+frDate(r.date)+(r.message?" · "+r.message:"")}));
+  if(r.tendances)b.appendChild(el("p",{class:"recap-text",text:r.tendances}));
+  var tags=r.hashtags||[];if(tags.length){b.appendChild(el("span",{class:"lbl",text:"Hashtags du moment"}));var w=el("div",{class:"tagrow"});tags.forEach(function(t){var x=(t.tag||"").replace(/^#?/,"#");w.appendChild(el("button",{class:"tagchip",type:"button",title:t.note||"",text:x+(t.usage?" · "+t.usage:""),onclick:function(){copyText(x,x+" copié")}}))});b.appendChild(w);
+    b.appendChild(el("button",{class:"btn",type:"button",text:"Copier tous les hashtags",onclick:function(){copyText(tags.map(function(t){return(t.tag||"").replace(/^#?/,"#")}).join(" "),"Hashtags copiés")}}))}
+  var pubs=r.publications||[];if(pubs.length){b.appendChild(el("span",{class:"lbl",text:"Publications à regarder"}));var l=el("div",{class:"contacts"});pubs.forEach(function(p){l.appendChild(el("div",{class:"contact"},[el("a",{href:p.url,target:"_blank",rel:"noopener"},[el("b",{text:p.compte||"Voir la publication"})]),p.resume?el("span",{class:"hint",text:p.resume}):null,p.idee?el("span",{class:"hint",text:"Idée : "+p.idee}):null]))});b.appendChild(l)}}
+function renderComptes(){var suivis=S.comptes.filter(function(c){return c.statut==="suivi"&&!(c.message&&!c.contacteLe)}).sort(function(a,b){return(a.username||"").localeCompare(b.username||"")}),props=S.comptes.filter(function(c){return c.statut==="propose"||(c.statut==="suivi"&&c.message&&!c.contacteLe)});
+  $("n-comptes").textContent=[suivis.length||"",props.length?props.length+" à traiter":""].filter(Boolean).join(" · ");
+  var pb=$("comptes-proposes");pb.textContent="";if(props.length){pb.appendChild(el("span",{class:"lbl",text:"Proposés par la recherche"}));props.forEach(function(c){pb.appendChild(compteRow(c,true))})}
   var sb=$("comptes-suivis");sb.textContent="";sb.appendChild(suivis.length?el("span",{class:"lbl",text:"Suivis ("+suivis.length+")"}):el("div",{class:"hint",text:"Aucun compte suivi pour l’instant."}));suivis.forEach(function(c){sb.appendChild(compteRow(c,false))})}
+renderReseaux();
 $("compte-form").addEventListener("submit",function(e){e.preventDefault();if(!S.db)return;var u=cleanUser($("c-user").value);if(!/^[a-z0-9._]{1,30}$/.test(u)){toast("Nom de compte invalide");return}
-  var ref=S.db.collection("comptes").doc(u);ref.get().then(function(sn){return sn.exists?ref.update({statut:"suivi",village:$("c-village").value}):ref.set({username:u,village:$("c-village").value,statut:"suivi",ajouteLe:new Date().toISOString(),origine:"manuel"})}).then(function(){$("c-user").value="";toast("@"+u+" sera lu dès demain matin")},function(){toast("Ajout impossible pour l’instant")})});
+  var ref=S.db.collection("comptes").doc(u);ref.get().then(function(sn){return sn.exists?ref.update({statut:"suivi",village:$("c-village").value}):ref.set({username:u,village:$("c-village").value,statut:"suivi",ajouteLe:new Date().toISOString(),origine:"manuel"})}).then(function(){$("c-user").value="";toast("@"+u+" ajouté")},function(){toast("Ajout impossible pour l’instant")})});
 
 /* ---------- Atelier ---------- */
 function infosOf(i){var line=((i.details||"").split("\n")[0]||"");var m=line.match(/\*\*(.*?)\*\*/);var bold=m?m[1]:"";var rest=line.replace(/\*\*.*?\*\*/,"").replace(/^[\s·:,-]+/,"").trim();
@@ -892,6 +914,7 @@ else{
     snap("comptes",function(d){S.comptes=d;renderComptes()},db.collection("comptes").limit(300));
     snap("meteo",function(d,live){S.meteo={};d.forEach(function(m){S.meteo[m.date||m.id]=m});renderWeek();if(P.type==="meteo"){syncForm();draw()}if(live)purge("meteo",d,function(m){return(m.date||m.id)<todayIso()})},db.collection("meteo").limit(30));
     db.doc("reglages/meta").onSnapshot(function(s){S.sync=s.exists?s.data():null;renderAna();renderWeek()});
+    db.doc("reglages/reseaux").onSnapshot(function(s){S.reseaux=s.exists?s.data():null;renderReseaux()});
   });
   C.use("assets").then(function(a){S.assets=a});C.use("downloads").then(function(d){S.downloads=d});
   C.use("sample").then(function(s){S.sample=s;if(!s)$("btn-legende").hidden=true});

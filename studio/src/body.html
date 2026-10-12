@@ -59,6 +59,10 @@
         <button type="button" class="btn ghost" id="sel-cancel">Annuler</button>
       </div>
     </div>
+    <details class="add" id="reseaux-box">
+      <summary><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 9h14M5 15h14M10 4 8 20M16 4l-2 16"/></svg>Veille réseaux du jour <span class="chipn" id="n-reseaux"></span></summary>
+      <div class="panel" id="reseaux-body"></div>
+    </details>
     <details class="add" id="add-idea">
       <summary><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Ajouter une idée à la main</summary>
       <form class="panel" id="idea-form">
@@ -77,15 +81,15 @@
       </form>
     </details>
     <details class="add" id="comptes-box">
-      <summary><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>Comptes Instagram suivis <span class="chipn" id="n-comptes"></span></summary>
+      <summary><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>Comptes à suivre et à contacter <span class="chipn" id="n-comptes"></span></summary>
       <div class="panel">
-        <p class="hint" style="margin:0">Chaque matin, la veille lit les derniers posts de ces comptes professionnels publics et en tire des idées. Les comptes personnels ou privés ne sont pas lisibles.</p>
+        <p class="hint" style="margin:0">Tous les deux jours, la recherche de comptes propose des pages Instagram et Facebook du coin : abonne-toi depuis l’application, envoie le message préparé si besoin, puis note-le ici.</p>
         <div id="comptes-proposes"></div>
         <div id="comptes-suivis" class="contacts"></div>
         <form id="compte-form" class="two">
           <div class="field"><label for="c-user">Nom du compte</label><input type="text" id="c-user" placeholder="@nom_du_compte" autocapitalize="off" autocorrect="off" spellcheck="false" required></div>
           <div class="field"><label for="c-village">Village</label><select id="c-village"></select></div>
-          <div class="row"><button class="btn primary" type="submit">Suivre ce compte</button></div>
+          <div class="row"><button class="btn primary" type="submit">Ajouter aux comptes suivis</button></div>
         </form>
       </div>
     </details>
