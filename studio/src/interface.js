@@ -25,12 +25,13 @@ Promise.all(["600 100px Fredoka","800 40px Nunito","400 40px Nunito","700 40px N
 /* ---------- Ma semaine : rendez-vous ---------- */
 function postMatch(day,type,format,village){var per=isList(type)?period(type,day).from:null;return S.posts.find(function(p){if(p.type!==type||(p.format||"post")!==format||(village&&p.village!==village)||!p.datePrevue)return false;return per?period(type,p.datePrevue).from===per&&Math.abs(parseIso(p.datePrevue)-parseIso(day))<6*864e5:p.datePrevue===day})}
 function candidates(p){return S.ideas.filter(function(i){var st=i.statut||"nouvelle";if(st==="ecartee"||isPast(i))return false;var a=i.quand,b=i.fin||i.quand;if(!a)return false;return a<=p.to&&b>=p.from}).sort(function(x,y){return(x.quand||"").localeCompare(y.quand||"")||((x.aVerifier?1:0)-(y.aVerifier?1:0))})}
+var METEO_DEBUT="2026-10-15"; /* première story météo : jeudi 15 octobre au soir */
 function rdvsFor(day){var wd=parseIso(day).getDay(),out=[];
   if(wd===0){out.push({type:"semaine",format:"post",label:"Agenda de la semaine",sub:"post · lun. "+parseIso(addDays(day,1)).getDate()+" → dim. "+parseIso(addDays(day,7)).getDate()});
     var counts={};candidates(period("semaine",day)).forEach(function(i){if(i.village&&i.village!=="cotebleue")counts[i.village]=(counts[i.village]||0)+1});
     V4.forEach(function(k){if(counts[k]>=3)out.push({type:"semaine",format:"story",village:k,label:"Story « Ça bouge à "+vil(k).short+" »",sub:counts[k]+" événements dans ce village"})})}
   if(wd===4){out.push({type:"weekend",format:"post",label:"Agenda du week-end",sub:"post · sam. et dim."});out.push({type:"weekend",format:"story",label:"Agenda du week-end",sub:"story"})}
-  out.push({type:"meteo",format:"story",label:"Météo de demain",sub:"story · 18h",meteoDate:addDays(day,1)});return out}
+  if(day>=METEO_DEBUT)out.push({type:"meteo",format:"story",label:"Météo de demain",sub:"story · 18h",meteoDate:addDays(day,1)});return out}
 function rdvStatus(r,day,p){if(p)return p.statut==="publie"?["Publié","st-done"]:[p.auto?"Prêt à vérifier":"Brouillon","st-ready"];
   if(r.type==="meteo")return S.meteo[r.meteoDate]?["Prévisions prêtes","st-ready"]:(day<todayIso()?["Passé","st-wait"]:["Prévisions à 17h30","st-wait"]);
   return day<todayIso()?["Non fait","st-wait"]:["À créer","st-todo"]}
@@ -186,7 +187,7 @@ $("btn-legende").onclick=function(){if(!S.sample){toast("Claude n’est pas disp
   var t=typ(P.type),v=vil(P.village),m=S.meteo[P.meteoDate];var story=P.format==="story"||t.storyOnly;
   var what=isList(P.type)?t.name+" ; événements : "+(P.rows||[]).map(function(r){return frDate(r.date)+" "+vil(r.village).short+" : "+r.titre+(r.infos?" ("+r.infos+")":"")}).join(" | "):
     P.type==="teaser"?"teaser du happening de lancement ("+(P.compteur||"révélation")+"). Ne révèle pas le concept avant J-1, crée du mystère, invite à s’abonner et activer la cloche.":
-    P.type==="meteo"?"story météo de demain ("+frDate(P.meteoDate)+")"+(m?" : "+V4.map(function(k){var x=m.villages&&m.villages[k];return vil(k).short+" "+(x?Math.round(x.tmin)+"°/"+Math.round(x.tmax)+"°":"?")}).join(", ")+(m.mer?" ; eau "+Math.round(m.mer.eau)+"°, vent "+Math.round(m.mer.vent)+" km/h"+(isMistral(m.mer)?" (mistral)":""):""):""):
+    P.type==="meteo"?"story météo de demain ("+frDate(P.meteoDate)+")"+(m?" : "+V4.map(function(k){var x=m.villages&&m.villages[k];return vil(k).short+" "+(x?Math.round(x.tmin)+"°/"+Math.round(x.tmax)+"°":"?")}).join(", ")+(m.mer?" ; eau "+Math.round(m.mer.eau)+"°, "+(m.mer.dir!=null?windFrom(m.mer.dir).toLowerCase():"vent")+" à "+Math.round(m.mer.vent)+" km/h"+(isMistral(m.mer)?" (mistral)":""):""):""):
     t.name+" à "+v.name+" ; titre : "+(P.titre||"(vide)")+" ; détails : "+((P.details||"").replace(/\*\*/g,"")||"(aucun)");
   var brief=["Tu rédiges la légende Instagram d’un "+(story?"texte de story":"post")+" du compte @maison.cotebleue (« Maison Côte Bleue »), média local de La Couronne-Carro, Sausset-les-Pins, Carry-le-Rouet et Ensuès-la-Redonne (dont la calanque de La Redonne).","Promesse : « Ce qui se passe chez nous, au même endroit. » Ton : un voisin bien informé, chaleureux et direct. Tutoiement.",
     story?"Règles : 1 à 2 phrases courtes, pas de hashtags.":"Règles : moins de 120 mots, phrases courtes, 1 ou 2 emojis maximum, termine par un appel doux (s’abonner, écrire en message pour partager une info) puis une ligne de 3 à 5 hashtags locaux.",

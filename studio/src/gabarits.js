@@ -200,6 +200,8 @@ function drawTeaser(P,W,H){var story=P.format==="story";var title=P.titre||defTi
 
 /* ---------- Météo ---------- */
 function compass(deg){return["N","NE","E","SE","S","SO","O","NO"][Math.round(((deg%360)+360)%360/45)%8]}
+var DIR16=["nord","nord-nord-est","nord-est","est-nord-est","est","est-sud-est","sud-est","sud-sud-est","sud","sud-sud-ouest","sud-ouest","ouest-sud-ouest","ouest","ouest-nord-ouest","nord-ouest","nord-nord-ouest"];
+function windFrom(deg){var n=DIR16[Math.round(((deg%360)+360)%360/22.5)%16];return(/^[eo]/.test(n)?"Vent d’":"Vent du ")+n}
 function isMistral(m){return m&&m.vent>=30&&m.dir!=null&&(m.dir>=290||m.dir<=30)}
 function sunShape(cx,cy,r){ctx.fillStyle=SOLEIL;ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fill();ctx.lineWidth=4;ctx.strokeStyle=NUIT;ctx.stroke()}
 function cloudShape(cx,cy,s,fill){var parts=[[cx-s*.38,cy+s*.08,s*.28],[cx,cy-s*.1,s*.38],[cx+s*.38,cy+s*.08,s*.28]];ctx.fillStyle=NUIT;parts.forEach(function(p){ctx.beginPath();ctx.arc(p[0],p[1],p[2]+4,0,Math.PI*2);ctx.fill()});rr(cx-s*.66-4,cy+s*.02-4,s*1.32+8,s*.36+8,s*.18+4);ctx.fill();
@@ -213,8 +215,8 @@ function wIcon(code,cx,cy,s){code=+code;if(code<=1){sunShape(cx,cy,s*.38);return
   var snow=(code>=71&&code<=77)||code===85||code===86;[-.28,0,.28].forEach(function(k){if(snow){ctx.fillStyle=BLANC;ctx.strokeStyle=NUIT;ctx.lineWidth=3;ctx.beginPath();ctx.arc(cx+k*s,cy+s*.42,s*.07,0,Math.PI*2);ctx.fill();ctx.stroke()}else{ctx.strokeStyle=BLEU;ctx.lineWidth=7;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(cx+k*s+6,cy+s*.3);ctx.lineTo(cx+k*s-4,cy+s*.5);ctx.stroke()}})}
 function drawMeteo(P,W,H,data){var M=64;ctx.fillStyle=BLEU;ctx.fillRect(0,0,W,H);
   var md=P.meteoDate||addDays(P.datePrevue||todayIso(),1);var d=parseIso(md);
-  var f=fitTitle(P.titre||defTitle(P),W-2*M,200,96,60),rh=P.photoId?120:156,gap=P.photoId?14:20,mh=176;
-  var blk=130+28*1.75+26+f.lines.length*f.size*1.04+34+(P.photoId?338:0)+4*rh+4*gap+6+mh;var o=Math.max(0,(H-340-220-blk)/2),t0=220+o;
+  var f=fitTitle(P.titre||defTitle(P),W-2*M,200,96,60),rh=P.photoId?120:156,gap=P.photoId?14:20,mh=236;
+  var blk=130+28*1.75+26+f.lines.length*f.size*1.04+34+(P.photoId?338:0)+4*rh+4*gap+6+mh+56;var o=Math.max(0,(H-340-220-blk)/2),t0=220+o;
   zigzag(770,t0+70,1.75,SOLEIL,9);triangle(950,Math.max(t0+blk+60,1640),1.85,CIEL);ring(110,Math.max(t0+blk+70,1650),18,SOLEIL,8);
   logo(M,t0,90,BLEU);ctx.fillStyle=BLANC;ctx.font="800 30px "+FB;ctx.textBaseline="alphabetic";ctx.fillText("Maison Côte Bleue",M+108,t0+40);ctx.fillStyle=CIEL;ctx.font="600 24px "+FB;ctx.fillText("@maison.cotebleue",M+108,t0+72);
   var y=t0+130;var ph=pill(M,y,P.pill||("Météo · "+JOURSL[d.getDay()]+" "+d.getDate()),SOLEIL,NUIT,NUIT,NUIT,28,3,4);y+=ph+26;
@@ -225,9 +227,11 @@ function drawMeteo(P,W,H,data){var M=64;ctx.fillStyle=BLEU;ctx.fillRect(0,0,W,H)
     wIcon(m?m.code:3,M+620,y+rh/2,rh*.62);
     ctx.textAlign="right";ctx.font="600 58px "+FD;ctx.fillStyle=NUIT;var hi=m?Math.round(m.tmax)+"°":"–";ctx.fillText(hi,W-M-24,y+rh/2);var hw=ctx.measureText(hi).width;ctx.font="700 38px "+FB;ctx.fillStyle=ENCRE2;ctx.fillText((m?Math.round(m.tmin)+"°":"–")+" /",W-M-24-hw-10,y+rh/2+3);ctx.textAlign="left";y+=rh+gap});
   var mer=data&&data.mer;y+=6;card(M,y,W-2*M,mh,20,SOLEIL);ctx.fillStyle=NUIT;ctx.textBaseline="alphabetic";ctx.font="800 24px "+FB;setLS(3);ctx.fillText("LA MER",M+28,y+50);setLS(0);
-  var parts=[["Eau",mer&&mer.eau!=null?Math.round(mer.eau)+"°":"–"],["Vent",mer&&mer.vent!=null?compass(mer.dir||0)+" "+Math.round(mer.vent)+" km/h":"–"],["Vagues",mer&&mer.vagues!=null?String(Math.round(mer.vagues*10)/10).replace(".",",")+" m":"–"]];
-  var cw=(W-2*M-56)/3;parts.forEach(function(p,i){var x=M+28+i*cw;ctx.font="700 26px "+FB;ctx.fillStyle=ENCRE2;ctx.fillText(p[0],x,y+98);ctx.font="600 "+(i===1?38:48)+"px "+FD;ctx.fillStyle=NUIT;ctx.fillText(ellip(p[1],"600 "+(i===1?38:48)+"px "+FD,cw-14),x,y+150)});
+  var parts=[["Eau",mer&&mer.eau!=null?Math.round(mer.eau)+"°":"–"],["Vent",mer&&mer.vent!=null?Math.round(mer.vent)+" km/h":"–"],["Vagues",mer&&mer.vagues!=null?String(Math.round(mer.vagues*10)/10).replace(".",",")+" m":"–"]];
+  var cw=(W-2*M-56)/3;parts.forEach(function(p,i){var x=M+28+i*cw;ctx.font="700 26px "+FB;ctx.fillStyle=ENCRE2;ctx.fillText(p[0],x,y+98);ctx.font="600 48px "+FD;ctx.fillStyle=NUIT;ctx.fillText(ellip(p[1],"600 48px "+FD,cw-14),x,y+150)});
+  if(mer&&mer.dir!=null){ctx.fillStyle=NUIT;ctx.fillRect(M+28,y+176,W-2*M-56,3);ctx.font="800 30px "+FB;ctx.fillText(ellip(windFrom(mer.dir)+(mer.rafales!=null?" · rafales à "+Math.round(mer.rafales)+" km/h":""),"800 30px "+FB,W-2*M-56),M+28,y+218)}
   if(isMistral(mer)){var t="Mistral";var w=pillW(t,24);pill(W-M-w-10,y-20,t,NUIT,BLANC,null,null,24)}
+  if(data){ctx.fillStyle=CIEL;ctx.font="700 24px "+FB;ctx.textBaseline="alphabetic";ctx.textAlign="left";ctx.fillText("Source : "+(data.source||"Open-Meteo")+" · open-meteo.com",M+4,y+mh+48)}
   if(!data){ctx.fillStyle=CIEL;ctx.font="700 26px "+FB;ctx.textAlign="center";ctx.fillText("Prévisions en attente : elles arrivent vers 17h30",W/2,y+mh+70);ctx.textAlign="left"}}
 
 /* ---------- Point d’entrée ---------- */

@@ -602,6 +602,8 @@ function drawTeaser(P,W,H){var story=P.format==="story";var title=P.titre||defTi
 
 /* ---------- Météo ---------- */
 function compass(deg){return["N","NE","E","SE","S","SO","O","NO"][Math.round(((deg%360)+360)%360/45)%8]}
+var DIR16=["nord","nord-nord-est","nord-est","est-nord-est","est","est-sud-est","sud-est","sud-sud-est","sud","sud-sud-ouest","sud-ouest","ouest-sud-ouest","ouest","ouest-nord-ouest","nord-ouest","nord-nord-ouest"];
+function windFrom(deg){var n=DIR16[Math.round(((deg%360)+360)%360/22.5)%16];return(/^[eo]/.test(n)?"Vent d’":"Vent du ")+n}
 function isMistral(m){return m&&m.vent>=30&&m.dir!=null&&(m.dir>=290||m.dir<=30)}
 function sunShape(cx,cy,r){ctx.fillStyle=SOLEIL;ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fill();ctx.lineWidth=4;ctx.strokeStyle=NUIT;ctx.stroke()}
 function cloudShape(cx,cy,s,fill){var parts=[[cx-s*.38,cy+s*.08,s*.28],[cx,cy-s*.1,s*.38],[cx+s*.38,cy+s*.08,s*.28]];ctx.fillStyle=NUIT;parts.forEach(function(p){ctx.beginPath();ctx.arc(p[0],p[1],p[2]+4,0,Math.PI*2);ctx.fill()});rr(cx-s*.66-4,cy+s*.02-4,s*1.32+8,s*.36+8,s*.18+4);ctx.fill();
@@ -615,8 +617,8 @@ function wIcon(code,cx,cy,s){code=+code;if(code<=1){sunShape(cx,cy,s*.38);return
   var snow=(code>=71&&code<=77)||code===85||code===86;[-.28,0,.28].forEach(function(k){if(snow){ctx.fillStyle=BLANC;ctx.strokeStyle=NUIT;ctx.lineWidth=3;ctx.beginPath();ctx.arc(cx+k*s,cy+s*.42,s*.07,0,Math.PI*2);ctx.fill();ctx.stroke()}else{ctx.strokeStyle=BLEU;ctx.lineWidth=7;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(cx+k*s+6,cy+s*.3);ctx.lineTo(cx+k*s-4,cy+s*.5);ctx.stroke()}})}
 function drawMeteo(P,W,H,data){var M=64;ctx.fillStyle=BLEU;ctx.fillRect(0,0,W,H);
   var md=P.meteoDate||addDays(P.datePrevue||todayIso(),1);var d=parseIso(md);
-  var f=fitTitle(P.titre||defTitle(P),W-2*M,200,96,60),rh=P.photoId?120:156,gap=P.photoId?14:20,mh=176;
-  var blk=130+28*1.75+26+f.lines.length*f.size*1.04+34+(P.photoId?338:0)+4*rh+4*gap+6+mh;var o=Math.max(0,(H-340-220-blk)/2),t0=220+o;
+  var f=fitTitle(P.titre||defTitle(P),W-2*M,200,96,60),rh=P.photoId?120:156,gap=P.photoId?14:20,mh=236;
+  var blk=130+28*1.75+26+f.lines.length*f.size*1.04+34+(P.photoId?338:0)+4*rh+4*gap+6+mh+56;var o=Math.max(0,(H-340-220-blk)/2),t0=220+o;
   zigzag(770,t0+70,1.75,SOLEIL,9);triangle(950,Math.max(t0+blk+60,1640),1.85,CIEL);ring(110,Math.max(t0+blk+70,1650),18,SOLEIL,8);
   logo(M,t0,90,BLEU);ctx.fillStyle=BLANC;ctx.font="800 30px "+FB;ctx.textBaseline="alphabetic";ctx.fillText("Maison Côte Bleue",M+108,t0+40);ctx.fillStyle=CIEL;ctx.font="600 24px "+FB;ctx.fillText("@maison.cotebleue",M+108,t0+72);
   var y=t0+130;var ph=pill(M,y,P.pill||("Météo · "+JOURSL[d.getDay()]+" "+d.getDate()),SOLEIL,NUIT,NUIT,NUIT,28,3,4);y+=ph+26;
@@ -627,9 +629,11 @@ function drawMeteo(P,W,H,data){var M=64;ctx.fillStyle=BLEU;ctx.fillRect(0,0,W,H)
     wIcon(m?m.code:3,M+620,y+rh/2,rh*.62);
     ctx.textAlign="right";ctx.font="600 58px "+FD;ctx.fillStyle=NUIT;var hi=m?Math.round(m.tmax)+"°":"–";ctx.fillText(hi,W-M-24,y+rh/2);var hw=ctx.measureText(hi).width;ctx.font="700 38px "+FB;ctx.fillStyle=ENCRE2;ctx.fillText((m?Math.round(m.tmin)+"°":"–")+" /",W-M-24-hw-10,y+rh/2+3);ctx.textAlign="left";y+=rh+gap});
   var mer=data&&data.mer;y+=6;card(M,y,W-2*M,mh,20,SOLEIL);ctx.fillStyle=NUIT;ctx.textBaseline="alphabetic";ctx.font="800 24px "+FB;setLS(3);ctx.fillText("LA MER",M+28,y+50);setLS(0);
-  var parts=[["Eau",mer&&mer.eau!=null?Math.round(mer.eau)+"°":"–"],["Vent",mer&&mer.vent!=null?compass(mer.dir||0)+" "+Math.round(mer.vent)+" km/h":"–"],["Vagues",mer&&mer.vagues!=null?String(Math.round(mer.vagues*10)/10).replace(".",",")+" m":"–"]];
-  var cw=(W-2*M-56)/3;parts.forEach(function(p,i){var x=M+28+i*cw;ctx.font="700 26px "+FB;ctx.fillStyle=ENCRE2;ctx.fillText(p[0],x,y+98);ctx.font="600 "+(i===1?38:48)+"px "+FD;ctx.fillStyle=NUIT;ctx.fillText(ellip(p[1],"600 "+(i===1?38:48)+"px "+FD,cw-14),x,y+150)});
+  var parts=[["Eau",mer&&mer.eau!=null?Math.round(mer.eau)+"°":"–"],["Vent",mer&&mer.vent!=null?Math.round(mer.vent)+" km/h":"–"],["Vagues",mer&&mer.vagues!=null?String(Math.round(mer.vagues*10)/10).replace(".",",")+" m":"–"]];
+  var cw=(W-2*M-56)/3;parts.forEach(function(p,i){var x=M+28+i*cw;ctx.font="700 26px "+FB;ctx.fillStyle=ENCRE2;ctx.fillText(p[0],x,y+98);ctx.font="600 48px "+FD;ctx.fillStyle=NUIT;ctx.fillText(ellip(p[1],"600 48px "+FD,cw-14),x,y+150)});
+  if(mer&&mer.dir!=null){ctx.fillStyle=NUIT;ctx.fillRect(M+28,y+176,W-2*M-56,3);ctx.font="800 30px "+FB;ctx.fillText(ellip(windFrom(mer.dir)+(mer.rafales!=null?" · rafales à "+Math.round(mer.rafales)+" km/h":""),"800 30px "+FB,W-2*M-56),M+28,y+218)}
   if(isMistral(mer)){var t="Mistral";var w=pillW(t,24);pill(W-M-w-10,y-20,t,NUIT,BLANC,null,null,24)}
+  if(data){ctx.fillStyle=CIEL;ctx.font="700 24px "+FB;ctx.textBaseline="alphabetic";ctx.textAlign="left";ctx.fillText("Source : "+(data.source||"Open-Meteo")+" · open-meteo.com",M+4,y+mh+48)}
   if(!data){ctx.fillStyle=CIEL;ctx.font="700 26px "+FB;ctx.textAlign="center";ctx.fillText("Prévisions en attente : elles arrivent vers 17h30",W/2,y+mh+70);ctx.textAlign="left"}}
 
 /* ---------- Point d’entrée ---------- */
@@ -665,12 +669,13 @@ Promise.all(["600 100px Fredoka","800 40px Nunito","400 40px Nunito","700 40px N
 /* ---------- Ma semaine : rendez-vous ---------- */
 function postMatch(day,type,format,village){var per=isList(type)?period(type,day).from:null;return S.posts.find(function(p){if(p.type!==type||(p.format||"post")!==format||(village&&p.village!==village)||!p.datePrevue)return false;return per?period(type,p.datePrevue).from===per&&Math.abs(parseIso(p.datePrevue)-parseIso(day))<6*864e5:p.datePrevue===day})}
 function candidates(p){return S.ideas.filter(function(i){var st=i.statut||"nouvelle";if(st==="ecartee"||isPast(i))return false;var a=i.quand,b=i.fin||i.quand;if(!a)return false;return a<=p.to&&b>=p.from}).sort(function(x,y){return(x.quand||"").localeCompare(y.quand||"")||((x.aVerifier?1:0)-(y.aVerifier?1:0))})}
+var METEO_DEBUT="2026-10-15"; /* première story météo : jeudi 15 octobre au soir */
 function rdvsFor(day){var wd=parseIso(day).getDay(),out=[];
   if(wd===0){out.push({type:"semaine",format:"post",label:"Agenda de la semaine",sub:"post · lun. "+parseIso(addDays(day,1)).getDate()+" → dim. "+parseIso(addDays(day,7)).getDate()});
     var counts={};candidates(period("semaine",day)).forEach(function(i){if(i.village&&i.village!=="cotebleue")counts[i.village]=(counts[i.village]||0)+1});
     V4.forEach(function(k){if(counts[k]>=3)out.push({type:"semaine",format:"story",village:k,label:"Story « Ça bouge à "+vil(k).short+" »",sub:counts[k]+" événements dans ce village"})})}
   if(wd===4){out.push({type:"weekend",format:"post",label:"Agenda du week-end",sub:"post · sam. et dim."});out.push({type:"weekend",format:"story",label:"Agenda du week-end",sub:"story"})}
-  out.push({type:"meteo",format:"story",label:"Météo de demain",sub:"story · 18h",meteoDate:addDays(day,1)});return out}
+  if(day>=METEO_DEBUT)out.push({type:"meteo",format:"story",label:"Météo de demain",sub:"story · 18h",meteoDate:addDays(day,1)});return out}
 function rdvStatus(r,day,p){if(p)return p.statut==="publie"?["Publié","st-done"]:[p.auto?"Prêt à vérifier":"Brouillon","st-ready"];
   if(r.type==="meteo")return S.meteo[r.meteoDate]?["Prévisions prêtes","st-ready"]:(day<todayIso()?["Passé","st-wait"]:["Prévisions à 17h30","st-wait"]);
   return day<todayIso()?["Non fait","st-wait"]:["À créer","st-todo"]}
@@ -826,7 +831,7 @@ $("btn-legende").onclick=function(){if(!S.sample){toast("Claude n’est pas disp
   var t=typ(P.type),v=vil(P.village),m=S.meteo[P.meteoDate];var story=P.format==="story"||t.storyOnly;
   var what=isList(P.type)?t.name+" ; événements : "+(P.rows||[]).map(function(r){return frDate(r.date)+" "+vil(r.village).short+" : "+r.titre+(r.infos?" ("+r.infos+")":"")}).join(" | "):
     P.type==="teaser"?"teaser du happening de lancement ("+(P.compteur||"révélation")+"). Ne révèle pas le concept avant J-1, crée du mystère, invite à s’abonner et activer la cloche.":
-    P.type==="meteo"?"story météo de demain ("+frDate(P.meteoDate)+")"+(m?" : "+V4.map(function(k){var x=m.villages&&m.villages[k];return vil(k).short+" "+(x?Math.round(x.tmin)+"°/"+Math.round(x.tmax)+"°":"?")}).join(", ")+(m.mer?" ; eau "+Math.round(m.mer.eau)+"°, vent "+Math.round(m.mer.vent)+" km/h"+(isMistral(m.mer)?" (mistral)":""):""):""):
+    P.type==="meteo"?"story météo de demain ("+frDate(P.meteoDate)+")"+(m?" : "+V4.map(function(k){var x=m.villages&&m.villages[k];return vil(k).short+" "+(x?Math.round(x.tmin)+"°/"+Math.round(x.tmax)+"°":"?")}).join(", ")+(m.mer?" ; eau "+Math.round(m.mer.eau)+"°, "+(m.mer.dir!=null?windFrom(m.mer.dir).toLowerCase():"vent")+" à "+Math.round(m.mer.vent)+" km/h"+(isMistral(m.mer)?" (mistral)":""):""):""):
     t.name+" à "+v.name+" ; titre : "+(P.titre||"(vide)")+" ; détails : "+((P.details||"").replace(/\*\*/g,"")||"(aucun)");
   var brief=["Tu rédiges la légende Instagram d’un "+(story?"texte de story":"post")+" du compte @maison.cotebleue (« Maison Côte Bleue »), média local de La Couronne-Carro, Sausset-les-Pins, Carry-le-Rouet et Ensuès-la-Redonne (dont la calanque de La Redonne).","Promesse : « Ce qui se passe chez nous, au même endroit. » Ton : un voisin bien informé, chaleureux et direct. Tutoiement.",
     story?"Règles : 1 à 2 phrases courtes, pas de hashtags.":"Règles : moins de 120 mots, phrases courtes, 1 ou 2 emojis maximum, termine par un appel doux (s’abonner, écrire en message pour partager une info) puis une ligne de 3 à 5 hashtags locaux.",
