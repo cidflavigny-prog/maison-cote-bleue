@@ -194,6 +194,7 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
 .tagrow{display:flex;flex-wrap:wrap;gap:8px}
 .tagchip{font:inherit;font-size:13px;font-weight:700;border:0;border-radius:100px;padding:8px 12px;background:var(--surface-2);color:inherit;cursor:pointer;min-height:36px}
 #reseaux-body{display:flex;flex-direction:column;gap:10px}
+.trend{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;line-height:1.45}
 </style>
 
 <div class="wrap">
@@ -761,7 +762,7 @@ function compteRow(c,prop){var v=vil(c.village),fb=c.plateforme==="facebook";var
 function renderReseaux(){var r=S.reseaux,b=$("reseaux-body");b.textContent="";$("n-reseaux").textContent=r&&r.date===todayIso()?"nouveau":"";
   if(!r){b.appendChild(el("p",{class:"hint",style:"margin:0",text:"La veille réseaux passe chaque matin vers 6h30 : hashtags du moment, sujets qui font parler et publications à repartager."}));return}
   b.appendChild(el("span",{class:"hint",text:"Mise à jour du "+frDate(r.date)+(r.message?" · "+r.message:"")}));
-  if(r.tendances)b.appendChild(el("p",{class:"recap-text",text:r.tendances}));
+  var tl=Array.isArray(r.tendances)?r.tendances:(r.tendances?String(r.tendances).split("\n"):[]);tl=tl.filter(function(x){return x&&String(x).trim()});if(tl.length){b.appendChild(el("span",{class:"lbl",text:"Ce qui fait parler"}));b.appendChild(el("ul",{class:"trend"},tl.map(function(x){return el("li",{text:String(x).replace(/^[-•]\s*/,"")})})))}
   var tags=r.hashtags||[];if(tags.length){b.appendChild(el("span",{class:"lbl",text:"Hashtags du moment"}));var w=el("div",{class:"tagrow"});tags.forEach(function(t){var x=(t.tag||"").replace(/^#?/,"#");w.appendChild(el("button",{class:"tagchip",type:"button",title:t.note||"",text:x+(t.usage?" · "+t.usage:""),onclick:function(){copyText(x,x+" copié")}}))});b.appendChild(w);
     b.appendChild(el("button",{class:"btn",type:"button",text:"Copier tous les hashtags",onclick:function(){copyText(tags.map(function(t){return(t.tag||"").replace(/^#?/,"#")}).join(" "),"Hashtags copiés")}}))}
   var pubs=r.publications||[];if(pubs.length){b.appendChild(el("span",{class:"lbl",text:"Publications à regarder"}));var l=el("div",{class:"contacts"});pubs.forEach(function(p){l.appendChild(el("div",{class:"contact"},[el("a",{href:p.url,target:"_blank",rel:"noopener"},[el("b",{text:p.compte||"Voir la publication"})]),p.resume?el("span",{class:"hint",text:p.resume}):null,p.idee?el("span",{class:"hint",text:"Idée : "+p.idee}):null]))});b.appendChild(l)}}
