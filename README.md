@@ -1,6 +1,6 @@
 # Maison Côte Bleue
 
-Média local Instagram de la Côte Bleue (La Couronne-Carro, Sausset-les-Pins, Carry-le-Rouet, La Redonne).
+Média local Instagram de la Côte Bleue (La Couronne-Carro, Sausset-les-Pins, Carry-le-Rouet, Ensuès-la-Redonne).
 Direction artistique v1 : piste « Mistral », Fredoka + Nunito, une couleur par village, touche années 90.
 
 ## Studio Côte Bleue

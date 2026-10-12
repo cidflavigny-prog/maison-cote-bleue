@@ -5,7 +5,7 @@ var VILLAGES={
   couronne:{name:"La Couronne-Carro",short:"Couronne-Carro",color:"#007277",tint:"#D1F3F4",deep:"#003A3F"},
   sausset:{name:"Sausset-les-Pins",short:"Sausset",color:"#007932",tint:"#DCF2DF",deep:"#003B0E"},
   carry:{name:"Carry-le-Rouet",short:"Carry",color:"#AD3300",tint:"#FFE4D9",deep:"#541500"},
-  redonne:{name:"La Redonne",short:"La Redonne",color:"#AC1B6E",tint:"#FFE2EE",deep:"#501133"},
+  redonne:{name:"Ensuès-la-Redonne",short:"Ensuès",color:"#AC1B6E",tint:"#FFE2EE",deep:"#501133"},
   cotebleue:{name:"Côte Bleue",short:"Côte Bleue",color:BLEU,tint:CIEL,deep:NUIT}
 };
 var VORDER=["couronne","sausset","carry","redonne","cotebleue"], V4=["couronne","sausset","carry","redonne"];
