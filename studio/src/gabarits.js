@@ -153,20 +153,22 @@ function drawList(P,W,H){var story=P.format==="story";var rows=(P.rows||[]).slic
   if(P.type==="semaine"&&story&&v)rows=rows.filter(function(r){return r.village===vk});
   if(!rows.length)rows=[{date:period(P.type,P.datePrevue).from,village:vk||"cotebleue",titre:"",infos:""}];
   if(!story){zigzag(760,150,1.75,SOLEIL,9);triangle(930,282,1.85,CIEL);ring(1000,1230,20,SOLEIL,8)}else{zigzag(740,250,1.75,SOLEIL,9);triangle(930,1590,1.85,v?v.tint:CIEL);ring(990,240,18,SOLEIL,8)}
-  var M=64,top=story?330:96;var ph=pill(M,top,pillTxt,BLANC,pfg,NUIT,NUIT,26,3,4);var y=top+ph+22;
-  if(P.type==="jour"){var d=parseIso(P.datePrevue||todayIso());dateBlock(M,y+12,190,190,JC[d.getDay()],String(d.getDate()),34,110);var f1=fitTitle(title,W-2*M-222,230,104,64);drawTitle(f1,M+222,y+12+(190-f1.lines.length*f1.size*1.04)/2,BLANC,sh);y+=12+190+40}
-  else{var f=fitTitle(title,W-2*M,story?240:220,story?104:96,60);drawTitle(f,M,y,BLANC,sh);y+=f.lines.length*f.size*1.04+(story?40:44);if(!story)y=Math.max(y,400)}
-  var noDate=P.type==="jour",rh=noDate?120:132,gap=noDate?24:22;
-  var fy=story?H-470:H-34-64,n=Math.min(rows.length,maxRows(P));y+=Math.max(0,(fy-36-y-(n*rh+(n-1)*gap))/2);
+  var M=64,noDate=P.type==="jour",rh=noDate?120:132,gap=noDate?24:22,fy=story?H-470:H-34-64,n=Math.min(rows.length,maxRows(P));
+  var f=noDate?fitTitle(title,W-2*M-222,230,104,64):fitTitle(title,W-2*M,story?240:220,story?104:96,60),fH=f.lines.length*f.size*1.04;
+  var headH=26*1.75+22+(noDate?12+190+40:fH+(story?40:44)),lo=story?260:80;
+  var top=lo+Math.max(0,(fy-36-lo-headH-(n*rh+(n-1)*gap))/2);var ph=pill(M,top,pillTxt,BLANC,pfg,NUIT,NUIT,26,3,4);var y=top+ph+22;
+  if(noDate){var d=parseIso(P.datePrevue||todayIso());dateBlock(M,y+12,190,190,JC[d.getDay()],String(d.getDate()),34,110);drawTitle(f,M+222,y+12+(190-fH)/2,BLANC,sh);y+=12+190+40}
+  else{drawTitle(f,M,y,BLANC,sh);y+=fH+(story?40:44)}
   rows.slice(0,maxRows(P)).forEach(function(r){card(M,y,W-2*M,rh);var x=M+16;if(!noDate){var d=parseIso(r.date);dateBlock(x,y+14,104,104,JC[d.getDay()],String(d.getDate()),22,56);x+=104+26}else x+=4;
     var isz=noDate?88:84;logo(x,y+(rh-isz)/2,isz,vil(r.village).color);x+=isz+26;var right=W-M-26;if(r.photoId){var ts=rh-28;thumb(r,W-M-14-ts,y+14,ts);right=W-M-14-ts-20}evText(x,y+rh/2,right-x,r,20,40,24);y+=rh+gap});
   footer(M,fy,64,false,W);if(story&&v){ctx.fillStyle=CIEL;ctx.font="700 24px "+FB;ctx.textAlign="right";ctx.fillText(v.name,W-M,fy+40);ctx.textAlign="left"}}
 function drawWeekend(P,W,H,rows,pillTxt,title){var story=P.format==="story";var p=period("weekend",P.datePrevue);var M=64;
-  if(!story){zigzag(760,150,1.75,SOLEIL,9);triangle(940,282,1.85,CIEL)}else{zigzag(770,420,1.75,SOLEIL,9);triangle(940,1492,1.85,CIEL)}
-  var y=story?300:80;var ph=pill(M,y,pillTxt,BLANC,BLEU,NUIT,NUIT,26,3,4);y+=ph+30;var f=fitTitle(title,W-2*M,story?240:200,story?104:92,60);drawTitle(f,M,y,BLANC,NUIT);y+=f.lines.length*f.size*1.04+34;
+  if(!story){zigzag(760,150,1.75,SOLEIL,9);triangle(940,282,1.85,CIEL)}else{zigzag(740,250,1.75,SOLEIL,9);triangle(930,1590,1.85,CIEL)}
+  var f=fitTitle(title,W-2*M,story?240:200,story?104:92,60),fH=f.lines.length*f.size*1.04;
   var mx=perDayMax(P);var days=[p.from,p.to].map(function(d){return{d:d,ev:rows.filter(function(r){return r.date===d}).slice(0,mx)}}).filter(function(x){return x.ev.length});if(!days.length)days=[{d:p.from,ev:[{village:"cotebleue",titre:"",infos:""}]}];
   var isz=story?88:80,es=story?44:40,dw=story?210:200,eg=story?30:24,eh=story?110:100,dg=story?26:22;
-  var chOf=function(x){var n=x.ev.length;return Math.max(n*eh+(n-1)*eg,150)+36};var fy=story?H-470:H-34-60;var blk=days.reduce(function(a,x){return a+chOf(x)},0)+(days.length-1)*dg;y+=Math.max(0,(fy-36-y-blk)/2);
+  var chOf=function(x){var n=x.ev.length;return Math.max(n*eh+(n-1)*eg,150)+36};var fy=story?H-470:H-34-60;var blk=days.reduce(function(a,x){return a+chOf(x)},0)+(days.length-1)*dg;var lo=story?260:80;var y=lo+Math.max(0,(fy-36-lo-(26*1.75+30+fH+34)-blk)/2);
+  var ph=pill(M,y,pillTxt,BLANC,BLEU,NUIT,NUIT,26,3,4);y+=ph+30;drawTitle(f,M,y,BLANC,NUIT);y+=fH+34;
   days.forEach(function(x){var n=x.ev.length;var ch=chOf(x);card(M,y,W-2*M,ch);var dd=parseIso(x.d);dateBlock(M+18,y+18,dw,ch-36,JC[dd.getDay()],String(dd.getDate()),24,story?93:82);
     var ey=y+18+((ch-36)-(n*eh+(n-1)*eg))/2;x.ev.forEach(function(r){var ex=M+18+dw+22;logo(ex,ey+(eh-isz)/2,isz,vil(r.village).color);var right=W-M-24;if(r.photoId){thumb(r,W-M-18-isz,ey+(eh-isz)/2,isz);right=W-M-18-isz-16}evText(ex+isz+16,ey+eh/2,right-(ex+isz+16),r,17,es,24);ey+=eh+eg});y+=ch+dg});
   footer(M,fy,60,false,W)}
