@@ -42,7 +42,7 @@ function mondayOf(s){var d=parseIso(s);return addDays(s,-((d.getDay()+6)%7))}
    week-end publié le jeudi → samedi-dimanche suivants. */
 function period(type,ref){ref=ref||todayIso();var wd=parseIso(ref).getDay();
   if(type==="semaine"){var mon=wd===0?addDays(ref,1):mondayOf(ref);return{from:mon,to:addDays(mon,6)}}
-  if(type==="weekend"){var sat=wd===0?addDays(ref,-1):addDays(ref,(6-wd+7)%7);return{from:sat,to:addDays(sat,1)}}
+  if(type==="weekend"){var sat=wd===0?addDays(ref,-1):addDays(ref,(6-wd+7)%7);return{from:addDays(sat,-1),to:addDays(sat,1)}}
   return{from:ref,to:ref}}
 function monthPill(dates){var ms=[];dates.filter(Boolean).sort().forEach(function(s){var m=MOISL[parseIso(s).getMonth()];if(ms.indexOf(m)<0)ms.push(m)});if(!ms.length)ms=[MOISL[new Date().getMonth()]];return ms.length>1?ms.slice(0,2).join(" · "):"Agenda · "+ms[0]}
 
@@ -165,7 +165,7 @@ function drawList(P,W,H){var story=P.format==="story";var rows=(P.rows||[]).slic
 function drawWeekend(P,W,H,rows,pillTxt,title){var story=P.format==="story";var p=period("weekend",P.datePrevue);var M=64;
   if(!story){zigzag(760,150,1.75,SOLEIL,9);triangle(940,282,1.85,CIEL)}else{zigzag(740,250,1.75,SOLEIL,9);triangle(930,1590,1.85,CIEL)}
   var f=fitTitle(title,W-2*M,story?240:200,story?104:92,60),fH=f.lines.length*f.size*1.04;
-  var mx=perDayMax(P);var days=[p.from,p.to].map(function(d){return{d:d,ev:rows.filter(function(r){return r.date===d}).slice(0,mx)}}).filter(function(x){return x.ev.length});if(!days.length)days=[{d:p.from,ev:[{village:"cotebleue",titre:"",infos:""}]}];
+  var mx=perDayMax(P);var days=[p.from,addDays(p.from,1),p.to].map(function(d){return{d:d,ev:rows.filter(function(r){return r.date===d}).slice(0,mx)}}).filter(function(x){return x.ev.length});if(!days.length)days=[{d:addDays(p.from,1),ev:[{village:"cotebleue",titre:"",infos:""}]}];
   var isz=story?88:80,es=story?44:40,dw=story?210:200,eg=story?30:24,eh=story?110:100,dg=story?26:22;
   var chOf=function(x){var n=x.ev.length;return Math.max(n*eh+(n-1)*eg,150)+36};var fy=story?H-470:H-34-60;var cta=(P.details||"").trim(),ctaH=cta?26*1.75+40:0;var blk=days.reduce(function(a,x){return a+chOf(x)},0)+(days.length-1)*dg+ctaH;var lo=story?260:80;var y=lo+Math.max(0,(fy-36-lo-(26*1.75+30+fH+34)-blk)/2);
   var ph=pill(M,y,pillTxt,BLANC,BLEU,NUIT,NUIT,26,3,4);y+=ph+30;drawTitle(f,M,y,BLANC,NUIT);y+=fH+34;

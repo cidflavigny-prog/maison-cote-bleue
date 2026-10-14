@@ -30,7 +30,7 @@ function rdvsFor(day){var wd=parseIso(day).getDay(),out=[];
   if(wd===0){out.push({type:"semaine",format:"post",label:"Agenda de la semaine",sub:"post · lun. "+parseIso(addDays(day,1)).getDate()+" → dim. "+parseIso(addDays(day,7)).getDate()});
     var counts={};candidates(period("semaine",day)).forEach(function(i){if(i.village&&i.village!=="cotebleue")counts[i.village]=(counts[i.village]||0)+1});
     V4.forEach(function(k){if(counts[k]>=3)out.push({type:"semaine",format:"story",village:k,label:"Story « Ça bouge à "+vil(k).short+" »",sub:counts[k]+" événements dans ce village"})})}
-  if(wd===4){out.push({type:"weekend",format:"post",label:"Agenda du week-end",sub:"post · sam. et dim."});out.push({type:"weekend",format:"story",label:"Agenda du week-end",sub:"story"})}
+  if(wd===4){out.push({type:"weekend",format:"post",label:"Agenda du week-end",sub:"post · ven. au dim."});out.push({type:"weekend",format:"story",label:"Agenda du week-end",sub:"story"})}
   if(day>=METEO_DEBUT)out.push({type:"meteo",format:"story",label:"Météo de demain",sub:"story · 18h",meteoDate:addDays(day,1)});return out}
 function rdvStatus(r,day,p){if(p)return p.statut==="publie"?["Publié","st-done"]:[p.auto?"Prêt à vérifier":"Brouillon","st-ready"];
   if(r.type==="meteo")return S.meteo[r.meteoDate]?["Prévisions prêtes","st-ready"]:(day<todayIso()?["Passé","st-wait"]:["Prévisions à 17h30","st-wait"]);
@@ -81,7 +81,7 @@ $("btn-select").onclick=function(){S.selecting=!S.selecting;S.sel={};this.setAtt
 $("sel-cancel").onclick=function(){$("btn-select").click()};
 $("sel-agenda").onclick=function(){var list=S.ideas.filter(function(i){return S.sel[i.id]&&i.quand}).sort(function(a,b){return a.quand.localeCompare(b.quand)});if(!list.length){toast("Coche des idées datées");return}
   var wk=list.every(function(i){var d=parseIso(i.quand).getDay();return d===0||d===6});var t0=todayIso();P=blankPost();P.type=wk?"weekend":"semaine";
-  var first=list[0].quand;if(wk){var thu=addDays(period("weekend",first).from,-2);P.datePrevue=thu>=t0?thu:t0}else{var sun=addDays(mondayOf(first),-1);P.datePrevue=sun>=t0?sun:t0}
+  var first=list[0].quand;if(wk){var thu=addDays(period("weekend",first).from,-1);P.datePrevue=thu>=t0?thu:t0}else{var sun=addDays(mondayOf(first),-1);P.datePrevue=sun>=t0?sun:t0}
   var pp=period(P.type,P.datePrevue);P.rows=list.map(function(i){return ideaToRow(i,pp)});P.ideeIds=list.map(function(i){return i.id});S.selecting=false;S.sel={};$("btn-select").textContent="Sélectionner";$("btn-select").setAttribute("aria-pressed","false");renderIdeas();syncForm();show("atelier");if(!rowsOk())toast("Trop d’événements pour le gabarit : retire les moins importants")};
 IDEA_TYPES.forEach(function(k){$("i-type").appendChild(el("option",{value:k,text:TYPES[k].name}))});VORDER.forEach(function(k){$("i-village").appendChild(el("option",{value:k,text:VILLAGES[k].name}));$("c-village").appendChild(el("option",{value:k,text:VILLAGES[k].name}))});
 $("idea-form").addEventListener("submit",function(e){e.preventDefault();if(!S.db)return;var body={date:todayIso(),type:$("i-type").value,village:$("i-village").value,titre:$("i-titre").value.trim(),texte:$("i-texte").value.trim(),details:"",quand:$("i-quand").value||"",fin:$("i-fin").value||"",sourceUrl:$("i-source").value.trim(),sourceNom:"",statut:"nouvelle",aVerifier:false,origine:"manuel",createdAt:new Date().toISOString()};
@@ -127,7 +127,7 @@ $("compte-form").addEventListener("submit",function(e){e.preventDefault();if(!S.
 function infosOf(i){var line=((i.details||"").split("\n")[0]||"");var m=line.match(/\*\*(.*?)\*\*/);var bold=m?m[1]:"";var rest=line.replace(/\*\*.*?\*\*/,"").replace(/^[\s·:,-]+/,"").trim();
   var h=(bold+" "+(i.texte||"")).match(/\d{1,2}h\d{0,2}(\s*[-–à]\s*\d{1,2}h\d{0,2})?/);return[h?h[0].replace(/\s+/g,""):"",rest].filter(Boolean).join(" · ")||(i.texte||"").slice(0,48)}
 function ideaToRow(i,p){var d=i.quand||p.from;if(d<p.from)d=p.from;if(d>p.to)d=p.to;return{date:d,village:VILLAGES[i.village]?i.village:"cotebleue",titre:i.titre||"",infos:infosOf(i),ideeId:i.id}}
-function rowsOk(){var rows=P.rows||[];if(P.type!=="weekend")return rows.length<=maxRows(P);var p=period("weekend",P.datePrevue),mx=perDayMax(P),a=0,b=0;rows.forEach(function(r){if(r.date===p.from)a++;else if(r.date===p.to)b++});return a<=mx&&b<=mx}
+function rowsOk(){var rows=P.rows||[];if(P.type!=="weekend")return rows.length<=maxRows(P);var mx=perDayMax(P),n={};return rows.every(function(r){n[r.date]=(n[r.date]||0)+1;return n[r.date]<=mx})}
 function autoFill(){var p=period(P.type,P.datePrevue);var c=candidates(p);if(P.type==="semaine"&&P.format==="story"&&P.village!=="cotebleue")c=c.filter(function(i){return i.village===P.village});var rows=[],per={},mx=perDayMax(P);
   c.forEach(function(i){var r=ideaToRow(i,p);if(P.type==="weekend"){per[r.date]=(per[r.date]||0)+1;if(per[r.date]>mx)return}else if(rows.length>=maxRows(P))return;rows.push(r)});P.rows=rows;return c.length-rows.length}
 function buildTypeChips(){function chip(k){return el("button",{type:"button",class:"chip","data-type":k,"aria-pressed":"false",onclick:function(){setType(k)}},[TYPES[k].name])}
@@ -164,7 +164,7 @@ $("p-photo").addEventListener("change",function(){var f=this.files&&this.files[0
 $("btn-photo-rm").onclick=function(){P.photoId=null;syncForm();draw()};
 /* Lignes d’agenda */
 function renderRows(){var box=$("rows");box.textContent="";var p=period(P.type,P.datePrevue);P.rows=P.rows||[];renderCands();
-  $("rows-period").textContent=(P.type==="semaine"?"Semaine du "+frDate(p.from)+" au "+frDate(p.to):P.type==="weekend"?"Week-end du "+frDate(p.from)+" et "+frDate(p.to):"Journée du "+frDate(p.from)).replace(/\.$/,"")+". "+(P.type==="weekend"?perDayMax(P)+" événements maximum par jour.":maxRows(P)+" lignes maximum.")+(P.type==="semaine"&&P.format==="story"&&P.village!=="cotebleue"?" Seules les lignes de "+vil(P.village).short+" s’affichent.":"");
+  $("rows-period").textContent=(P.type==="semaine"?"Semaine du "+frDate(p.from)+" au "+frDate(p.to):P.type==="weekend"?"Week-end du "+frDate(p.from)+" au "+frDate(p.to)+" (le vendredi ne s’affiche que s’il a un événement)":"Journée du "+frDate(p.from)).replace(/\.$/,"")+". "+(P.type==="weekend"?perDayMax(P)+" événements maximum par jour.":maxRows(P)+" lignes maximum.")+(P.type==="semaine"&&P.format==="story"&&P.village!=="cotebleue"?" Seules les lignes de "+vil(P.village).short+" s’affichent.":"");
   P.rows.forEach(function(r,i){var b=el("div",{class:"rowed"}),id="r"+i;
     var d=el("input",{type:"date",id:id+"d",value:r.date||"","aria-label":"Date"});d.oninput=function(){r.date=d.value;draw()};
     var v=el("select",{id:id+"v","aria-label":"Village"});VORDER.forEach(function(k){v.appendChild(el("option",{value:k,text:VILLAGES[k].short,selected:k===r.village?"selected":null}))});v.onchange=function(){r.village=v.value;draw()};
@@ -174,7 +174,7 @@ function renderRows(){var box=$("rows");box.textContent="";var p=period(P.type,P
     var pr=el("div",{class:"photo-row"},[el("span",{class:"hint",text:r.photoId?"Vignette photo :":"Vignette photo (facultatif) :"}),ph,r.photoId?el("button",{type:"button",class:"btn ghost",text:"Retirer",onclick:function(){r.photoId=null;renderRows();draw()}}):null]);
     var x=el("button",{type:"button",class:"btn ghost rmv full",text:"Retirer cette ligne",onclick:function(){P.rows.splice(i,1);renderRows();draw()}});
     [d,v,t,f,pr,x].forEach(function(n){b.appendChild(n)});box.appendChild(b)});
-  $("btn-add-row").disabled=P.type==="weekend"?P.rows.length>=perDayMax(P)*2:P.rows.length>=maxRows(P);
+  $("btn-add-row").disabled=P.type==="weekend"?P.rows.length>=perDayMax(P)*3:P.rows.length>=maxRows(P);
   if(!rowsOk())box.appendChild(el("p",{class:"verif",text:"Trop d’événements : retire-en, les lignes en trop ne s’affichent pas."}))}
 $("btn-add-row").onclick=function(){var p=period(P.type,P.datePrevue);P.rows=P.rows||[];P.rows.push({date:p.from,village:"cotebleue",titre:"",infos:""});renderRows();draw()};
 /* Choix des événements : post et story */
