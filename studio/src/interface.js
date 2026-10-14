@@ -107,7 +107,9 @@ function compteRow(c,prop){var v=vil(c.village),fb=c.plateforme==="facebook";var
   return el("div",{class:"compte"+(prop?" propose":"")},kids)}
 /* Veille réseaux */
 function renderReseaux(){var r=S.reseaux,b=$("reseaux-body");b.textContent="";$("n-reseaux").textContent=r&&r.date===todayIso()?"nouveau":"";
-  if(!r){b.appendChild(el("p",{class:"hint",style:"margin:0",text:"La veille réseaux passe chaque matin vers 6h30 : hashtags du moment, sujets qui font parler et publications à repartager."}));return}
+  var so=S.ideas.filter(function(i){return i.origine==="sortie"&&(i.fin||i.quand||"9999")>=todayIso()&&i.statut!=="ecartee"}).sort(function(x,y){return(x.quand||"").localeCompare(y.quand||"")});
+  if(so.length){b.appendChild(el("span",{class:"lbl",text:"Sorties du week-end"}));var sl=el("div",{class:"contacts"});so.forEach(function(i){sl.appendChild(el("div",{class:"contact"},[el("span",{class:"hint",text:[i.public==="adultes"?"Entre adultes":i.public==="famille"?"En famille":"",vil(i.village).short,i.quand?frDate(i.quand)+(i.fin&&i.fin!==i.quand?" → "+frDate(i.fin):""):""].filter(Boolean).join(" · ")}),el("b",{text:i.titre||""}),i.texte?el("span",{class:"hint",text:i.texte}):null,i.sourceUrl?el("a",{href:i.sourceUrl,target:"_blank",rel:"noopener",text:"Voir le détail"+(i.sourceNom?" ("+i.sourceNom+")":"")}):null]))});b.appendChild(sl)}
+  if(!r){b.appendChild(el("p",{class:"hint",style:"margin:0",text:"La veille réseaux passe chaque matin vers 6h30 : hashtags du moment, sujets qui font parler, publications à repartager et, le mercredi, deux idées de sortie pour le week-end."}));return}
   b.appendChild(el("span",{class:"hint",text:"Mise à jour du "+frDate(r.date)+(r.message?" · "+r.message:"")}));
   var tl=Array.isArray(r.tendances)?r.tendances:(r.tendances?String(r.tendances).split("\n"):[]);tl=tl.filter(function(x){return x&&String(x).trim()});if(tl.length){b.appendChild(el("span",{class:"lbl",text:"Ce qui fait parler"}));b.appendChild(el("ul",{class:"trend"},tl.map(function(x){return el("li",{text:String(x).replace(/^[-•]\s*/,"")})})))}
   var tags=r.hashtags||[];if(tags.length){b.appendChild(el("span",{class:"lbl",text:"Hashtags du moment"}));var w=el("div",{class:"tagrow"});tags.forEach(function(t){var x=(t.tag||"").replace(/^#?/,"#");w.appendChild(el("button",{class:"tagchip",type:"button",title:t.note||"",text:x+(t.usage?" · "+t.usage:""),onclick:function(){copyText(x,x+" copié")}}))});b.appendChild(w);
@@ -255,7 +257,7 @@ var C=window.claude;
 if(!C||!C.use)setConn(false,"Hors ligne");
 else{
   C.use("db").then(function(db){if(!db){setConn(false,"Base indisponible");return}S.db=db;setConn(true,"Synchronisé");
-    snap("idees",function(d,live){S.ideas=d;renderIdeas();renderWeek();if(live)purge("idees",d,function(i){return isPast(i)||oldUndated(i)})},db.collection("idees").limit(500));
+    snap("idees",function(d,live){S.ideas=d;renderIdeas();renderWeek();renderReseaux();if(live)purge("idees",d,function(i){return isPast(i)||oldUndated(i)})},db.collection("idees").limit(500));
     snap("posts",function(d,live){S.posts=d;renderWeek();renderAna();if(live)purge("posts",d,stale)},db.collection("posts").limit(500));
     snap("stats",function(d){S.stats=d.filter(function(x){return x.date});renderAna()},db.collection("stats").limit(800));
     snap("recaps",function(d,live){S.recaps=d.filter(function(x){return x.date});renderRecap();if(live)purge("recaps",d,function(r){return r.date<todayIso()})},db.collection("recaps").limit(60));

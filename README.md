@@ -41,7 +41,7 @@ Page de travail publiée sur claude.ai (privée) : https://claude.ai/artifact/PH
 
 | Heure | Routine | Environnement |
 | --- | --- | --- |
-| 6h33 | Veille réseaux : comptes pros lus via l'API Meta, hashtags du moment, tendances, idées | « Maison cote bleue » (jeton Meta en secret réseau pour `graph.facebook.com`) |
+| 6h33 | Veille réseaux : publications des comptes pros lues via l'API Meta (promos, événements), hashtags, tendances, idées ; le mercredi, 2 sorties du week-end (famille et adultes) avec lien | « Maison cote bleue » (jeton Meta en secret réseau pour `graph.facebook.com`) |
 | 6h40 | Instagram : abonnés, stats des posts, communauté — **en pause** jusqu'à ce que le compte ait de l'activité | « Maison cote bleue » |
 | 7h20, un jour sur deux | Recherche de comptes Instagram et Facebook à suivre ou contacter, avec message proposé | « Maison cote bleue » |
 | 6h57 | Veille : recherche web, récap, idées, ménage, brouillons d'agenda le dimanche et le jeudi | Cowork |
