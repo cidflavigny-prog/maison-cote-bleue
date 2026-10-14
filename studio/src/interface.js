@@ -212,6 +212,19 @@ function fallbackImg(blob){var fb=$("export-fallback");fb.hidden=false;fb.textCo
 $("btn-export").onclick=function(){draw(true);cv.toBlob(function(blob){if(!blob){toast("Image impossible à générer");return}if(!S.downloads)return fallbackImg(blob);
   S.downloads.save({filename:fileName(),data:blob}).then(function(r){if(r&&r.status==="saved")toast("Image enregistrée. Ouvre Instagram pour publier.")},function(e){if(e&&e.code==="unavailable")fallbackImg(blob)})},"image/png")};
 $("btn-copy").onclick=function(){var txt=$("p-legende").value;if(!txt){toast("La légende est vide");return}copyText(txt,"Légende copiée",$("p-legende"))};
+/* Sources citées en fin de légende, avec tag Instagram quand le compte est connu */
+function normTxt(x){return(x||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9@]+/g," ").trim()}
+function sourceTag(i){var sn=i.sourceNom||"",m=sn.match(/@([A-Za-z0-9._]{2,30})/);if(m)return"@"+m[1];var n=normTxt(sn);
+  var ig=S.comptes.filter(function(c){return c.statut!=="ignore"&&(c.plateforme||"instagram")==="instagram"&&c.username});
+  var hit=ig.find(function(c){var cn=normTxt(c.nom);return(cn&&n.indexOf(cn)>=0)||n.indexOf(normTxt(c.username))>=0});
+  if(!hit&&/mairie|ville de|commune/.test(n))hit=ig.find(function(c){return c.categorie==="mairie"&&c.village===i.village});
+  if(!hit&&/office de tourisme/.test(n))hit=ig.find(function(c){return/office de tourisme/.test(normTxt(c.nom))&&c.village===i.village});
+  if(hit)return"@"+hit.username;var short=sn.split(/\s[–·|-]\s|\s\(/)[0].trim();return short||(i.sourceUrl?i.sourceUrl.replace(/^https?:\/\/(www\.)?/,"").split("/")[0]:"")}
+function sourcesLine(){var ids=(P.ideeIds||[]).slice();(P.rows||[]).forEach(function(r){if(r.ideeId&&ids.indexOf(r.ideeId)<0)ids.push(r.ideeId)});var out=[];
+  ids.forEach(function(id){var i=S.ideas.find(function(x){return x.id===id});if(!i)return;var t=sourceTag(i);if(t&&!/^id[ée]e de la veille/i.test(t)&&out.indexOf(t)<0)out.push(t)});
+  return out.length?"Sources : "+out.join(" · "):""}
+$("btn-sources").onclick=function(){var line=sourcesLine();if(!line){toast("Aucune source trouvée pour ce visuel");return}var lg=(P.legende||"").replace(/\n?Sources : [^\n]*/,"").replace(/\s+$/,"");
+  var parts=lg.split("\n"),last=parts[parts.length-1]||"";if(/^#/.test(last)){parts.splice(parts.length-1,0,line)}else parts.push(line);P.legende=parts.join("\n").replace(/^\n/,"");$("p-legende").value=P.legende;toast("Sources ajoutées")};
 /* Légende par Claude */
 var legAbort=null;
 $("btn-legende").onclick=function(){if(!S.sample){toast("Claude n’est pas disponible sur cette vue");return}if(legAbort){legAbort.abort();return}
@@ -222,7 +235,7 @@ $("btn-legende").onclick=function(){if(!S.sample){toast("Claude n’est pas disp
     t.name+" à "+v.name+" ; titre : "+(P.titre||"(vide)")+" ; détails : "+((P.details||"").replace(/\*\*/g,"")||"(aucun)");
   var brief=["Tu rédiges la légende Instagram d’un "+(story?"texte de story":"post")+" du compte @maison.cotebleue (« Maison Côte Bleue »), média local de La Couronne-Carro, Sausset-les-Pins, Carry-le-Rouet et Ensuès-la-Redonne (dont la calanque de La Redonne).","Promesse : « Ce qui se passe chez nous, au même endroit. » Ton : un voisin bien informé, chaleureux et direct. Tutoiement.",
     story?"Règles : 1 à 2 phrases courtes, pas de hashtags.":"Règles : moins de 120 mots, phrases courtes, 1 ou 2 emojis maximum, termine par un appel doux (s’abonner, écrire en message pour partager une info) puis une ligne de 3 à 5 hashtags locaux.",
-    "N’invente aucun fait, date, horaire ni prix : utilise uniquement les infos ci-dessous. Cite la source à la fin si elle est fournie.","Réponds uniquement avec la légende.","","Contenu : "+what,P.source?"Source : "+P.source:""].join("\n");
+    "N’invente aucun fait, date, horaire ni prix : utilise uniquement les infos ci-dessous."+(sourcesLine()?" Juste avant la ligne de hashtags, recopie telle quelle cette ligne de sources (ne tague aucun autre compte) : "+sourcesLine():(P.source?" Cite la source à la fin.":"")),"Réponds uniquement avec la légende.","","Contenu : "+what,P.source?"Source : "+P.source:""].join("\n");
   legAbort=new AbortController();var btn=$("btn-legende"),lab=btn.querySelector("span");var old=lab.textContent;lab.textContent="Arrêter";$("p-legende").value="Claude écrit…";
   S.sample(brief,{signal:legAbort.signal,cache:false,onText:function(u){$("p-legende").value=u.text}}).then(function(r){P.legende=$("p-legende").value=r.text.trim()},function(e){if(e&&e.text){P.legende=$("p-legende").value=e.text}else $("p-legende").value=P.legende||"";if(e&&e.code==="rate_limited")toast("Trop de demandes, réessaie dans un moment");else if(e&&e.code!=="cancelled")toast("Légende indisponible pour l’instant")}).then(function(){legAbort=null;lab.textContent=old})};
 
