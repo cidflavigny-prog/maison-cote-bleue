@@ -143,8 +143,8 @@ function drawSimpleStory(P,W,H){var M=90,t=typ(P.type),v=vil(P.village),th=theme
 function rowsDates(P){return(P.rows||[]).map(function(r){return r.date}).concat(P.type==="jour"?[P.datePrevue||todayIso()]:[])}
 function defTitle(P){var v=vil(P.village);if(P.type==="semaine"&&P.format==="story"&&P.village!=="cotebleue")return"Ça bouge "+(P.village==="couronne"?"à la Couronne-Carro":"à "+v.short)+"\ncette semaine";
   return P.type==="semaine"?"Ça bouge\ncette semaine":P.type==="weekend"?"Ça bouge\nce week-end":P.type==="jour"?"Ça bouge\naujourd’hui":P.type==="meteo"?"Demain sur\nla Côte Bleue":"Quelque chose arrive\nsur la Côte Bleue"}
-function maxRows(P){if(P.type==="semaine")return P.format==="story"?4:5;if(P.type==="jour")return 4;return 6}
-function perDayMax(P){return P.format==="story"?2:3}
+function maxRows(P){if(P.type==="semaine")return P.format==="story"?6:5;if(P.type==="jour")return 5;return 6}
+function perDayMax(P){return 3}
 function singleVillage(rows){var vs={};rows.forEach(function(r){vs[r.village]=1});var k=Object.keys(vs);return k.length===1&&k[0]!=="cotebleue"?k[0]:null}
 function drawList(P,W,H){var story=P.format==="story";var rows=(P.rows||[]).slice().sort(function(a,b){return a.date.localeCompare(b.date)});var pillTxt=P.pill||monthPill(rowsDates(P));var title=P.titre||defTitle(P);
   var vk=P.type==="semaine"&&story?P.village:(P.type==="jour"?singleVillage(rows):null);var v=vk&&vk!=="cotebleue"?vil(vk):null;var bg=v?v.color:BLEU,sh=v?v.deep:NUIT,pfg=v?v.color:BLEU;
@@ -161,7 +161,7 @@ function drawList(P,W,H){var story=P.format==="story";var rows=(P.rows||[]).slic
   else{drawTitle(f,M,y,BLANC,sh);y+=fH+(story?40:44)}
   rows.slice(0,maxRows(P)).forEach(function(r){card(M,y,W-2*M,rh);var x=M+16;if(!noDate){var d=parseIso(r.date);dateBlock(x,y+14,104,104,JC[d.getDay()],String(d.getDate()),22,56);x+=104+26}else x+=4;
     var isz=noDate?88:84;logo(x,y+(rh-isz)/2,isz,vil(r.village).color);x+=isz+26;var right=W-M-26;if(r.photoId){var ts=rh-28;thumb(r,W-M-14-ts,y+14,ts);right=W-M-14-ts-20}evText(x,y+rh/2,right-x,r,20,40,24);y+=rh+gap});
-  footer(M,fy,64,false,W);if(story&&v){ctx.fillStyle=CIEL;ctx.font="700 24px "+FB;ctx.textAlign="right";ctx.fillText(v.name,W-M,fy+40);ctx.textAlign="left"}}
+  if(story)fy=Math.max(fy,y+10);footer(M,fy,64,false,W);if(story&&v){ctx.fillStyle=CIEL;ctx.font="700 24px "+FB;ctx.textAlign="right";ctx.fillText(v.name,W-M,fy+40);ctx.textAlign="left"}}
 function drawWeekend(P,W,H,rows,pillTxt,title){var story=P.format==="story";var p=period("weekend",P.datePrevue);var M=64;
   if(!story){zigzag(760,150,1.75,SOLEIL,9);triangle(940,282,1.85,CIEL)}else{zigzag(740,250,1.75,SOLEIL,9);triangle(930,1590,1.85,CIEL)}
   var f=fitTitle(title,W-2*M,story?240:200,story?104:92,60),fH=f.lines.length*f.size*1.04;
@@ -172,7 +172,7 @@ function drawWeekend(P,W,H,rows,pillTxt,title){var story=P.format==="story";var 
   days.forEach(function(x){var n=x.ev.length;var ch=chOf(x);card(M,y,W-2*M,ch);var dd=parseIso(x.d);dateBlock(M+18,y+18,dw,ch-36,JC[dd.getDay()],String(dd.getDate()),24,story?93:82);
     var ey=y+18+((ch-36)-(n*eh+(n-1)*eg))/2;x.ev.forEach(function(r){var ex=M+18+dw+22;logo(ex,ey+(eh-isz)/2,isz,vil(r.village).color);var right=W-M-24;if(r.photoId){thumb(r,W-M-18-isz,ey+(eh-isz)/2,isz);right=W-M-18-isz-16}evText(ex+isz+16,ey+eh/2,right-(ex+isz+16),r,17,es,24);ey+=eh+eg});y+=ch+dg});
   if(cta)pill((W-pillW(cta,26))/2,y+18,cta,SOLEIL,NUIT,NUIT,NUIT,26,3,4);
-  footer(M,fy,60,false,W)}
+  footer(M,story?Math.max(fy,y+(cta?ctaH:0)+10):fy,60,false,W)}
 
 /* ---------- Happening ---------- */
 function bigLogo(cx,cy,r){ctx.fillStyle=NUIT;ctx.beginPath();ctx.arc(cx+14,cy+14,r,0,Math.PI*2);ctx.fill();ctx.fillStyle=SOLEIL;ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fill();ctx.lineWidth=5;ctx.strokeStyle=NUIT;ctx.stroke();
