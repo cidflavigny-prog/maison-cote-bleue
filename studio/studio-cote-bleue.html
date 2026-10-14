@@ -543,13 +543,13 @@ function drawSimplePost(P,W,H){var M=76,t=typ(P.type),v=vil(P.village),th=themeO
 function drawSimpleStory(P,W,H){var M=90,t=typ(P.type),v=vil(P.village),th=themeOf(P.type);var title=P.titre||t.title,details=P.details!==""&&P.details!=null?P.details:(P.titre?"":t.details),pillTxt=P.pill||(P.type==="agenda"?t.storyPill:t.pill);
   var bg=th.bg,fg=th.fg,shadow=th.shadow,pBg=th.pillBg,pFg=th.pillFg;if(P.type==="agenda"){bg=v.color;fg=BLANC;shadow=v.deep;pBg=BLANC;pFg=v.color}
   var hasPhoto=!!P.photoId||P.type==="nouveau";ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
-  if(P.type==="agenda"){zigzag(W-330,330,5.4,SOLEIL,22);ring(150,H-300,50,SOLEIL,22);triangle(W-260,H-380,5.4,v.tint)}
+  if(P.type==="agenda"){zigzag(W-330,190,5.4,SOLEIL,22);ring(150,H-230,50,SOLEIL,22);triangle(W-260,H-330,5.4,v.tint)}
   if(P.type==="pratique")zigzag(W-330,H-470,5.4,SOLEIL,22);
   logo(M,270,110,v.color);ctx.font="800 40px "+FB;setLS(40*.12);var lab=v.short.toUpperCase(),lw=ctx.measureText(lab).width+56;
   var lbg=P.type==="bonplan"?NUIT:(P.type==="question"?BLEU:(P.type==="nouveau"?BLEU:BLANC)),lfg=P.type==="bonplan"||P.type==="question"||P.type==="nouveau"?BLANC:(P.type==="agenda"?v.deep:NUIT);
   ctx.fillStyle=lbg;rr(M+136,290,lw,72,36);ctx.fill();ctx.fillStyle=lfg;ctx.textBaseline="middle";ctx.fillText(lab,M+164,328);setLS(0);
   var y=430,bottomMax=H-400,fh=hasPhoto?620+60:0,phH=44*1.75;
-  var detFont="400 48px "+FB,detBold="800 48px "+FB,lh=68;var detLines=details?layout(details,detFont,detBold,W-2*M-(P.type==="bonplan"&&!hasPhoto?280:0)).slice(0,hasPhoto?2:6):[];var detH=detLines.length*lh;
+  var detFont="400 48px "+FB,detBold="800 48px "+FB,lh=68;var detLines=details?layout(details,detFont,detBold,W-2*M-(P.type==="bonplan"&&!hasPhoto?280:0)).slice(0,hasPhoto?3:6):[];var detH=detLines.length*lh;
   var avail=bottomMax-y-(P.type==="question"?300:0)-fh-phH-40;var fit=fitTitle(title,W-2*M,avail-detH-(detH?40:0),hasPhoto?110:170,64);var titleH=fit.lines.length*fit.size*1.04;
   y+=Math.max(0,(avail-titleH-(detH?40+detH:0))/2);var photoY=y;
   if(hasPhoto){photoFrame(imgFor(P.photoId),M,y,W-2*M,620,30,8,14,"[Photo]");y+=fh}
