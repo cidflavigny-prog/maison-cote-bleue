@@ -578,10 +578,11 @@ function drawWeekend(P,W,H,rows,pillTxt,title){var story=P.format==="story";var 
   var f=fitTitle(title,W-2*M,story?240:200,story?104:92,60),fH=f.lines.length*f.size*1.04;
   var mx=perDayMax(P);var days=[p.from,p.to].map(function(d){return{d:d,ev:rows.filter(function(r){return r.date===d}).slice(0,mx)}}).filter(function(x){return x.ev.length});if(!days.length)days=[{d:p.from,ev:[{village:"cotebleue",titre:"",infos:""}]}];
   var isz=story?88:80,es=story?44:40,dw=story?210:200,eg=story?30:24,eh=story?110:100,dg=story?26:22;
-  var chOf=function(x){var n=x.ev.length;return Math.max(n*eh+(n-1)*eg,150)+36};var fy=story?H-470:H-34-60;var blk=days.reduce(function(a,x){return a+chOf(x)},0)+(days.length-1)*dg;var lo=story?260:80;var y=lo+Math.max(0,(fy-36-lo-(26*1.75+30+fH+34)-blk)/2);
+  var chOf=function(x){var n=x.ev.length;return Math.max(n*eh+(n-1)*eg,150)+36};var fy=story?H-470:H-34-60;var cta=(P.details||"").trim(),ctaH=cta?26*1.75+40:0;var blk=days.reduce(function(a,x){return a+chOf(x)},0)+(days.length-1)*dg+ctaH;var lo=story?260:80;var y=lo+Math.max(0,(fy-36-lo-(26*1.75+30+fH+34)-blk)/2);
   var ph=pill(M,y,pillTxt,BLANC,BLEU,NUIT,NUIT,26,3,4);y+=ph+30;drawTitle(f,M,y,BLANC,NUIT);y+=fH+34;
   days.forEach(function(x){var n=x.ev.length;var ch=chOf(x);card(M,y,W-2*M,ch);var dd=parseIso(x.d);dateBlock(M+18,y+18,dw,ch-36,JC[dd.getDay()],String(dd.getDate()),24,story?93:82);
     var ey=y+18+((ch-36)-(n*eh+(n-1)*eg))/2;x.ev.forEach(function(r){var ex=M+18+dw+22;logo(ex,ey+(eh-isz)/2,isz,vil(r.village).color);var right=W-M-24;if(r.photoId){thumb(r,W-M-18-isz,ey+(eh-isz)/2,isz);right=W-M-18-isz-16}evText(ex+isz+16,ey+eh/2,right-(ex+isz+16),r,17,es,24);ey+=eh+eg});y+=ch+dg});
+  if(cta)pill((W-pillW(cta,26))/2,y+18,cta,SOLEIL,NUIT,NUIT,NUIT,26,3,4);
   footer(M,fy,60,false,W)}
 
 /* ---------- Happening ---------- */
@@ -795,7 +796,7 @@ function syncForm(){var t=typ(P.type),L=isList(P.type),T=P.type==="teaser",Mt=P.
   document.querySelectorAll("#p-villages .chip").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.village===P.village))});
   $("fmt-post").setAttribute("aria-pressed",String(P.format!=="story"));$("fmt-story").setAttribute("aria-pressed",String(P.format==="story"));$("fmt-post").disabled=!!t.storyOnly;
   $("village-field").hidden=!(simple||(P.type==="semaine"&&P.format==="story"));$("village-label").textContent=P.type==="semaine"?"Village de la story":"Village";
-  $("list-fields").hidden=!L;$("teaser-fields").hidden=!T;$("meteo-fields").hidden=!Mt;$("details-field").hidden=!(simple||T);$("sticker-field").hidden=P.type!=="bonplan";
+  $("list-fields").hidden=!L;$("teaser-fields").hidden=!T;$("meteo-fields").hidden=!Mt;$("details-field").hidden=!(simple||T||P.type==="weekend");$("sticker-field").hidden=P.type!=="bonplan";
   $("photo-field").hidden=L;$("btn-photo-rm").hidden=!P.photoId;
   $("p-pill").value=P.pill||"";$("p-pill").placeholder=L?monthPill(rowsDates(P)):T?(P.format==="story"?"Active la cloche":"Bientôt"):Mt?"Météo · demain":(P.format==="story"&&P.type==="agenda"?t.storyPill:t.pill)||"";
   $("p-sticker").value=P.sticker||"";$("p-titre").value=P.titre||"";$("p-titre").placeholder=simple?t.title:defTitle(P).replace("\n"," ");$("p-titre-label").textContent=P.type==="nouveau"?"Nom du commerce":P.type==="question"?"Question":"Titre";

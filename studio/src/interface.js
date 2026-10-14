@@ -142,7 +142,7 @@ function syncForm(){var t=typ(P.type),L=isList(P.type),T=P.type==="teaser",Mt=P.
   document.querySelectorAll("#p-villages .chip").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.village===P.village))});
   $("fmt-post").setAttribute("aria-pressed",String(P.format!=="story"));$("fmt-story").setAttribute("aria-pressed",String(P.format==="story"));$("fmt-post").disabled=!!t.storyOnly;
   $("village-field").hidden=!(simple||(P.type==="semaine"&&P.format==="story"));$("village-label").textContent=P.type==="semaine"?"Village de la story":"Village";
-  $("list-fields").hidden=!L;$("teaser-fields").hidden=!T;$("meteo-fields").hidden=!Mt;$("details-field").hidden=!(simple||T);$("sticker-field").hidden=P.type!=="bonplan";
+  $("list-fields").hidden=!L;$("teaser-fields").hidden=!T;$("meteo-fields").hidden=!Mt;$("details-field").hidden=!(simple||T||P.type==="weekend");$("sticker-field").hidden=P.type!=="bonplan";
   $("photo-field").hidden=L;$("btn-photo-rm").hidden=!P.photoId;
   $("p-pill").value=P.pill||"";$("p-pill").placeholder=L?monthPill(rowsDates(P)):T?(P.format==="story"?"Active la cloche":"Bientôt"):Mt?"Météo · demain":(P.format==="story"&&P.type==="agenda"?t.storyPill:t.pill)||"";
   $("p-sticker").value=P.sticker||"";$("p-titre").value=P.titre||"";$("p-titre").placeholder=simple?t.title:defTitle(P).replace("\n"," ");$("p-titre-label").textContent=P.type==="nouveau"?"Nom du commerce":P.type==="question"?"Question":"Titre";
