@@ -136,7 +136,7 @@ function buildTypeChips(){function chip(k){return el("button",{type:"button",cla
   V4.forEach(function(k){var id="tv-"+k;$("t-villages").appendChild(el("label",{class:"chip",for:id},[el("input",{type:"checkbox",id:id,value:k,style:"width:18px;height:18px;accent-color:#0F4CDB"}),el("span",{class:"dot",style:"background:"+VILLAGES[k].color}),VILLAGES[k].short]))})}
 buildTypeChips();
 function setType(k){var t=TYPES[k];P.type=k;P.pill="";if(t.storyOnly)P.format="story";if(!P.datePrevue)P.datePrevue=todayIso();if(k==="meteo"&&!P.meteoDate)P.meteoDate=addDays(P.datePrevue,1);
-  if(isList(k)&&!(P.rows&&P.rows.length)){var rest=autoFill();if(rest>0)toast(rest+" autre(s) idée(s) dans la période : « Choisir dans les idées »")}syncForm();draw()}
+  if(isList(k)&&!(P.rows&&P.rows.length)){var rest=autoFill();if(rest>0)toast(rest+" autre(s) événement(s) à cocher dans la liste")}syncForm();draw()}
 function syncForm(){var t=typ(P.type),L=isList(P.type),T=P.type==="teaser",Mt=P.type==="meteo",simple=isSimple(P.type);
   document.querySelectorAll("[data-type]").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.type===P.type))});
   document.querySelectorAll("#p-villages .chip").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.village===P.village))});
@@ -150,8 +150,9 @@ function syncForm(){var t=typ(P.type),L=isList(P.type),T=P.type==="teaser",Mt=P.
   if(L)renderRows();if(T){$("t-compteur").value=P.compteur||"";$("t-visuel").value=P.visuel||"logo";document.querySelectorAll("#t-villages input").forEach(function(cb){cb.checked=(P.villages||[]).indexOf(cb.value)>=0})}
   if(Mt){var m=S.meteo[P.meteoDate];$("meteo-info").textContent=m?"Prévisions Open-Meteo pour le "+frDate(P.meteoDate)+", mises à jour "+(m.majLe?"le "+frDate(m.majLe.slice(0,10))+" à "+m.majLe.slice(11,16):"")+".":"Prévisions du "+frDate(P.meteoDate)+" pas encore arrivées : la routine les récupère vers 17h30 la veille."}
   $("btn-delete").hidden=!P.id;$("post-status").textContent=P.statut==="publie"?"Publié le "+frDate(P.datePublie):(P.id?"Brouillon enregistré":"Nouveau visuel, pas encore enregistré");$("btn-published").textContent=P.statut==="publie"?"Publié":"Marquer publié"}
-$("fmt-post").onclick=function(){if(typ(P.type).storyOnly){toast("Ce gabarit existe en story");return}P.format="post";syncForm();draw()};
-$("fmt-story").onclick=function(){P.format="story";syncForm();draw()};
+function switchFmt(f){if(P.format===f)return;var sib=P.type==="weekend"?sibling():null;if(sib){openPost(sib);return}P.format=f;if(P.type==="weekend"&&P.id){P.id=null;P.statut="brouillon";autoFill();toast("Nouveau visuel "+(f==="story"?"story":"post")+" : enregistre-le")}syncForm();draw()}
+$("fmt-post").onclick=function(){if(typ(P.type).storyOnly){toast("Ce gabarit existe en story");return}switchFmt("post")};
+$("fmt-story").onclick=function(){switchFmt("story")};
 [["p-pill","pill"],["p-sticker","sticker"],["p-titre","titre"],["p-details","details"],["p-legende","legende"],["p-source","source"]].forEach(function(p){$(p[0]).addEventListener("input",function(){P[p[1]]=$(p[0]).value;if(p[1]!=="legende"&&p[1]!=="source")draw()})});
 $("p-date").addEventListener("change",function(){P.datePrevue=$("p-date").value;if(P.type==="meteo")P.meteoDate=addDays(P.datePrevue,1);syncForm();draw()});
 $("t-villages").addEventListener("change",function(){P.villages=[].slice.call(document.querySelectorAll("#t-villages input:checked")).map(function(x){return x.value});draw()});
@@ -162,8 +163,8 @@ function pickPhoto(file){if(!file)return Promise.resolve(null);if(S.assets)retur
 $("p-photo").addEventListener("change",function(){var f=this.files&&this.files[0];this.value="";pickPhoto(f).then(function(id){if(id){P.photoId=id;syncForm();draw()}})});
 $("btn-photo-rm").onclick=function(){P.photoId=null;syncForm();draw()};
 /* Lignes d’agenda */
-function renderRows(){var box=$("rows");box.textContent="";var p=period(P.type,P.datePrevue);P.rows=P.rows||[];
-  $("rows-period").textContent=(P.type==="semaine"?"Semaine du "+frDate(p.from)+" au "+frDate(p.to):P.type==="weekend"?"Week-end du "+frDate(p.from)+" et "+frDate(p.to):"Journée du "+frDate(p.from))+". "+(P.type==="weekend"?perDayMax(P)+" événements maximum par jour.":maxRows(P)+" lignes maximum.")+(P.type==="semaine"&&P.format==="story"&&P.village!=="cotebleue"?" Seules les lignes de "+vil(P.village).short+" s’affichent.":"");
+function renderRows(){var box=$("rows");box.textContent="";var p=period(P.type,P.datePrevue);P.rows=P.rows||[];renderCands();
+  $("rows-period").textContent=(P.type==="semaine"?"Semaine du "+frDate(p.from)+" au "+frDate(p.to):P.type==="weekend"?"Week-end du "+frDate(p.from)+" et "+frDate(p.to):"Journée du "+frDate(p.from)).replace(/\.$/,"")+". "+(P.type==="weekend"?perDayMax(P)+" événements maximum par jour.":maxRows(P)+" lignes maximum.")+(P.type==="semaine"&&P.format==="story"&&P.village!=="cotebleue"?" Seules les lignes de "+vil(P.village).short+" s’affichent.":"");
   P.rows.forEach(function(r,i){var b=el("div",{class:"rowed"}),id="r"+i;
     var d=el("input",{type:"date",id:id+"d",value:r.date||"","aria-label":"Date"});d.oninput=function(){r.date=d.value;draw()};
     var v=el("select",{id:id+"v","aria-label":"Village"});VORDER.forEach(function(k){v.appendChild(el("option",{value:k,text:VILLAGES[k].short,selected:k===r.village?"selected":null}))});v.onchange=function(){r.village=v.value;draw()};
@@ -176,11 +177,23 @@ function renderRows(){var box=$("rows");box.textContent="";var p=period(P.type,P
   $("btn-add-row").disabled=P.type==="weekend"?P.rows.length>=perDayMax(P)*2:P.rows.length>=maxRows(P);
   if(!rowsOk())box.appendChild(el("p",{class:"verif",text:"Trop d’événements : retire-en, les lignes en trop ne s’affichent pas."}))}
 $("btn-add-row").onclick=function(){var p=period(P.type,P.datePrevue);P.rows=P.rows||[];P.rows.push({date:p.from,village:"cotebleue",titre:"",infos:""});renderRows();draw()};
-$("btn-pick").onclick=function(){var pk=$("picker");if(!pk.hidden){pk.hidden=true;return}pk.hidden=false;pk.textContent="";var p=period(P.type,P.datePrevue),have={};(P.rows||[]).forEach(function(r){if(r.ideeId)have[r.ideeId]=1});
-  var c=candidates(p).filter(function(i){return!have[i.id]});if(!c.length){pk.appendChild(el("p",{class:"hint",text:"Aucune autre idée datée dans cette période."}));return}
-  c.forEach(function(i){pk.appendChild(el("label",{class:"pick"},[el("input",{type:"checkbox",value:i.id,id:"pk-"+i.id}),el("span",{},[el("b",{text:frDate(i.quand)+" · "+vil(i.village).short+" · "}),i.titre||"",i.aVerifier?el("span",{class:"verif",text:" À vérifier"}):null])]))});
-  pk.appendChild(el("button",{type:"button",class:"btn primary",text:"Ajouter la sélection",onclick:function(){var add=[].slice.call(pk.querySelectorAll("input:checked")).map(function(x){return ideaToRow(S.ideas.find(function(i){return i.id===x.value}),p)});var before=P.rows;P.rows=(P.rows||[]).concat(add);
-    if(!rowsOk()){P.rows=before;toast("Trop de lignes pour ce gabarit : décoche-en ou retire une ligne.");return}P.rows.sort(function(a,b){return a.date.localeCompare(b.date)});pk.hidden=true;renderRows();draw()}}))};
+/* Choix des événements : post et story */
+function otherFmt(){return P.format==="story"?"post":"story"}
+function sibling(){if(P.type!=="weekend"||!P.datePrevue)return null;var o=otherFmt();return S.posts.filter(function(x){return x.id!==P.id&&x.type==="weekend"&&(x.format||"post")===o&&x.datePrevue&&period("weekend",x.datePrevue).from===period("weekend",P.datePrevue).from})[0]||null}
+function sortRows(rows){return rows.sort(function(a,b){return(a.date||"").localeCompare(b.date||"")})}
+function setSiblingRows(sib,rows){if(!S.db)return;var o=otherFmt();if(sib){S.db.collection("posts").doc(sib.id).update({rows:rows,updatedAt:new Date().toISOString()}).then(function(){toast("Story mise à jour".replace("Story",o==="story"?"Story":"Post"))},function(){toast("Modification impossible pour l’instant")});return}
+  var b=Object.assign(blankPost(),{type:P.type,format:o,village:P.village,datePrevue:P.datePrevue,rows:rows,source:"Créé depuis le choix des événements",createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()});delete b.id;
+  S.db.collection("posts").add(b).then(function(){toast((o==="story"?"Story":"Post")+" créé(e) avec cet événement")},function(){toast("Création impossible pour l’instant")})}
+function renderCands(){var box=$("cands");box.textContent="";var p=period(P.type,P.datePrevue);
+  var c=candidates(p).filter(function(i){return i.origine!=="sortie"});if(P.type==="semaine"&&P.format==="story"&&P.village!=="cotebleue")c=c.filter(function(i){return i.village===P.village});
+  var sib=sibling(),two=P.type==="weekend",cur=P.format==="story"?"Story":"Post",oth=P.format==="story"?"Post":"Story";
+  $("cands-hint").textContent=c.length?(two?"Coche ce que tu veux afficher sur le post et sur la story.":"Coche ce que tu veux afficher sur ce visuel."):"Aucun événement daté dans les idées pour cette période. Tu peux ajouter une ligne à la main.";
+  c.forEach(function(i){var inCur=(P.rows||[]).some(function(r){return r.ideeId===i.id}),inOth=sib?(sib.rows||[]).some(function(r){return r.ideeId===i.id}):false;
+    var cb1=el("input",{type:"checkbox",id:"cc-"+i.id});cb1.checked=inCur;cb1.onchange=function(){if(cb1.checked){P.rows=sortRows((P.rows||[]).concat([ideaToRow(i,p)]))}else{P.rows=(P.rows||[]).filter(function(r){return r.ideeId!==i.id})}renderRows();draw()};
+    var kids=[el("label",{class:"tg",for:"cc-"+i.id},[cb1,cur])];
+    if(two){var cb2=el("input",{type:"checkbox",id:"co-"+i.id});cb2.checked=inOth;cb2.onchange=function(){var rows=((sib&&sib.rows)||[]).slice();if(cb2.checked)rows=sortRows(rows.concat([ideaToRow(i,p)]));else rows=rows.filter(function(r){return r.ideeId!==i.id});if(sib)sib.rows=rows;setSiblingRows(sib,rows)};kids.push(el("label",{class:"tg",for:"co-"+i.id},[cb2,oth]))}
+    var meta=[frDate(i.fin&&i.fin!==i.quand&&i.quand<p.from?p.from:i.quand),vil(i.village).short,i.sourceNom||""].filter(Boolean).join(" · ");
+    box.appendChild(el("div",{class:"cand"+(inCur||inOth?" on":"")},[el("div",{class:"who"},[el("b",{text:i.titre||""}),el("span",{class:"hint",text:meta}),i.aVerifier?el("span",{class:"verif",text:"À vérifier"}):null,i.sourceUrl?el("a",{href:i.sourceUrl,target:"_blank",rel:"noopener",class:"hint",text:"Voir la source"}):null]),el("div",{class:"tgs"},kids)]))})}
 function openPost(post){P=Object.assign(blankPost(),JSON.parse(JSON.stringify(post)));if(P.format==="carrousel")P.format="post";if(P.type==="meteo"&&!P.meteoDate)P.meteoDate=addDays(P.datePrevue||todayIso(),1);syncForm();show("atelier");$("atelier-lead").textContent=typ(P.type).name+(P.datePrevue?" prévu le "+frDate(P.datePrevue):"")+(P.source?" · "+P.source:"")}
 $("btn-new").onclick=function(){P=blankPost();syncForm();draw();toast("Nouveau visuel")};
 /* Enregistrement */
