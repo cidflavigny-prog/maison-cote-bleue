@@ -235,8 +235,9 @@ function drawMeteo(P,W,H,data){var M=64;ctx.fillStyle=BLEU;ctx.fillRect(0,0,W,H)
     wIcon(m?m.code:3,M+620,y+rh/2,rh*.62);
     ctx.textAlign="right";ctx.font="600 58px "+FD;ctx.fillStyle=NUIT;var hi=m?Math.round(m.tmax)+"°":"–";ctx.fillText(hi,W-M-24,y+rh/2);var hw=ctx.measureText(hi).width;ctx.font="700 38px "+FB;ctx.fillStyle=ENCRE2;ctx.fillText((m?Math.round(m.tmin)+"°":"–")+" /",W-M-24-hw-10,y+rh/2+3);ctx.textAlign="left";y+=rh+gap});
   var mer=data&&data.mer;y+=6;card(M,y,W-2*M,mh,20,SOLEIL);ctx.fillStyle=NUIT;ctx.textBaseline="alphabetic";ctx.font="800 24px "+FB;setLS(3);ctx.fillText("LA MER",M+28,y+50);setLS(0);
-  var parts=[["Eau",mer&&mer.eau!=null?Math.round(mer.eau)+"°":"–"],["Vent",mer&&mer.vent!=null?Math.round(mer.vent)+" km/h":"–"],["Vagues",mer&&mer.vagues!=null?String(Math.round(mer.vagues*10)/10).replace(".",",")+" m":"–"]];
-  var cw=(W-2*M-56)/3;parts.forEach(function(p,i){var x=M+28+i*cw;ctx.font="700 26px "+FB;ctx.fillStyle=ENCRE2;ctx.fillText(p[0],x,y+98);ctx.font="600 48px "+FD;ctx.fillStyle=NUIT;ctx.fillText(ellip(p[1],"600 48px "+FD,cw-14),x,y+150)});
+  var parts=[["Eau",mer&&mer.eau!=null?(mer.eauVeille?"≈ ":"")+Math.round(mer.eau)+"°":null],["Vent",mer&&mer.vent!=null?Math.round(mer.vent)+" km/h":null],["Vagues",mer&&mer.vagues!=null?String(Math.round(mer.vagues*10)/10).replace(".",",")+" m":null]];
+  var known=parts.filter(function(p){return p[1]!=null});parts=known.length?known:parts.map(function(p){return[p[0],"–"]});
+  var cw=(W-2*M-56)/parts.length;parts.forEach(function(p,i){var x=M+28+i*cw;ctx.font="700 26px "+FB;ctx.fillStyle=ENCRE2;ctx.fillText(p[0],x,y+98);ctx.font="600 48px "+FD;ctx.fillStyle=NUIT;ctx.fillText(ellip(p[1],"600 48px "+FD,cw-14),x,y+150)});
   if(mer&&mer.dir!=null){ctx.fillStyle=NUIT;ctx.fillRect(M+28,y+176,W-2*M-56,3);ctx.font="800 30px "+FB;ctx.fillText(ellip(windFrom(mer.dir)+(mer.rafales!=null?" · rafales à "+Math.round(mer.rafales)+" km/h":""),"800 30px "+FB,W-2*M-56),M+28,y+218)}
   if(isMistral(mer)){var t="Mistral";var w=pillW(t,24);pill(W-M-w-10,y-20,t,NUIT,BLANC,null,null,24)}
   if(data){ctx.fillStyle=CIEL;ctx.font="700 24px "+FB;ctx.textBaseline="alphabetic";ctx.textAlign="left";ctx.fillText("Source : "+(data.source||"Open-Meteo")+" · open-meteo.com",M+4,y+mh+48)}
