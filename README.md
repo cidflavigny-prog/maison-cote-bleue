@@ -30,7 +30,7 @@ Page de travail publiée sur claude.ai (privée) : https://claude.ai/artifact/PH
 | Collection | Contenu | Ménage |
 | --- | --- | --- |
 | `idees` | `date, type, village, titre, texte, details, quand, fin, story, sourceNom, sourceUrl, aVerifier, statut, origine` | supprimée le lendemain de `fin` (sinon `quand`) ; sans date : après 14 jours |
-| `posts` | `format, type, village, pill, sticker, titre, details, legende, datePrevue, source, photoId, rows[{date, village, titre, infos, ideeId, photoId}], compteur, visuel, villages[], meteoDate, statut, datePublie, stats, auto` | brouillon dont la date est passée depuis 7 jours |
+| `posts` | `format, type, village, pill, sticker, titre, details, legende, datePrevue, source, photoId, rows[{date, village, titre, infos, ideeId, photoId}], compteur, visuel, villages[], meteoDate, statut, datePublie, stats, auto` | brouillon (non publié) dès que sa date est passée : date prévue, dernière ligne d’agenda ou jour de la météo |
 | `recaps` | un document par jour : `texte, legende, contacts[]` | seul celui du jour est gardé |
 | `meteo` | un document par jour (`AAAA-MM-JJ`) : `villages{code, tmin, tmax}, mer{eau, eauVeille, vagues, vent, rafales, dir}` (valeur mer absente = colonne masquée ; `eauVeille` = eau reprise de la veille, affichée « ≈ ») | supprimé le jour passé |
 | `stats` | un document par jour : `abonnes, messages` | — |

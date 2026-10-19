@@ -795,7 +795,7 @@ function renderStrat(){var r=S.strat,b=$("strat-body");b.textContent="";$("n-str
   if(!r){b.appendChild(el("p",{class:"hint",style:"margin:0",text:"Chaque lundi matin, ta responsable com fait le point : bilan de la semaine passée, calendrier de la semaine, idées pour progresser et relances à faire."}));return}
   b.appendChild(el("span",{class:"hint",text:"Point du "+frDate(r.semaine||(r.majLe||"").slice(0,10))}));
   if(r.bilan){b.appendChild(el("span",{class:"lbl",text:"Bilan"}));b.appendChild(el("p",{class:"recap-text",text:r.bilan}))}
-  var cal=r.calendrier||[];if(cal.length){b.appendChild(el("span",{class:"lbl",text:"Calendrier de la semaine"}));var l=el("div",{class:"contacts"});cal.forEach(function(c){l.appendChild(el("div",{class:"contact"},[el("span",{class:"hint",text:[c.jour?frDate(c.jour):"",c.format||""].filter(Boolean).join(" · ")}),el("b",{text:c.sujet||""}),c.pourquoi?el("span",{class:"hint",text:c.pourquoi}):null]))});b.appendChild(l)}
+  var cal=(r.calendrier||[]).filter(function(c){return!c.jour||c.jour>=todayIso()});if(cal.length){b.appendChild(el("span",{class:"lbl",text:"Calendrier de la semaine"}));var l=el("div",{class:"contacts"});cal.forEach(function(c){l.appendChild(el("div",{class:"contact"},[el("span",{class:"hint",text:[c.jour?frDate(c.jour):"",c.format||""].filter(Boolean).join(" · ")}),el("b",{text:c.sujet||""}),c.pourquoi?el("span",{class:"hint",text:c.pourquoi}):null]))});b.appendChild(l)}
   [["optimisations","Pour progresser"],["relances","Relances à faire"]].forEach(function(k){var xs=strList(r[k[0]]);if(xs.length){b.appendChild(el("span",{class:"lbl",text:k[1]}));b.appendChild(el("ul",{class:"trend"},xs.map(function(x){return el("li",{text:x})})))}});
   if(r.sante)b.appendChild(el("span",{class:"hint",text:"Routines : "+r.sante}))}
 function renderComptes(){var suivis=S.comptes.filter(function(c){return c.statut==="suivi"&&!(c.message&&!c.contacteLe)}).sort(function(a,b){return(a.username||"").localeCompare(b.username||"")}),props=S.comptes.filter(function(c){return c.statut==="propose"||(c.statut==="suivi"&&c.message&&!c.contacteLe)});
@@ -957,7 +957,9 @@ $("stat-form").addEventListener("submit",function(e){e.preventDefault();if(!S.db
 /* ---------- Ménage automatique ---------- */
 var purged={};
 function purge(col,docs,test){if(!S.db)return;docs.forEach(function(d){if(purged[col+d.id]||!test(d))return;purged[col+d.id]=1;S.db.collection(col).doc(d.id).delete().catch(function(){purged[col+d.id]=0})})}
-function stale(p){var lim=addDays(todayIso(),-7);return p.statut!=="publie"&&p.datePrevue&&p.datePrevue<lim}
+/* Dernier jour utile d’un post : date prévue, dernière ligne d’agenda ou jour de la météo */
+function postEnd(p){var e=p.datePrevue||"";(p.rows||[]).forEach(function(r){if(r.date&&r.date>e)e=r.date});if(p.meteoDate&&p.meteoDate>e)e=p.meteoDate;return e}
+function stale(p){var e=postEnd(p);return p.statut!=="publie"&&!!e&&e<todayIso()}
 function oldUndated(i){return!i.quand&&!i.fin&&i.date&&i.date<addDays(todayIso(),-14)}
 
 /* ---------- Connexion ---------- */
