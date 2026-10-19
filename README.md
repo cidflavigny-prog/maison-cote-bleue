@@ -39,6 +39,10 @@ Page de travail publiée sur claude.ai (privée) : https://claude.ai/artifact/PH
 | `comptes` | comptes pros Instagram et Facebook : `plateforme, url, statut (suivi/propose/ignore), action, message, contacteLe, village, abonnes, dernierPost` | — |
 | `reglages` | `objectifs`, `meta` (bilan des routines), `reseaux` (hashtags, tendances, publications du jour), `strategie` (Point com du lundi) | — |
 
+## Voix de la marque
+
+Règle permanente (Océane, 19 octobre 2026) : tout message vers l'extérieur parle au nom du média, jamais d'une personne. Jamais de prénom ni de « je » : toujours « nous », « Maison Côte Bleue », « le média local ». Ouverture type : « Bonjour ! Nous sommes Maison Côte Bleue, le média local gratuit qui… ». Signature : « L'équipe Maison Côte Bleue ». La règle est aussi enregistrée dans le studio (`reglages/charte`), lue par toutes les routines.
+
 ## Ligne éditoriale
 
 Décision d'Océane (19 octobre 2026), valable jusqu'à nouvel ordre de sa part : **aucun contenu politique** (réunions publiques, conseils municipaux, maire et élus, campagnes, élections). Priorité aux sorties, soirées, jeux, lotos, dégustations, promos et nouveautés des commerces, restaurants, bars, associations et lieux de loisirs. L'organisation municipale (déchets, démarches, travaux) passe en dernier, seulement pour une alerte vraiment utile.
