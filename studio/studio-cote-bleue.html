@@ -829,7 +829,6 @@ function carItems(P){if(isList(P.type)){var days=[];(P.rows||[]).slice().sort(fu
 function carCount(P){return carItems(P).length+2}
 function carCta(P){return P.cta||(P.type==="question"?"Réponds en commentaire\net tague qui vient avec toi":isList(P.type)?"Enregistre ce post\net envoie-le à qui cherche une sortie":"Enregistre ce post\net partage-le autour de toi")}
 function carBg(P){var th=isList(P.type)&&!P.couleur?themeOf("agenda"):themeFor(P);ctx.fillStyle=th.bg;ctx.fillRect(0,0,1080,1350);return th}
-function carCounter(i,n,th){var t=(i+1)+" / "+n;ctx.font="800 26px "+FB;var w=ctx.measureText(t).width+36;ctx.fillStyle=th.fg===BLANC?"rgba(255,255,255,.18)":"rgba(11,27,63,.08)";rr(1080-64-w,64,w,48,24);ctx.fill();ctx.fillStyle=th.fg;ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(t,1080-64-w/2,89);ctx.textAlign="left"}
 function carFooter(th){if(th.fg===BLANC){footer(64,1350-34-64,64,false,1080);return}logo(64,1350-34-64,64,BLEU);ctx.fillStyle=NUIT;ctx.font="800 28px "+FB;ctx.textBaseline="alphabetic";ctx.fillText("Maison Côte Bleue",64+82,1350-34-32);ctx.fillStyle=ENCRE2;ctx.font="600 22px "+FB;ctx.fillText("@maison.cotebleue",64+82,1350-34-4)}
 function drawCarousel(P,W,H,i){var items=carItems(P),n=items.length+2;i=Math.max(0,Math.min(i||0,n-1));var th=carBg(P),M=64,t=typ(P.type);
   if(i===0){/* Couverture */
@@ -839,16 +838,19 @@ function drawCarousel(P,W,H,i){var items=carItems(P),n=items.length+2;i=Math.max
     var blk=26*1.75+30+fH+(hasPhoto?40+420:0)+60+70,y=Math.max(150,(H-120-blk)/2);
     var ph=pill(M,y,pillTxt,th.pillBg,th.pillFg,th.pillShadow,th.pillBorder,26,3,4);y+=ph+30;drawTitle(f,M,y,th.fg,th.shadow);y+=fH+40;
     if(hasPhoto){photoFrame(imgFor(P.photoId),M,y,W-2*M,420,28,8,14,"");y+=420+40}
-    var g=items.length?(items[0].day?"Glisse : "+items.length+(items.length>1?" jours":" jour")+" →":"Glisse pour voir les "+items.length+" →"):"Glisse →";ctx.font="800 30px "+FB;var gw=ctx.measureText(g).width+56;ctx.fillStyle=NUIT;rr(M+6,y+6,gw,70,35);ctx.fill();ctx.fillStyle=SOLEIL;rr(M,y,gw,70,35);ctx.fill();ctx.lineWidth=3;ctx.strokeStyle=NUIT;ctx.stroke();ctx.fillStyle=NUIT;ctx.textBaseline="middle";ctx.fillText(g,M+28,y+37);
-    carCounter(0,n,th);carFooter(th);return n}
+    else if(P.sticker){/* Sans photo : gros autocollant (émoji ou mot court) en bas à droite */
+      ctx.save();ctx.translate(W-240,H-330);ctx.rotate(.12);ctx.fillStyle=NUIT;ctx.beginPath();ctx.arc(14,14,170,0,Math.PI*2);ctx.fill();ctx.fillStyle=SOLEIL;ctx.beginPath();ctx.arc(0,0,170,0,Math.PI*2);ctx.fill();ctx.lineWidth=6;ctx.strokeStyle=NUIT;ctx.stroke();
+      ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle=NUIT;ctx.font=/\p{Extended_Pictographic}/u.test(P.sticker)?"190px 'Apple Color Emoji','Noto Color Emoji','Segoe UI Emoji',sans-serif":"600 90px "+FD;ctx.fillText(P.sticker,0,10);ctx.restore();ctx.textAlign="left"}
+    var g="Glisse →";ctx.font="800 30px "+FB;var gw=ctx.measureText(g).width+56;ctx.fillStyle=NUIT;rr(M+6,y+6,gw,70,35);ctx.fill();ctx.fillStyle=SOLEIL;rr(M,y,gw,70,35);ctx.fill();ctx.lineWidth=3;ctx.strokeStyle=NUIT;ctx.stroke();ctx.fillStyle=NUIT;ctx.textBaseline="middle";ctx.fillText(g,M+28,y+37);
+    carFooter(th);return n}
   if(i===n-1){/* Fin : appel à l'action */
     ring(W-160,250,60,SOLEIL,22);triangle(120,1040,2.4,th.fg===BLANC?CIEL:SOLEIL);
     var cta=carCta(P),f2=fitTitle(cta,W-2*M-40,460,104,60),h2=f2.lines.length*f2.size*1.04,y2=(H-120-(300+40+h2+40+80))/2;
     bigLogo(W/2,y2+150,130);y2+=340;var font="600 "+f2.size+"px "+FD;f2.lines.forEach(function(l,k){var w=l.reduce(function(a,tk){return a+tk.width},0);if(th.shadow)drawLines([l],(W-w)/2+f2.size*.07,y2+k*f2.size*1.04+f2.size*.07,f2.size*1.04,font,font,th.shadow);drawLines([l],(W-w)/2,y2+k*f2.size*1.04,f2.size*1.04,font,font,th.fg)});y2+=h2+40;
     var ab="Abonne-toi : @maison.cotebleue";ctx.font="800 32px "+FB;var aw=ctx.measureText(ab).width+60;ctx.fillStyle=th.fg===BLANC?BLANC:BLEU;rr((W-aw)/2,y2,aw,76,38);ctx.fill();ctx.fillStyle=th.fg===BLANC?BLEU:BLANC;ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(ab,W/2,y2+40);ctx.textAlign="left";
-    carCounter(i,n,th);return n}
+    return n}
   /* Slide d'un élément */
-  var it=items[i-1];zigzag(W-240,H-210,1.6,SOLEIL,9);carCounter(i,n,th);
+  var it=items[i-1];zigzag(W-240,H-210,1.6,SOLEIL,9);
   var cx=M,cw=W-2*M,cy=200,chMax=H-200-150;
   if(it.day){var dd=parseIso(it.day),rows=it.rows,n2=rows.length;
     var hy=150;dateBlock(cx,hy,200,200,JC[dd.getDay()],String(dd.getDate()),34,110);ctx.textBaseline="alphabetic";ctx.fillStyle=th.fg;ctx.font="600 84px "+FD;
@@ -866,11 +868,20 @@ function drawCarousel(P,W,H,i){var items=carItems(P),n=items.length+2;i=Math.max
     if(r.date){ctx.fillStyle=ENCRE2;ctx.font="700 28px "+FB;var dd=parseIso(r.date);ctx.fillText(JOURSL[dd.getDay()]+" "+dd.getDate()+" "+MOIS[dd.getMonth()].replace(".",""),cx+40+230+36,yy+236)}
     yy+=230+40;if(hasP){var oc=CREDIT;CREDIT=r.photoCredit||"";photoFrame(imgFor(r.photoId),cx+40,yy,cw-80,ph2,24,6,10,"");CREDIT=oc;yy+=ph2+36}
     drawLines(tl,cx+40,yy,fs*1.06,"600 "+fs+"px "+FD,"600 "+fs+"px "+FD,NUIT);yy+=tl.length*fs*1.06+24;drawLines(il,cx+40,yy,54,"600 40px "+FB,"800 40px "+FB,ENCRE2)}
-  else{var line=it.line,num=null,m=line.match(/^\*\*(\d+)\*\*\s*/);if(m){num=m[1];line=line.slice(m[0].length)}var parts=line.split(/\s+·\s+/),head=parts.shift(),sub=parts.join(" · ");
-    var hl=layout(head,"600 96px "+FD,"600 96px "+FD,cw-80),hs=96;while(hl.length>3&&hs>60){hs-=6;hl=layout(head,"600 "+hs+"px "+FD,"600 "+hs+"px "+FD,cw-80)}var sl=sub?layout(sub,"600 44px "+FB,"800 44px "+FB,cw-80):[];
-    var ch3=48+(num?220+40:0)+hl.length*hs*1.06+(sl.length?30+sl.length*60:0)+56,y3=cy+Math.max(0,(chMax-ch3)/2);card(cx,y3,cw,ch3,32);var y4=y3+48;
-    if(num){ctx.fillStyle=NUIT;ctx.beginPath();ctx.arc(cx+40+110+8,y4+110+8,110,0,Math.PI*2);ctx.fill();ctx.fillStyle=SOLEIL;ctx.beginPath();ctx.arc(cx+40+110,y4+110,110,0,Math.PI*2);ctx.fill();ctx.lineWidth=4;ctx.strokeStyle=NUIT;ctx.stroke();ctx.fillStyle=NUIT;ctx.font="600 130px "+FD;ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(num,cx+40+110,y4+118);ctx.textAlign="left";y4+=220+40}
-    drawLines(hl,cx+40,y4,hs*1.06,"600 "+hs+"px "+FD,"600 "+hs+"px "+FD,BLEU);y4+=hl.length*hs*1.06;if(sl.length){y4+=30;drawLines(sl,cx+40,y4,60,"600 44px "+FB,"800 44px "+FB,ENCRE2)}}
+  else{/* Slide « étape » : gros autocollant (émoji en tête de ligne), numéro fantôme, titre géant, puis une carte par info */
+    var line=it.line,num=null,m=line.match(/^\*\*(\d+)\*\*\s*/);if(m){num=m[1];line=line.slice(m[0].length)}
+    var emo=null,em=line.match(/^(\p{Extended_Pictographic}\uFE0F?)\s*/u);if(em){emo=em[1];line=line.slice(em[0].length)}
+    var parts=line.split(/\s+·\s+/),head=parts.shift(),acc=P.village&&P.village!=="cotebleue"?vil(P.village).color:BLEU;
+    if(num){ctx.save();ctx.globalAlpha=th.fg===BLANC?.14:.08;ctx.fillStyle=th.fg===BLANC?BLANC:NUIT;ctx.font="600 820px "+FD;ctx.textAlign="right";ctx.textBaseline="alphabetic";ctx.fillText(num,W-24,H-150);ctx.restore()}
+    var top=(emo||num)?300:0,f3=fitTitle(head,cw,330,124,72),fh3=f3.lines.length*f3.size*1.04;
+    var pts=parts.map(function(t){var l=layout(t,"700 44px "+FB,"800 44px "+FB,cw-120);return{l:l,h:l.length*56+46}});
+    var ph3=pts.reduce(function(a,q){return a+q.h+20},0),tot=top+fh3+(pts.length?44+ph3:0),y=Math.max(120,(H-150-tot)/2+10);
+    if(emo||num){var sx=M+128,sy=y+128;ctx.save();ctx.translate(sx,sy);ctx.rotate(-.1);ctx.fillStyle=NUIT;ctx.beginPath();ctx.arc(12,12,128,0,Math.PI*2);ctx.fill();ctx.fillStyle=SOLEIL;ctx.beginPath();ctx.arc(0,0,128,0,Math.PI*2);ctx.fill();ctx.lineWidth=5;ctx.strokeStyle=NUIT;ctx.stroke();
+      ctx.textAlign="center";ctx.textBaseline="middle";if(emo){ctx.font="140px 'Apple Color Emoji','Noto Color Emoji','Segoe UI Emoji',sans-serif";ctx.fillText(emo,0,8)}else{ctx.fillStyle=NUIT;ctx.font="600 150px "+FD;ctx.fillText(num,0,10)}ctx.restore();ctx.textAlign="left";
+      if(emo&&num)pill(M+290,y+92,"Étape "+num,th.pillBg,th.pillFg,th.pillShadow,th.pillBorder,30,3,5);
+      ring(W-150,y+70,30,SOLEIL,11);y+=top}
+    drawTitle(f3,M,y,th.fg,th.shadow);y+=fh3+44;
+    pts.forEach(function(q){card(M,y,cw,q.h,24);ctx.fillStyle=acc;ctx.beginPath();ctx.arc(M+46,y+23+28,13,0,Math.PI*2);ctx.fill();drawLines(q.l,M+82,y+23,56,"700 44px "+FB,"800 44px "+FB,NUIT);y+=q.h+20})}
   carFooter(th);return n}
 
 /* ---------- Point d’entrée ---------- */
