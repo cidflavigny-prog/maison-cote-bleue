@@ -166,8 +166,8 @@ function postDay(p){return p.statut==="publie"?(p.datePublie||p.datePrevue||""):
 function isStoryPost(p){return p.format==="story"||(TYPES[p.type]&&TYPES[p.type].storyOnly)}
 function postState(p){if(p.statut==="publie")return["Publié","st-done"];if(planOn(p))return["Programmé "+p.planif.heure+"h","st-plan"];if(p.planif&&p.planif.statut==="erreur")return["Échec","st-err"];return["Brouillon","st-ready"]}
 /* Stories à la une (mêmes couleurs et émojis que les couvertures fournies) */
-var HIGHLIGHTS=[["Météo","☀️","#0F4CDB"],["Agenda","🗓️","#0B1B3F"],["Week-end","🎉","#AC1B6E"],["Bons plans","🏷️","#FFC93C"],["Bonnes adresses","🍽️","#AD3300"],["Balades","🥾","#007932"],["Carry","⚓","#AD3300"],["Sausset","🌲","#007932"],["Ensuès","⛰️","#AC1B6E"],["Couronne-Carro","🏖️","#007277"],["Partage ton info","📣","#DCE8FF"]];
-function renderHighlights(){var r=$("feed-hl");if(!r||r.childNodes.length)return;HIGHLIGHTS.forEach(function(h){var light=h[2]==="#FFC93C"||h[2]==="#DCE8FF";r.appendChild(el("div",{class:"hl"},[el("i",{style:"background:"+h[2]+";box-shadow:inset 0 0 0 4px "+h[2]+",inset 0 0 0 6px "+(light?"#0F4CDB":"#FFC93C"),text:h[1]}),el("span",{text:h[0]})]))})}
+var HIGHLIGHTS=[["Météo","#0F4CDB","#DCE8FF"],["Agenda","#0B1B3F","#DCE8FF"],["Week-end","#AC1B6E","#FFE2EE"],["Bons plans","#0B1B3F","#FFC93C"],["Bonnes adresses","#AD3300","#FFC93C"],["Balades","#007932","#FFC93C"],["Carry","#AD3300","#FFE4D9"],["Sausset","#007932","#DCF2DF"],["Ensuès","#AC1B6E","#FFE2EE"],["Couronne-Carro","#007277","#D1F3F4"],["Partage ton info","#0F4CDB","#FFC93C"]];
+function renderHighlights(){var r=$("feed-hl");if(!r||r.childNodes.length)return;var keep=ctx;HIGHLIGHTS.forEach(function(h){var c=el("canvas",{width:128,height:128});ctx=c.getContext("2d");ctx.fillStyle=h[2];ctx.fillRect(0,0,128,128);var s=100/52;logo(64-26*s,64-26*s,100,h[1]);r.appendChild(el("div",{class:"hl"},[c,el("span",{text:h[0]})]))});ctx=keep}
 function renderFeed(){var box=$("feed");box.textContent="";var today=todayIso();renderHighlights();
   var posts=S.posts.filter(function(p){return!isStoryPost(p)&&postDay(p)&&(p.statut==="publie"||postDay(p)>=today)}).sort(function(a,b){return postDay(b).localeCompare(postDay(a))||(b.planif&&b.planif.heure||0)-(a.planif&&a.planif.heure||0)});
   $("feed-sub").textContent=" · "+S.posts.filter(function(p){return p.statut==="publie"&&!isStoryPost(p)}).length+" publiés · "+posts.filter(function(p){return p.statut!=="publie"}).length+" prévus";
@@ -392,4 +392,6 @@ else{
 }
 // Rendu sans écran pour les routines (outils/rendu.mjs) : renvoie le PNG d'un visuel en data URL.
 window.MCBRendu=function(post,meteo,slide){var Q=Object.assign(blankPost(),post);render(Q,meteo,slide||0);return cv.toDataURL("image/png")};
+// Couverture de story « À la une » : l'icône de la marque (soleil et vague) dans la couleur de la rubrique.
+window.MCBAlaUne=function(ring,bg){cv.width=1080;cv.height=1920;ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle=bg;ctx.fillRect(0,0,1080,1920);var s=760/52;logo(540-26*s,960-26*s,760,ring);return cv.toDataURL("image/png")};
 window.MCBSlides=function(post){var Q=Object.assign(blankPost(),post);return Q.format==="carrousel"&&canCarousel(Q.type)?carCount(Q):1};
