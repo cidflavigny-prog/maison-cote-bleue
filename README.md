@@ -35,17 +35,17 @@ Page de travail publiée sur claude.ai (privée) : https://claude.ai/artifact/PH
 | `meteo` | un document par jour (`AAAA-MM-JJ`) : `villages{code, tmin, tmax}, mer{eau, eauVeille, vagues, vent, rafales, dir}` (valeur mer absente = colonne masquée ; `eauVeille` = eau reprise de la veille, affichée « ≈ ») | supprimé le jour passé |
 | `stats` | un document par jour : `abonnes, messages` | — |
 | `comptes` | comptes pros Instagram et Facebook : `plateforme, url, statut (suivi/propose/ignore), action, message, contacteLe, village, abonnes, dernierPost` | — |
-| `reglages` | `objectifs`, `meta` (bilan des routines), `reseaux` (hashtags, tendances, publications du jour) | — |
+| `reglages` | `objectifs`, `meta` (bilan des routines), `reseaux` (hashtags, tendances, publications du jour), `strategie` (Point com du lundi) | — |
 
 ## Routines
 
 | Heure | Routine | Environnement |
 | --- | --- | --- |
-| 6h33 | Veille réseaux : publications des comptes pros lues via l'API Meta (promos, événements), hashtags, tendances, idées ; le mercredi, 2 sorties du week-end (famille et adultes) avec lien | « Maison cote bleue » (jeton Meta en secret réseau pour `graph.facebook.com`) |
-| 6h40 | Instagram : abonnés, stats des posts, communauté — **en pause** jusqu'à ce que le compte ait de l'activité | « Maison cote bleue » |
-| 7h20, un jour sur deux | Recherche de comptes Instagram et Facebook à suivre ou contacter, avec message proposé | « Maison cote bleue » |
-| 6h57 | Veille : recherche web, récap, idées, ménage, brouillons d'agenda le dimanche et le jeudi | Cowork |
-| 17h30 | Météo de demain (Open-Meteo) → story du soir, à partir du 15 octobre 2026 | « Maison cote bleue » (domaines `api.open-meteo.com` et `marine-api.open-meteo.com` à autoriser) |
+| Dim, mar, jeu 6h47 | Veille : publications des comptes pros via l'API Meta, hashtags, tendances, recherche web, récap, idées, ménage ; brouillons d'agenda le dimanche (semaine) et le jeudi (week-end), plus 2 idées de sortie le jeudi | « Maison cote bleue » (jeton Meta en secret réseau pour `graph.facebook.com`) |
+| Lundi 7h20 | Recherche de comptes Instagram et Facebook à suivre ou contacter, avec message proposé | « Maison cote bleue » |
+| Lundi 8h12 | Point com : chiffres Meta, bilan de la semaine, calendrier éditorial, conseils, relances, santé des routines → `reglages/strategie` (onglet Semaine → Point com) | « Maison cote bleue » |
+| 17h30 chaque jour | Météo de demain (Open-Meteo, mer avec réserve sur 3 jours) → story du soir | « Maison cote bleue » |
+| — | Anciennes routines en pause : veille quotidienne Cowork, stats Instagram quotidiennes (reprises dans le Point com) | — |
 
 Compte Instagram `17841462383522173`, page Facebook `1307148845825864`.
 Révoquer l'accès Meta : Facebook → Paramètres → Intégrations professionnelles → Studio Côte Bleue → Supprimer.
