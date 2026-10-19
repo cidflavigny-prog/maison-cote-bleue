@@ -37,6 +37,10 @@ Page de travail publiée sur claude.ai (privée) : https://claude.ai/artifact/PH
 | `comptes` | comptes pros Instagram et Facebook : `plateforme, url, statut (suivi/propose/ignore), action, message, contacteLe, village, abonnes, dernierPost` | — |
 | `reglages` | `objectifs`, `meta` (bilan des routines), `reseaux` (hashtags, tendances, publications du jour), `strategie` (Point com du lundi) | — |
 
+## Ligne éditoriale
+
+Décision d'Océane (19 octobre 2026), valable jusqu'à nouvel ordre de sa part : **aucun contenu politique** (réunions publiques, conseils municipaux, maire et élus, campagnes, élections). Priorité aux sorties, soirées, jeux, lotos, dégustations, promos et nouveautés des commerces, restaurants, bars, associations et lieux de loisirs. L'organisation municipale (déchets, démarches, travaux) passe en dernier, seulement pour une alerte vraiment utile.
+
 ## Routines
 
 | Heure | Routine | Environnement |
