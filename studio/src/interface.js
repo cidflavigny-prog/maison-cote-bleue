@@ -165,7 +165,10 @@ renderReseaux();renderStrat();
 function postDay(p){return p.statut==="publie"?(p.datePublie||p.datePrevue||""):(p.planif&&p.planif.statut==="programme"?p.planif.date:(p.datePrevue||""))}
 function isStoryPost(p){return p.format==="story"||(TYPES[p.type]&&TYPES[p.type].storyOnly)}
 function postState(p){if(p.statut==="publie")return["Publié","st-done"];if(planOn(p))return["Programmé "+p.planif.heure+"h","st-plan"];if(p.planif&&p.planif.statut==="erreur")return["Échec","st-err"];return["Brouillon","st-ready"]}
-function renderFeed(){var box=$("feed");box.textContent="";var today=todayIso();
+/* Stories à la une (mêmes couleurs et émojis que les couvertures fournies) */
+var HIGHLIGHTS=[["Météo","☀️","#0F4CDB"],["Agenda","🗓️","#0B1B3F"],["Week-end","🎉","#AC1B6E"],["Bons plans","🏷️","#FFC93C"],["Bonnes adresses","🍽️","#AD3300"],["Balades","🥾","#007932"],["Carry","⚓","#AD3300"],["Sausset","🌲","#007932"],["Ensuès","⛰️","#AC1B6E"],["Couronne-Carro","🏖️","#007277"],["Partage ton info","📣","#DCE8FF"]];
+function renderHighlights(){var r=$("feed-hl");if(!r||r.childNodes.length)return;HIGHLIGHTS.forEach(function(h){var light=h[2]==="#FFC93C"||h[2]==="#DCE8FF";r.appendChild(el("div",{class:"hl"},[el("i",{style:"background:"+h[2]+";box-shadow:inset 0 0 0 4px "+h[2]+",inset 0 0 0 6px "+(light?"#0F4CDB":"#FFC93C"),text:h[1]}),el("span",{text:h[0]})]))})}
+function renderFeed(){var box=$("feed");box.textContent="";var today=todayIso();renderHighlights();
   var posts=S.posts.filter(function(p){return!isStoryPost(p)&&postDay(p)&&(p.statut==="publie"||postDay(p)>=today)}).sort(function(a,b){return postDay(b).localeCompare(postDay(a))||(b.planif&&b.planif.heure||0)-(a.planif&&a.planif.heure||0)});
   $("feed-sub").textContent=" · "+S.posts.filter(function(p){return p.statut==="publie"&&!isStoryPost(p)}).length+" publiés · "+posts.filter(function(p){return p.statut!=="publie"}).length+" prévus";
   var prevH=cv.height;posts.forEach(function(p){var c=document.createElement("canvas");c.width=270;c.height=338;var tc=c.getContext("2d");
