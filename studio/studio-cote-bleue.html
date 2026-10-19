@@ -1255,6 +1255,9 @@ else{
   C.use("assets").then(function(a){S.assets=a});C.use("downloads").then(function(d){S.downloads=d});
   C.use("sample").then(function(s){S.sample=s;if(!s)$("btn-legende").hidden=true});
 }
+// Rendu sans écran pour les routines (outils/rendu.mjs) : renvoie le PNG d'un visuel en data URL.
+window.MCBRendu=function(post,meteo,slide){var Q=Object.assign(blankPost(),post);render(Q,meteo,slide||0);return cv.toDataURL("image/png")};
+window.MCBSlides=function(post){var Q=Object.assign(blankPost(),post);return Q.format==="carrousel"&&canCarousel(Q.type)?carCount(Q):1};
 
 })();
 </script>
