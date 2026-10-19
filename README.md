@@ -30,7 +30,7 @@ Page de travail publiée sur claude.ai (privée) : https://claude.ai/artifact/PH
 | Collection | Contenu | Ménage |
 | --- | --- | --- |
 | `idees` | `date, type, village, titre, texte, details, quand, fin, story, sourceNom, sourceUrl, aVerifier, statut, origine` | supprimée le lendemain de `fin` (sinon `quand`) ; sans date : après 14 jours |
-| `posts` | `format, type, village, pill, sticker, titre, details, legende, datePrevue, source, photoId, rows[{date, village, titre, infos, ideeId, photoId}], compteur, visuel, villages[], meteoDate, statut, datePublie, stats, auto` | brouillon (non publié) dès que sa date est passée : date prévue, dernière ligne d’agenda ou jour de la météo |
+| `posts` | `format, type, village, pill, sticker, titre, details, legende, datePrevue, source, photoId, rows[{date, village, titre, infos, ideeId, photoId}], planif{date, heure, at, statut (programme/en_cours/publie/erreur/annule), assetId, format, erreur}, compteur, visuel, villages[], meteoDate, statut, datePublie, stats, auto` | brouillon (non publié) dès que sa date est passée : date prévue, dernière ligne d’agenda ou jour de la météo |
 | `recaps` | un document par jour : `texte, legende, contacts[]` | seul celui du jour est gardé |
 | `meteo` | un document par jour (`AAAA-MM-JJ`) : `villages{code, tmin, tmax}, mer{eau, eauVeille, vagues, vent, rafales, dir}` (valeur mer absente = colonne masquée ; `eauVeille` = eau reprise de la veille, affichée « ≈ ») | supprimé le jour passé |
 | `stats` | un document par jour : `abonnes, messages` | — |
@@ -48,6 +48,7 @@ Décision d'Océane (19 octobre 2026), valable jusqu'à nouvel ordre de sa part 
 | Dim, mar, jeu 6h47 | Veille : publications des comptes pros via l'API Meta, hashtags, tendances, recherche web, récap, idées, ménage ; brouillons d'agenda le dimanche (semaine) et le jeudi (week-end), plus 2 idées de sortie le jeudi | « Maison cote bleue » (jeton Meta en secret réseau pour `graph.facebook.com`) |
 | Lundi 7h20 | Recherche de comptes Instagram et Facebook à suivre ou contacter, avec message proposé | « Maison cote bleue » |
 | Lundi 8h12 | Point com : chiffres Meta, bilan de la semaine, calendrier éditorial, conseils, relances, santé des routines → `reglages/strategie` (onglet Semaine → Point com) | « Maison cote bleue » |
+| 8h01, 12h01, 18h01, 20h01 | Publication programmée : publie sur Instagram (story ou post) les visuels programmés depuis l'atelier (bouton « Programmer »). L'image est déposée dans le studio, mise en ligne sur la page Facebook en photo non publiée, puis publiée via l'API Instagram. Besoin des autorisations `instagram_content_publish` et `pages_manage_posts` sur le jeton | « Maison cote bleue » |
 | 7h04 chaque jour | Météo de demain (Open-Meteo, mer avec réserve sur 3 jours) → story à télécharger et programmer pour 18h | « Maison cote bleue » |
 | — | Anciennes routines en pause : veille quotidienne Cowork, stats Instagram quotidiennes (reprises dans le Point com) | — |
 

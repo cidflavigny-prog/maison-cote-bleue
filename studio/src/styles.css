@@ -259,3 +259,7 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
 .cand .tgs{display:flex;gap:8px}
 .tg{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:14px;background:var(--surface);border:1px solid var(--line);border-radius:100px;padding:6px 12px;min-height:40px;cursor:pointer}
 .tg input{width:18px;height:18px;accent-color:var(--brand)}
+.st-plan{background:var(--brand-soft);color:var(--brand)}
+.st-err{background:#FDE0E0;color:#8F1D1D}
+.planif{gap:12px}
+.planif-head{display:flex;flex-direction:column;gap:2px}

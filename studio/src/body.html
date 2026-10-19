@@ -170,8 +170,18 @@
           <span class="hint stage-status" id="post-status"></span>
           <div class="row stage-actions">
             <button type="button" class="btn" id="btn-published">Marquer publié</button>
+            <button type="button" class="btn sun" id="btn-planif" aria-expanded="false" aria-controls="planif-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg><span id="btn-planif-txt">Programmer</span></button>
             <button type="button" class="btn primary" id="btn-export"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Télécharger</button>
           </div>
+        </div>
+        <div class="panel planif" id="planif-box" hidden>
+          <div class="planif-head"><b>Publier automatiquement sur Instagram</b><span class="hint" id="pl-state"></span></div>
+          <div class="two">
+            <div class="field"><label for="pl-date">Jour</label><input type="date" id="pl-date"></div>
+            <div class="field"><label for="pl-heure">Heure</label><select id="pl-heure"><option value="8">8h</option><option value="12">12h</option><option value="18" selected>18h</option><option value="20">20h</option></select></div>
+          </div>
+          <p class="hint" id="pl-hint" style="margin:0">La routine publie à l’heure choisie, à quelques minutes près. L’image envoyée est celle affichée maintenant : si tu la modifies ensuite, programme-la à nouveau.</p>
+          <div class="row"><button type="button" class="btn primary" id="pl-ok">Programmer</button><button type="button" class="btn ghost" id="pl-cancel" hidden>Annuler la programmation</button></div>
         </div>
         <div class="preview" id="preview">
           <canvas id="canvas" width="1080" height="1350" aria-label="Aperçu du visuel"></canvas>

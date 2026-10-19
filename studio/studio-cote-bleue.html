@@ -262,6 +262,10 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
 .cand .tgs{display:flex;gap:8px}
 .tg{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:14px;background:var(--surface);border:1px solid var(--line);border-radius:100px;padding:6px 12px;min-height:40px;cursor:pointer}
 .tg input{width:18px;height:18px;accent-color:var(--brand)}
+.st-plan{background:var(--brand-soft);color:var(--brand)}
+.st-err{background:#FDE0E0;color:#8F1D1D}
+.planif{gap:12px}
+.planif-head{display:flex;flex-direction:column;gap:2px}
 </style>
 
 <div class="wrap">
@@ -436,8 +440,18 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
           <span class="hint stage-status" id="post-status"></span>
           <div class="row stage-actions">
             <button type="button" class="btn" id="btn-published">Marquer publié</button>
+            <button type="button" class="btn sun" id="btn-planif" aria-expanded="false" aria-controls="planif-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg><span id="btn-planif-txt">Programmer</span></button>
             <button type="button" class="btn primary" id="btn-export"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Télécharger</button>
           </div>
+        </div>
+        <div class="panel planif" id="planif-box" hidden>
+          <div class="planif-head"><b>Publier automatiquement sur Instagram</b><span class="hint" id="pl-state"></span></div>
+          <div class="two">
+            <div class="field"><label for="pl-date">Jour</label><input type="date" id="pl-date"></div>
+            <div class="field"><label for="pl-heure">Heure</label><select id="pl-heure"><option value="8">8h</option><option value="12">12h</option><option value="18" selected>18h</option><option value="20">20h</option></select></div>
+          </div>
+          <p class="hint" id="pl-hint" style="margin:0">La routine publie à l’heure choisie, à quelques minutes près. L’image envoyée est celle affichée maintenant : si tu la modifies ensuite, programme-la à nouveau.</p>
+          <div class="row"><button type="button" class="btn primary" id="pl-ok">Programmer</button><button type="button" class="btn ghost" id="pl-cancel" hidden>Annuler la programmation</button></div>
         </div>
         <div class="preview" id="preview">
           <canvas id="canvas" width="1080" height="1350" aria-label="Aperçu du visuel"></canvas>
@@ -775,7 +789,7 @@ function rdvsFor(day){var wd=parseIso(day).getDay(),out=[];
     V4.forEach(function(k){if(counts[k]>=3)out.push({type:"semaine",format:"story",village:k,label:"Story « Ça bouge à "+vil(k).short+" »",sub:counts[k]+" événements dans ce village"})})}
   if(wd===4){out.push({type:"weekend",format:"post",label:"Agenda du week-end",sub:"post · ven. au dim."});out.push({type:"weekend",format:"story",label:"Agenda du week-end",sub:"story"})}
   if(day>=METEO_DEBUT)out.push({type:"meteo",format:"story",label:"Météo de demain",sub:"story · 18h",meteoDate:addDays(day,1)});return out}
-function rdvStatus(r,day,p){if(p)return p.statut==="publie"?["Publié","st-done"]:[p.auto?"Prêt à vérifier":"Brouillon","st-ready"];
+function rdvStatus(r,day,p){if(p){if(p.statut==="publie")return["Publié","st-done"];if(planOn(p))return["Programmé "+p.planif.heure+"h","st-plan"];if(p.planif&&p.planif.statut==="erreur")return["Échec publication","st-err"];return[p.auto?"Prêt à vérifier":"Brouillon","st-ready"]}
   if(r.type==="meteo")return S.meteo[r.meteoDate]?["Prévisions prêtes","st-ready"]:(day<todayIso()?["Passé","st-wait"]:["Prévisions vers 7h","st-wait"]);
   return day<todayIso()?["Non fait","st-wait"]:["À créer","st-todo"]}
 function openRdv(r,day){var p=postMatch(day,r.type,r.format,r.village);if(p)return openPost(p);
@@ -907,7 +921,7 @@ function syncForm(){var t=typ(P.type),L=isList(P.type),T=P.type==="teaser",Mt=P.
   $("p-details").value=P.details||"";$("p-details").placeholder=(t.details||"").replace(/\*\*/g,"");$("p-legende").value=P.legende||"";$("p-date").value=P.datePrevue||"";$("p-source").value=P.source||"";
   if(L)renderRows();if(T){$("t-compteur").value=P.compteur||"";$("t-visuel").value=P.visuel||"logo";document.querySelectorAll("#t-villages input").forEach(function(cb){cb.checked=(P.villages||[]).indexOf(cb.value)>=0})}
   if(Mt){var m=S.meteo[P.meteoDate];$("meteo-info").textContent=m?"Prévisions Open-Meteo pour le "+frDate(P.meteoDate)+", mises à jour "+(m.majLe?"le "+frDate(m.majLe.slice(0,10))+" à "+m.majLe.slice(11,16):"")+".":"Prévisions du "+frDate(P.meteoDate)+" pas encore arrivées : la routine les récupère vers 7h la veille au matin."}
-  $("btn-delete").hidden=!P.id;$("post-status").textContent=P.statut==="publie"?"Publié le "+frDate(P.datePublie):(P.id?"Brouillon enregistré":"Nouveau visuel, pas encore enregistré");$("btn-published").textContent=P.statut==="publie"?"Publié":"Marquer publié"}
+  $("btn-delete").hidden=!P.id;$("post-status").textContent=P.statut==="publie"?"Publié le "+frDate(P.datePublie):(P.id?"Brouillon enregistré":"Nouveau visuel, pas encore enregistré");$("btn-published").textContent=P.statut==="publie"?"Publié":"Marquer publié";if(planOn(P)||(P.planif&&P.planif.statut==="erreur"))$("post-status").textContent=planTxt(P.planif);syncPlan()}
 function switchFmt(f){if(P.format===f)return;var sib=P.type==="weekend"?sibling():null;if(sib){openPost(sib);return}P.format=f;if(P.type==="weekend"&&P.id){P.id=null;P.statut="brouillon";autoFill();toast("Nouveau visuel "+(f==="story"?"story":"post")+" : enregistre-le")}syncForm();draw()}
 $("fmt-post").onclick=function(){if(typ(P.type).storyOnly){toast("Ce gabarit existe en story");return}switchFmt("post")};
 $("fmt-story").onclick=function(){switchFmt("story")};
@@ -957,13 +971,26 @@ function renderCands(){var box=$("cands");box.textContent="";var p=period(P.type
 function openPost(post){P=Object.assign(blankPost(),JSON.parse(JSON.stringify(post)));if(P.format==="carrousel")P.format="post";if(P.type==="meteo"&&!P.meteoDate)P.meteoDate=addDays(P.datePrevue||todayIso(),1);syncForm();show("atelier");$("atelier-lead").textContent=typ(P.type).name+(P.datePrevue?" prévu le "+frDate(P.datePrevue):"")+(P.source?" · "+P.source:"")}
 $("btn-new").onclick=function(){P=blankPost();syncForm();draw();toast("Nouveau visuel")};
 /* Enregistrement */
-var FIELDS=["format","type","village","pill","sticker","titre","details","legende","datePrevue","source","photoId","ideeIds","rows","compteur","visuel","villages","meteoDate","statut","datePublie","stats","auto","mediaId","permalink","importe"];
+var FIELDS=["format","type","village","pill","sticker","titre","details","legende","datePrevue","source","photoId","ideeIds","rows","compteur","visuel","villages","meteoDate","statut","datePublie","stats","auto","mediaId","permalink","importe","planif"];
 function postBody(){var b={};FIELDS.forEach(function(k){if(P[k]!==undefined)b[k]=P[k]});if(b.photoId&&String(b.photoId).indexOf("blob:")===0)b.photoId=null;(b.rows||[]).forEach(function(r){if(r.photoId&&String(r.photoId).indexOf("blob:")===0)r.photoId=null});b.updatedAt=new Date().toISOString();b.createdAt=P.createdAt||b.updatedAt;return JSON.parse(JSON.stringify(b))}
 function savePost(extra){if(!S.db){toast("Base indisponible : rouvre la page");return Promise.reject()}Object.assign(P,extra||{});var ref=P.id?S.db.collection("posts").doc(P.id):S.db.collection("posts").doc();P.id=ref.id;
   return ref.set(postBody()).then(function(){var ids=(P.ideeIds||[]).slice();(P.rows||[]).forEach(function(r){if(r.ideeId&&ids.indexOf(r.ideeId)<0)ids.push(r.ideeId)});ids.forEach(function(iid){S.db.collection("idees").doc(iid).update({statut:"utilisee",postId:P.id}).catch(function(){})});syncForm()})}
 $("btn-save").onclick=function(){savePost().then(function(){toast("Brouillon enregistré")})};
 var delArmed=false;$("btn-delete").onclick=function(){if(!P.id)return;if(!delArmed){delArmed=true;$("btn-delete").textContent="Confirmer la suppression";setTimeout(function(){delArmed=false;$("btn-delete").textContent="Supprimer"},4000);return}
   delArmed=false;S.db.collection("posts").doc(P.id).delete().then(function(){P=blankPost();syncForm();draw();toast("Post supprimé")})};
+/* Publication programmée : l’image est déposée dans le studio, la routine la publie sur Instagram à l’heure dite */
+function planOn(p){return p&&p.planif&&p.planif.statut==="programme"}
+function planTxt(q){if(!q)return"";if(q.statut==="programme")return"Programmé · "+frDate(q.date)+" à "+q.heure+"h";if(q.statut==="publie")return"Publié automatiquement"+(q.publieLe?" le "+frDate(q.publieLe.slice(0,10)):"");if(q.statut==="erreur")return"Échec de la publication : "+(q.erreur||"raison inconnue")+". Publie-la à la main ou programme-la à nouveau.";return""}
+function syncPlan(){var q=P.planif,on=planOn(P);$("btn-planif-txt").textContent=on?q.heure+"h · "+frDate(q.date).replace(/\.$/,""):"Programmer";$("pl-cancel").hidden=!on;$("pl-ok").textContent=on?"Reprogrammer":"Programmer";$("pl-state").textContent=planTxt(q);
+  $("btn-planif").hidden=P.statut==="publie"}
+function pad2(n){return(n<10?"0":"")+n}
+$("btn-planif").onclick=function(){var box=$("planif-box"),open=box.hidden;box.hidden=!open;this.setAttribute("aria-expanded",String(open));if(!open)return;var q=P.planif||{};
+  $("pl-date").value=q.statut==="programme"&&q.date?q.date:(P.type==="meteo"?todayIso():(P.datePrevue&&P.datePrevue>=todayIso()?P.datePrevue:todayIso()));$("pl-heure").value=String(q.heure||18);syncPlan()};
+$("pl-ok").onclick=function(){var d=$("pl-date").value,h=+$("pl-heure").value;if(!d){toast("Choisis le jour");return}var at=d+"T"+pad2(h)+":00";if(new Date(at)<=new Date()){toast("Ce créneau est déjà passé : choisis une heure plus tard");return}
+  if(!S.assets||!S.db){toast("Envoi impossible pour l’instant : rouvre la page");return}var b=this;b.disabled=true;draw(true);
+  cv.toBlob(function(blob){if(!blob){b.disabled=false;toast("Image impossible à générer");return}var f=new File([blob],fileName(),{type:"image/png"});
+    S.assets.upload(f).then(function(r){return savePost({planif:{date:d,heure:h,at:at,statut:"programme",assetId:r.id,format:P.format==="story"||typ(P.type).storyOnly?"story":"post",programmeLe:new Date().toISOString()}})}).then(function(){b.disabled=false;syncPlan();$("planif-box").hidden=true;$("btn-planif").setAttribute("aria-expanded","false");toast("Programmé pour "+frDate(d).replace(/\.$/,"")+" à "+h+"h")},function(){b.disabled=false;toast("La programmation a échoué : réessaie")})},"image/png")};
+$("pl-cancel").onclick=function(){if(!planOn(P))return;savePost({planif:Object.assign({},P.planif,{statut:"annule"})}).then(function(){syncPlan();toast("Programmation annulée")})};
 $("btn-published").onclick=function(){if(P.statut==="publie")return;savePost({statut:"publie",datePublie:todayIso()}).then(function(){toast("Publié ! Les stats arriveront avec la routine du matin.")})};
 function fileName(){var v=vil(P.village).short.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"-");return"mcb-"+(P.datePrevue||todayIso())+"-"+P.type+(P.type==="meteo"||isList(P.type)?"":"-"+v)+(P.format==="story"||typ(P.type).storyOnly?"-story":"")+".png"}
 function fallbackImg(blob){var fb=$("export-fallback");fb.hidden=false;fb.textContent="";var r=new FileReader();r.onload=function(){fb.appendChild(el("img",{src:r.result,alt:"Visuel à enregistrer",class:"fallback-img"}));fb.appendChild(el("div",{text:"Appuie longuement sur l’image pour l’enregistrer dans ta galerie."}))};r.readAsDataURL(blob)}
