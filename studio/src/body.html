@@ -6,10 +6,16 @@
       <div class="sub" id="today-label">@maison.cotebleue</div>
     </div>
     <span class="badge" id="conn"><span class="dot" style="background:#93A3C8"></span>Connexion…</span>
+    <button type="button" class="btn primary create-btn" id="btn-create"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Créer un visuel</span></button>
   </header>
 
   <!-- SEMAINE -->
   <section class="view" id="v-semaine" aria-labelledby="h-sem">
+    <div class="hero">
+      <p class="hero-k">Maison Côte Bleue · Carry · Sausset · Ensuès · La Couronne-Carro</p>
+      <p class="hero-t">Que veux-tu créer aujourd’hui ?</p>
+      <div class="create-row" id="create-row" role="group" aria-label="Créer un visuel"></div>
+    </div>
     <div>
       <h2 id="h-sem">Ma semaine</h2>
       <p class="lead">Tes rendez-vous fixes : la météo de demain en story chaque soir à 18h, l’agenda de la semaine le dimanche, l’agenda du week-end le jeudi. Touche un rendez-vous pour l’ouvrir dans l’atelier.</p>
@@ -109,10 +115,6 @@
       <form class="panel" id="post-form" autocomplete="off">
         <div class="field"><span class="lbl">Rendez-vous</span><div class="chips" id="p-types-rdv" role="group" aria-label="Gabarits des rendez-vous"></div></div>
         <div class="field"><span class="lbl">Posts ponctuels</span><div class="chips" id="p-types" role="group" aria-label="Gabarits ponctuels"></div></div>
-        <div class="seg" role="group" aria-label="Format" style="grid-template-columns:1fr 1fr">
-          <button type="button" id="fmt-post" aria-pressed="true">Post 4:5</button>
-          <button type="button" id="fmt-story" aria-pressed="false">Story 9:16</button>
-        </div>
         <div class="field" id="village-field"><span class="lbl" id="village-label">Village</span><div class="chips" id="p-villages" role="group" aria-label="Village"></div></div>
         <div class="two">
           <div class="field"><label for="p-pill">Étiquette</label><input type="text" id="p-pill" maxlength="24"></div>
@@ -160,15 +162,21 @@
         </div>
       </form>
       <div class="preview-col">
+        <div class="stage-bar">
+          <div class="seg" role="group" aria-label="Format">
+            <button type="button" id="fmt-post" aria-pressed="true">Post 4:5</button>
+            <button type="button" id="fmt-story" aria-pressed="false">Story 9:16</button>
+          </div>
+          <span class="hint stage-status" id="post-status"></span>
+          <div class="row stage-actions">
+            <button type="button" class="btn" id="btn-published">Marquer publié</button>
+            <button type="button" class="btn primary" id="btn-export"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Télécharger</button>
+          </div>
+        </div>
         <div class="preview" id="preview">
           <canvas id="canvas" width="1080" height="1350" aria-label="Aperçu du visuel"></canvas>
-          <div class="row" style="justify-content:center">
-            <button type="button" class="btn primary" id="btn-export"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Enregistrer l’image</button>
-            <button type="button" class="btn sun" id="btn-published">Marquer publié</button>
-          </div>
-          <div id="export-fallback" hidden class="hint" style="text-align:center"></div>
-          <div class="hint" id="post-status" style="text-align:center"></div>
         </div>
+        <div id="export-fallback" hidden class="hint" style="text-align:center"></div>
       </div>
     </div>
   </section>
