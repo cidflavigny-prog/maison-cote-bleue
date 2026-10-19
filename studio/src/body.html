@@ -17,9 +17,17 @@
       <div class="create-row" id="create-row" role="group" aria-label="Créer un visuel"></div>
     </div>
     <div>
-      <h2 id="h-sem">Ma semaine</h2>
-      <p class="lead">Tes rendez-vous fixes : la météo de demain (prête dès 7h, à programmer pour 18h en story), l’agenda de la semaine le dimanche, l’agenda du week-end le jeudi. Touche un rendez-vous pour l’ouvrir dans l’atelier.</p>
+      <h2 id="h-sem">Planning éditorial</h2>
+      <p class="lead">Tes rendez-vous fixes (météo chaque soir, agenda de la semaine le dimanche, du week-end le jeudi) et tout ce qui est prévu. Touche un visuel pour l’ouvrir dans l’atelier.</p>
     </div>
+    <div class="seg plan-seg" role="group" aria-label="Affichage du planning"><button type="button" id="pv-cal" aria-pressed="true">Calendrier</button><button type="button" id="pv-feed" aria-pressed="false">Aperçu du feed</button></div>
+    <div id="feed-box" class="feedbox" hidden>
+      <div class="feed-head"><div class="feed-av"></div><div><b>maison.cotebleue</b><span class="hint" id="feed-sub"></span></div></div>
+      <p class="hint" style="margin:0">Comme sur ton profil Instagram : les posts et carrousels prévus en haut, puis ceux déjà publiés. Les stories sont listées en dessous.</p>
+      <div class="feed" id="feed"></div>
+      <div class="field"><h3>Stories prévues</h3><div class="contacts" id="feed-stories"></div></div>
+    </div>
+    <div id="cal-box" class="calbox">
     <div class="weeknav">
       <h3 id="week-title">Cette semaine</h3>
       <div class="row"><button type="button" class="btn" id="week-prev" aria-label="Semaine précédente">‹</button><button type="button" class="btn" id="week-now">Aujourd’hui</button><button type="button" class="btn" id="week-next" aria-label="Semaine suivante">›</button></div>
@@ -27,6 +35,7 @@
     <div class="note" id="week-note" hidden></div>
     <div class="daylist" id="days"></div>
     <div class="field"><h3>Brouillons sans date</h3><div class="list" id="drafts"></div></div>
+    </div>
   </section>
 
   <!-- IDÉES -->
@@ -86,19 +95,6 @@
         <div class="row"><button class="btn primary" type="submit">Ajouter l’idée</button></div>
       </form>
     </details>
-    <details class="add" id="comptes-box">
-      <summary><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>Comptes à suivre et à contacter <span class="chipn" id="n-comptes"></span></summary>
-      <div class="panel">
-        <p class="hint" style="margin:0">Tous les deux jours, la recherche de comptes propose des pages Instagram et Facebook du coin : abonne-toi depuis l’application, envoie le message préparé si besoin, puis note-le ici.</p>
-        <div id="comptes-proposes"></div>
-        <div id="comptes-suivis" class="contacts"></div>
-        <form id="compte-form" class="two">
-          <div class="field"><label for="c-user">Nom du compte</label><input type="text" id="c-user" placeholder="@nom_du_compte" autocapitalize="off" autocorrect="off" spellcheck="false" required></div>
-          <div class="field"><label for="c-village">Village</label><select id="c-village"></select></div>
-          <div class="row"><button class="btn primary" type="submit">Ajouter aux comptes suivis</button></div>
-        </form>
-      </div>
-    </details>
   </section>
 
   <!-- ATELIER -->
@@ -111,6 +107,7 @@
       <form class="panel" id="post-form" autocomplete="off">
         <div class="field"><span class="lbl">Rendez-vous</span><div class="chips" id="p-types-rdv" role="group" aria-label="Gabarits des rendez-vous"></div></div>
         <div class="field"><span class="lbl">Posts ponctuels</span><div class="chips" id="p-types" role="group" aria-label="Gabarits ponctuels"></div></div>
+        <div class="field" id="couleur-field"><span class="lbl">Couleur de fond</span><div class="chips swatches" id="p-couleurs" role="group" aria-label="Couleur de fond"></div></div>
         <div class="field" id="village-field"><span class="lbl" id="village-label">Village</span><div class="chips" id="p-villages" role="group" aria-label="Village"></div></div>
         <div class="two">
           <div class="field"><label for="p-pill">Étiquette</label><input type="text" id="p-pill" maxlength="24"></div>
@@ -141,7 +138,8 @@
         <div class="field" id="photo-field">
           <label for="p-photo">Photo (encadrée, le fond garde sa couleur)</label>
           <div class="photo-row"><input type="file" id="p-photo" accept="image/*"><button type="button" class="btn ghost" id="btn-photo-rm" hidden>Retirer la photo</button></div>
-          <span class="hint">Photo envoyée par le commerçant ou prise par toi.</span>
+          <span class="hint">Photo envoyée par le commerçant, prise par toi, ou photo libre de droits (Pexels).</span>
+          <label for="p-credit" style="margin-top:6px">Crédit photo (affiché avec « Photo non contractuelle »)</label><input type="text" id="p-credit" maxlength="60" placeholder="Prénom Nom / Pexels">
         </div>
         <div class="field">
           <label for="p-legende">Légende</label>
@@ -190,6 +188,28 @@
     </div>
   </section>
 
+  <!-- MESSAGES -->
+  <section class="view" id="v-messages" aria-labelledby="h-msg" hidden>
+    <div>
+      <h2 id="h-msg">Messages</h2>
+      <p class="lead">Les messages prêts à envoyer aux commerçants, associations et pages du coin. Copie, envoie depuis Instagram ou Facebook, puis touche « Message envoyé ». Rien ne part tout seul.</p>
+    </div>
+    <div class="panel"><div class="week-head"><h3>À envoyer</h3><span class="chipn" id="n-msg"></span></div><div id="msg-list" class="contacts"></div></div>
+    <details class="add" id="comptes-box" open>
+      <summary><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>Comptes à suivre et à contacter <span class="chipn" id="n-comptes"></span></summary>
+      <div class="panel">
+        <p class="hint" style="margin:0">Chaque lundi, la recherche de comptes propose des pages Instagram et Facebook du coin : abonne-toi depuis l’application, envoie le message préparé si besoin, puis note-le ici.</p>
+        <div id="comptes-proposes"></div>
+        <div id="comptes-suivis" class="contacts"></div>
+        <form id="compte-form" class="two">
+          <div class="field"><label for="c-user">Nom du compte</label><input type="text" id="c-user" placeholder="@nom_du_compte" autocapitalize="off" autocorrect="off" spellcheck="false" required></div>
+          <div class="field"><label for="c-village">Village</label><select id="c-village"></select></div>
+          <div class="row"><button class="btn primary" type="submit">Ajouter aux comptes suivis</button></div>
+        </form>
+      </div>
+    </details>
+  </section>
+
   <!-- POINT COM -->
   <section class="view" id="v-com" aria-labelledby="h-com" hidden>
     <div>
@@ -235,9 +255,10 @@
 </div>
 
 <nav class="tabs" aria-label="Sections">
-  <button data-view="semaine" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Semaine</button>
+  <button data-view="semaine" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Planning</button>
   <button data-view="idees"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.8V16h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0 0 12 3z"/></svg><span>Idées<span class="count" id="idea-count" hidden></span></span></button>
   <button data-view="atelier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 15l3-3 2 2 3-3"/><circle cx="9" cy="8" r="1.5"/></svg>Atelier</button>
+  <button data-view="messages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H8l-4 4z"/><path d="M8 9h8M8 12h5"/></svg><span>Messages<span class="count" id="msg-count" hidden></span></span></button>
   <button data-view="com"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11v3a1 1 0 0 0 1 1h2l5 4V6L7 10H5a1 1 0 0 0-1 1zM16 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12"/></svg><span>Com<span class="count" id="com-count" hidden></span></span></button>
   <button data-view="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Stats</button>
 </nav>

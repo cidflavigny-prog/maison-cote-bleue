@@ -51,7 +51,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 @media (max-width:560px){.hero-k{display:none}.create-btn span{display:none}.create-btn{padding:0 10px}.badge{display:none}}
 
 /* Rail d'outils (bas sur téléphone, gauche sur grand écran) */
-.tabs{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(6,1fr);padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
 .tabs button{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:3px;min-height:54px;justify-content:center;font-size:11.5px;font-weight:700;color:var(--faint);border-radius:10px;cursor:pointer}
 .tabs button svg{width:24px;height:24px;padding:4px;box-sizing:content-box;border-radius:10px}
 .tabs button:hover{color:var(--ink)}
@@ -281,6 +281,23 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
 .jat{color:var(--faint);font-size:12px;font-weight:700;padding-top:2px}
 .jtxt{overflow-wrap:anywhere}
 @media (max-width:520px){.jrow{grid-template-columns:1fr;gap:2px}.tabs button{font-size:10.5px}}
+.plan-seg{grid-template-columns:1fr 1fr;max-width:420px}
+.feedbox{display:flex;flex-direction:column;gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:16px}
+.feed-head{display:flex;align-items:center;gap:12px}.feed-head b{display:block}
+.feed-av{width:56px;height:56px;border-radius:50%;background:radial-gradient(circle at 45% 45%,#FFC93C 0 34%,#0F4CDB 35% 100%);box-shadow:0 0 0 3px var(--surface),0 0 0 5px #E2557A;flex:none}
+.feed{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;max-width:620px}
+.ftile{position:relative;padding:0;border:0;background:var(--surface-2);cursor:pointer;aspect-ratio:4/5;overflow:hidden;max-width:100%}
+.ftile canvas{width:100%;height:100%;display:block}
+.ftile.planned canvas{opacity:.92}
+.fbadge{position:absolute;left:6px;bottom:6px;right:6px;font-size:10.5px;font-weight:800;border-radius:6px;padding:3px 6px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fcar{position:absolute;top:6px;right:8px;color:#FFFFFF;font-size:18px;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.calbox{display:flex;flex-direction:column;gap:18px}
+.swatches .chip{padding:0 10px 0 6px}
+.sw{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--line-2);flex:none}
+.msg{gap:8px}.msg-who{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pf{font-size:11px;font-weight:800;border-radius:6px;padding:2px 7px;background:var(--surface-3);color:var(--muted)}
+.pf.ig{background:#FDE3EE;color:#A0185A}.pf.fb{background:#E3EBFF;color:#0F4CDB}
+@media (max-width:520px){.tabs button{font-size:10px}.tabs button svg{width:22px;height:22px;padding:3px}}
 </style>
 
 <div class="wrap">
@@ -302,9 +319,17 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
       <div class="create-row" id="create-row" role="group" aria-label="Créer un visuel"></div>
     </div>
     <div>
-      <h2 id="h-sem">Ma semaine</h2>
-      <p class="lead">Tes rendez-vous fixes : la météo de demain (prête dès 7h, à programmer pour 18h en story), l’agenda de la semaine le dimanche, l’agenda du week-end le jeudi. Touche un rendez-vous pour l’ouvrir dans l’atelier.</p>
+      <h2 id="h-sem">Planning éditorial</h2>
+      <p class="lead">Tes rendez-vous fixes (météo chaque soir, agenda de la semaine le dimanche, du week-end le jeudi) et tout ce qui est prévu. Touche un visuel pour l’ouvrir dans l’atelier.</p>
     </div>
+    <div class="seg plan-seg" role="group" aria-label="Affichage du planning"><button type="button" id="pv-cal" aria-pressed="true">Calendrier</button><button type="button" id="pv-feed" aria-pressed="false">Aperçu du feed</button></div>
+    <div id="feed-box" class="feedbox" hidden>
+      <div class="feed-head"><div class="feed-av"></div><div><b>maison.cotebleue</b><span class="hint" id="feed-sub"></span></div></div>
+      <p class="hint" style="margin:0">Comme sur ton profil Instagram : les posts et carrousels prévus en haut, puis ceux déjà publiés. Les stories sont listées en dessous.</p>
+      <div class="feed" id="feed"></div>
+      <div class="field"><h3>Stories prévues</h3><div class="contacts" id="feed-stories"></div></div>
+    </div>
+    <div id="cal-box" class="calbox">
     <div class="weeknav">
       <h3 id="week-title">Cette semaine</h3>
       <div class="row"><button type="button" class="btn" id="week-prev" aria-label="Semaine précédente">‹</button><button type="button" class="btn" id="week-now">Aujourd’hui</button><button type="button" class="btn" id="week-next" aria-label="Semaine suivante">›</button></div>
@@ -312,6 +337,7 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
     <div class="note" id="week-note" hidden></div>
     <div class="daylist" id="days"></div>
     <div class="field"><h3>Brouillons sans date</h3><div class="list" id="drafts"></div></div>
+    </div>
   </section>
 
   <!-- IDÉES -->
@@ -371,19 +397,6 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
         <div class="row"><button class="btn primary" type="submit">Ajouter l’idée</button></div>
       </form>
     </details>
-    <details class="add" id="comptes-box">
-      <summary><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>Comptes à suivre et à contacter <span class="chipn" id="n-comptes"></span></summary>
-      <div class="panel">
-        <p class="hint" style="margin:0">Tous les deux jours, la recherche de comptes propose des pages Instagram et Facebook du coin : abonne-toi depuis l’application, envoie le message préparé si besoin, puis note-le ici.</p>
-        <div id="comptes-proposes"></div>
-        <div id="comptes-suivis" class="contacts"></div>
-        <form id="compte-form" class="two">
-          <div class="field"><label for="c-user">Nom du compte</label><input type="text" id="c-user" placeholder="@nom_du_compte" autocapitalize="off" autocorrect="off" spellcheck="false" required></div>
-          <div class="field"><label for="c-village">Village</label><select id="c-village"></select></div>
-          <div class="row"><button class="btn primary" type="submit">Ajouter aux comptes suivis</button></div>
-        </form>
-      </div>
-    </details>
   </section>
 
   <!-- ATELIER -->
@@ -396,6 +409,7 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
       <form class="panel" id="post-form" autocomplete="off">
         <div class="field"><span class="lbl">Rendez-vous</span><div class="chips" id="p-types-rdv" role="group" aria-label="Gabarits des rendez-vous"></div></div>
         <div class="field"><span class="lbl">Posts ponctuels</span><div class="chips" id="p-types" role="group" aria-label="Gabarits ponctuels"></div></div>
+        <div class="field" id="couleur-field"><span class="lbl">Couleur de fond</span><div class="chips swatches" id="p-couleurs" role="group" aria-label="Couleur de fond"></div></div>
         <div class="field" id="village-field"><span class="lbl" id="village-label">Village</span><div class="chips" id="p-villages" role="group" aria-label="Village"></div></div>
         <div class="two">
           <div class="field"><label for="p-pill">Étiquette</label><input type="text" id="p-pill" maxlength="24"></div>
@@ -426,7 +440,8 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
         <div class="field" id="photo-field">
           <label for="p-photo">Photo (encadrée, le fond garde sa couleur)</label>
           <div class="photo-row"><input type="file" id="p-photo" accept="image/*"><button type="button" class="btn ghost" id="btn-photo-rm" hidden>Retirer la photo</button></div>
-          <span class="hint">Photo envoyée par le commerçant ou prise par toi.</span>
+          <span class="hint">Photo envoyée par le commerçant, prise par toi, ou photo libre de droits (Pexels).</span>
+          <label for="p-credit" style="margin-top:6px">Crédit photo (affiché avec « Photo non contractuelle »)</label><input type="text" id="p-credit" maxlength="60" placeholder="Prénom Nom / Pexels">
         </div>
         <div class="field">
           <label for="p-legende">Légende</label>
@@ -475,6 +490,28 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
     </div>
   </section>
 
+  <!-- MESSAGES -->
+  <section class="view" id="v-messages" aria-labelledby="h-msg" hidden>
+    <div>
+      <h2 id="h-msg">Messages</h2>
+      <p class="lead">Les messages prêts à envoyer aux commerçants, associations et pages du coin. Copie, envoie depuis Instagram ou Facebook, puis touche « Message envoyé ». Rien ne part tout seul.</p>
+    </div>
+    <div class="panel"><div class="week-head"><h3>À envoyer</h3><span class="chipn" id="n-msg"></span></div><div id="msg-list" class="contacts"></div></div>
+    <details class="add" id="comptes-box" open>
+      <summary><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>Comptes à suivre et à contacter <span class="chipn" id="n-comptes"></span></summary>
+      <div class="panel">
+        <p class="hint" style="margin:0">Chaque lundi, la recherche de comptes propose des pages Instagram et Facebook du coin : abonne-toi depuis l’application, envoie le message préparé si besoin, puis note-le ici.</p>
+        <div id="comptes-proposes"></div>
+        <div id="comptes-suivis" class="contacts"></div>
+        <form id="compte-form" class="two">
+          <div class="field"><label for="c-user">Nom du compte</label><input type="text" id="c-user" placeholder="@nom_du_compte" autocapitalize="off" autocorrect="off" spellcheck="false" required></div>
+          <div class="field"><label for="c-village">Village</label><select id="c-village"></select></div>
+          <div class="row"><button class="btn primary" type="submit">Ajouter aux comptes suivis</button></div>
+        </form>
+      </div>
+    </details>
+  </section>
+
   <!-- POINT COM -->
   <section class="view" id="v-com" aria-labelledby="h-com" hidden>
     <div>
@@ -520,9 +557,10 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
 </div>
 
 <nav class="tabs" aria-label="Sections">
-  <button data-view="semaine" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Semaine</button>
+  <button data-view="semaine" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Planning</button>
   <button data-view="idees"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.8V16h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0 0 12 3z"/></svg><span>Idées<span class="count" id="idea-count" hidden></span></span></button>
   <button data-view="atelier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 15l3-3 2 2 3-3"/><circle cx="9" cy="8" r="1.5"/></svg>Atelier</button>
+  <button data-view="messages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H8l-4 4z"/><path d="M8 9h8M8 12h5"/></svg><span>Messages<span class="count" id="msg-count" hidden></span></span></button>
   <button data-view="com"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11v3a1 1 0 0 0 1 1h2l5 4V6L7 10H5a1 1 0 0 0-1 1zM16 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12"/></svg><span>Com<span class="count" id="com-count" hidden></span></span></button>
   <button data-view="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Stats</button>
 </nav>
@@ -617,6 +655,7 @@ function coverImg(img,x,y,w,h){var r=Math.max(w/img.width,h/img.height),iw=img.w
 /* Photo dans un cadre : contour marine, ombre dure, le fond du gabarit reste visible autour */
 function photoFrame(img,x,y,w,h,r,bw,so,label){r=r||28;bw=bw||8;so=so||14;ctx.fillStyle=NUIT;rr(x+so,y+so,w,h,r);ctx.fill();ctx.save();rr(x,y,w,h,r);ctx.clip();
   if(img)coverImg(img,x,y,w,h);else{ctx.fillStyle=CIEL;ctx.fillRect(x,y,w,h);if(label){ctx.fillStyle=ENCRE2;ctx.font="700 "+Math.max(22,Math.round(h/12))+"px "+FB;ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(label,x+w/2,y+h/2);ctx.textAlign="left"}}
+  if(img&&CREDIT&&w>=400){var ct="Photo non contractuelle · "+CREDIT;ctx.font="700 22px "+FB;ct=ellip(ct,"700 22px "+FB,w-60);var cw=ctx.measureText(ct).width+28;ctx.fillStyle="rgba(11,27,63,.72)";rr(x+16,y+h-16-38,cw,38,19);ctx.fill();ctx.fillStyle=BLANC;ctx.textBaseline="middle";ctx.fillText(ct,x+30,y+h-16-18)}
   ctx.restore();rr(x,y,w,h,r);ctx.lineWidth=bw;ctx.strokeStyle=NUIT;ctx.stroke()}
 function dateBlock(x,y,w,h,day,num,fsS,fsB){ctx.fillStyle=NUIT;rr(x+4,y+4,w,h,14);ctx.fill();ctx.fillStyle=SOLEIL;rr(x,y,w,h,14);ctx.fill();ctx.lineWidth=3;ctx.strokeStyle=NUIT;ctx.stroke();
   ctx.fillStyle=NUIT;ctx.textAlign="center";ctx.textBaseline="alphabetic";ctx.font="800 "+fsS+"px "+FB;setLS(fsS*.14);var tot=fsS+fsB*.82+6;var y0=y+(h-tot)/2;ctx.fillText(day,x+w/2+fsS*.07,y0+fsS*.85);setLS(0);ctx.font="600 "+fsB+"px "+FD;ctx.fillText(num,x+w/2,y0+fsS+6+fsB*.78);ctx.textAlign="left"}
@@ -635,31 +674,38 @@ function themeOf(type){switch(type){
   case "nouveau":return{bg:BLANC,fg:NUIT,pillBg:BLEU,pillFg:BLANC,pillShadow:NUIT,pillBorder:NUIT,shadow:null,line:NUIT};
   default:return{bg:BLEU,fg:BLANC,pillBg:BLANC,pillFg:BLEU,pillShadow:NUIT,pillBorder:NUIT,shadow:NUIT,line:NUIT}}}
 
+/* Couleur de fond choisie dans l’atelier (vide = couleur du gabarit) */
+var COULEURS=[["","Auto"],["bleu","Bleu"],["soleil","Soleil"],["nuit","Nuit"],["blanc","Blanc"],["ciel","Ciel"],["couronne","Turquoise"],["sausset","Pin"],["carry","Terracotta"],["redonne","Framboise"]];
+function themeFor(P){var c=P&&P.couleur;if(!c)return themeOf(P.type);if(c==="bleu")return themeOf("agenda");if(c==="soleil")return themeOf("bonplan");if(c==="nuit")return themeOf("pratique");if(c==="blanc")return themeOf("question");
+  if(c==="ciel")return{bg:CIEL,fg:NUIT,pillBg:BLEU,pillFg:BLANC,pillShadow:NUIT,pillBorder:NUIT,shadow:BLANC,line:NUIT};var v=VILLAGES[c];if(v)return{bg:v.color,fg:BLANC,pillBg:SOLEIL,pillFg:NUIT,pillShadow:NUIT,pillBorder:NUIT,shadow:v.deep,line:NUIT};return themeOf(P.type)}
+/* Crédit de la photo principale, affiché dans le cadre avec la mention « non contractuelle » */
+var CREDIT="";
 /* ---------- Gabarits simples (événement, bon plan, nouveauté, info, question) ---------- */
-function drawSimplePost(P,W,H){var M=76,t=typ(P.type),v=vil(P.village),th=themeOf(P.type);var title=P.titre||t.title,details=P.details!==""&&P.details!=null?P.details:(P.titre?"":t.details),pillTxt=P.pill||t.pill;
+function drawSimplePost(P,W,H){var M=76,t=typ(P.type),v=vil(P.village),th=themeFor(P);var title=P.titre||t.title,details=P.details!==""&&P.details!=null?P.details:(P.titre?"":t.details),pillTxt=P.pill||t.pill;
   var hasPhoto=!!P.photoId||P.type==="nouveau";ctx.fillStyle=th.bg;ctx.fillRect(0,0,W,H);
-  if(!hasPhoto){if(P.type==="agenda"){zigzag(W-330,H-100,5.4,SOLEIL,20);triangle(W-240,H-330,4.4,CIEL);ring(140,H-290,42,SOLEIL,18)}if(P.type==="pratique")zigzag(702,1217,5.4,SOLEIL,20);if(P.type==="question")ring(W-170,H-330,75,SOLEIL,26)}
+  if(!hasPhoto){if(P.type==="agenda")zigzag(W-330,H-100,5.4,SOLEIL,20);if(P.type==="pratique")zigzag(702,1217,5.4,SOLEIL,20);if(P.type==="question")ring(W-170,H-330,75,SOLEIL,26)}
   else{zigzag(W-300,104,3.2,P.type==="bonplan"?NUIT:SOLEIL,14)}
   var ph=pill(64,64,pillTxt,th.pillBg,th.pillFg,th.pillShadow,th.pillBorder,40);
   if(P.type!=="question"&&!hasPhoto){ctx.font="800 38px "+FB;setLS(38*.14);ctx.fillStyle=th.fg;ctx.textAlign="right";ctx.textBaseline="middle";ctx.fillText(v.short.toUpperCase(),W-M,64+ph/2);ctx.textAlign="left";setLS(0)}
   var footH=200,footY=H-footH;ctx.fillStyle=th.line;ctx.fillRect(0,footY,W,10);logo(M-6,footY+(footH-120)/2+6,120,v.color);
-  ctx.fillStyle=P.type==="question"||P.type==="nouveau"?NUIT:th.fg;ctx.font="800 50px "+FB;ctx.textBaseline="middle";ctx.fillText("Maison Côte Bleue",M+140,footY+footH/2+4);
+  ctx.fillStyle=th.bg===BLANC?NUIT:th.fg;ctx.font="800 50px "+FB;ctx.textBaseline="middle";ctx.fillText("Maison Côte Bleue",M+140,footY+footH/2+4);
   if(hasPhoto&&P.type!=="question"){ctx.font="800 32px "+FB;setLS(32*.14);ctx.textAlign="right";ctx.fillText(v.short.toUpperCase(),W-M,footY+footH/2+4);ctx.textAlign="left";setLS(0)}
   var top=64+ph+40,bottom=footY-50,fh=hasPhoto?500:0,pg=hasPhoto?56:0;
   var avail=bottom-top-fh-pg,detFont="400 "+(hasPhoto?42:48)+"px "+FB,detBold="800 "+(hasPhoto?42:48)+"px "+FB,lh=hasPhoto?58:68;
   var detLines=details?layout(details,detFont,detBold,W-2*M-(P.type==="bonplan"&&!hasPhoto?300:0)):[];if(hasPhoto)detLines=detLines.slice(0,2);var detH=detLines.length*lh;
   var fit=fitTitle(title,W-2*M,avail-detH-(detH?28:0),hasPhoto?96:150,hasPhoto?56:72);var titleH=fit.lines.length*fit.size*1.04;
   var dg=hasPhoto?20:40;var y=top+Math.max(0,(avail-titleH-(detH?dg+detH:0))/2),photoY=y;
+  if(!hasPhoto&&P.type==="agenda"&&y+titleH+(detH?dg+detH:0)<H-370){triangle(W-240,H-330,4.4,th.bg===BLEU?CIEL:SOLEIL);ring(140,H-290,42,SOLEIL,18)}
   if(hasPhoto){photoFrame(imgFor(P.photoId),M,y,W-2*M,fh,28,8,14,"[Photo]");y+=fh+pg}
   drawTitle(fit,M,y,th.fg,th.shadow);if(detH)drawLines(detLines,M,y+titleH+dg,lh,detFont,detBold,th.fg);
   if(P.type==="bonplan"&&P.sticker)sticker(hasPhoto?W-150:W-200,hasPhoto?photoY+60:footY-190,hasPhoto?240:300,P.sticker)}
-function drawSimpleStory(P,W,H){var M=90,t=typ(P.type),v=vil(P.village),th=themeOf(P.type);var title=P.titre||t.title,details=P.details!==""&&P.details!=null?P.details:(P.titre?"":t.details),pillTxt=P.pill||(P.type==="agenda"?t.storyPill:t.pill);
-  var bg=th.bg,fg=th.fg,shadow=th.shadow,pBg=th.pillBg,pFg=th.pillFg;if(P.type==="agenda"){bg=v.color;fg=BLANC;shadow=v.deep;pBg=BLANC;pFg=v.color}
+function drawSimpleStory(P,W,H){var M=90,t=typ(P.type),v=vil(P.village),th=themeFor(P);var title=P.titre||t.title,details=P.details!==""&&P.details!=null?P.details:(P.titre?"":t.details),pillTxt=P.pill||(P.type==="agenda"?t.storyPill:t.pill);
+  var bg=th.bg,fg=th.fg,shadow=th.shadow,pBg=th.pillBg,pFg=th.pillFg;if(P.type==="agenda"&&!P.couleur){bg=v.color;fg=BLANC;shadow=v.deep;pBg=BLANC;pFg=v.color}
   var hasPhoto=!!P.photoId||P.type==="nouveau";ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
   if(P.type==="agenda"){zigzag(W-330,190,5.4,SOLEIL,22);ring(150,H-230,50,SOLEIL,22);triangle(W-260,H-330,5.4,v.tint)}
   if(P.type==="pratique")zigzag(W-330,H-470,5.4,SOLEIL,22);
   logo(M,270,110,v.color);ctx.font="800 40px "+FB;setLS(40*.12);var lab=v.short.toUpperCase(),lw=ctx.measureText(lab).width+56;
-  var lbg=P.type==="bonplan"?NUIT:(P.type==="question"?BLEU:(P.type==="nouveau"?BLEU:BLANC)),lfg=P.type==="bonplan"||P.type==="question"||P.type==="nouveau"?BLANC:(P.type==="agenda"?v.deep:NUIT);
+  var lbg=P.type==="bonplan"?NUIT:(P.type==="question"?BLEU:(P.type==="nouveau"?BLEU:BLANC)),lfg=P.type==="bonplan"||P.type==="question"||P.type==="nouveau"?BLANC:(P.type==="agenda"?v.deep:NUIT);if(P.couleur){lbg=th.pillBg;lfg=th.pillFg}
   ctx.fillStyle=lbg;rr(M+136,290,lw,72,36);ctx.fill();ctx.fillStyle=lfg;ctx.textBaseline="middle";ctx.fillText(lab,M+164,328);setLS(0);
   var y=430,bottomMax=H-400,fh=hasPhoto?620+60:0,phH=44*1.75;
   var detFont="400 48px "+FB,detBold="800 48px "+FB,lh=68;var detLines=details?layout(details,detFont,detBold,W-2*M-(P.type==="bonplan"&&!hasPhoto?280:0)).slice(0,hasPhoto?3:6):[];var detH=detLines.length*lh;
@@ -782,7 +828,7 @@ function carItems(P){if(isList(P.type))return(P.rows||[]).slice().sort(function(
   return(P.details||"").split("\n").map(function(s){return s.trim()}).filter(Boolean).slice(0,CAR_MAX_ITEMS).map(function(l){return{line:l}})}
 function carCount(P){return carItems(P).length+2}
 function carCta(P){return P.cta||(P.type==="question"?"Réponds en commentaire\net tague qui vient avec toi":isList(P.type)?"Enregistre ce post\net envoie-le à qui cherche une sortie":"Enregistre ce post\net partage-le autour de toi")}
-function carBg(P){var th=isList(P.type)?themeOf("agenda"):themeOf(P.type);ctx.fillStyle=th.bg;ctx.fillRect(0,0,1080,1350);return th}
+function carBg(P){var th=isList(P.type)&&!P.couleur?themeOf("agenda"):themeFor(P);ctx.fillStyle=th.bg;ctx.fillRect(0,0,1080,1350);return th}
 function carCounter(i,n,th){var t=(i+1)+" / "+n;ctx.font="800 26px "+FB;var w=ctx.measureText(t).width+36;ctx.fillStyle=th.fg===BLANC?"rgba(255,255,255,.18)":"rgba(11,27,63,.08)";rr(1080-64-w,64,w,48,24);ctx.fill();ctx.fillStyle=th.fg;ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(t,1080-64-w/2,89);ctx.textAlign="left"}
 function carFooter(th){if(th.fg===BLANC){footer(64,1350-34-64,64,false,1080);return}logo(64,1350-34-64,64,BLEU);ctx.fillStyle=NUIT;ctx.font="800 28px "+FB;ctx.textBaseline="alphabetic";ctx.fillText("Maison Côte Bleue",64+82,1350-34-32);ctx.fillStyle=ENCRE2;ctx.font="600 22px "+FB;ctx.fillText("@maison.cotebleue",64+82,1350-34-4)}
 function drawCarousel(P,W,H,i){var items=carItems(P),n=items.length+2;i=Math.max(0,Math.min(i||0,n-1));var th=carBg(P),M=64,t=typ(P.type);
@@ -811,7 +857,7 @@ function drawCarousel(P,W,H,i){var items=carItems(P),n=items.length+2;i=Math.max
     if(r.date){var d=parseIso(r.date);dateBlock(cx+40,yy,230,230,JC[d.getDay()],String(d.getDate()),40,120)}
     logo(cx+40+230+36,yy+20,120,v.color);ctx.fillStyle=v.color;ctx.font="800 30px "+FB;setLS(4);ctx.textBaseline="alphabetic";ctx.fillText(ellip(v.name.toUpperCase(),"800 30px "+FB,cw-40-230-36-40),cx+40+230+36,yy+200);setLS(0);
     if(r.date){ctx.fillStyle=ENCRE2;ctx.font="700 28px "+FB;var dd=parseIso(r.date);ctx.fillText(JOURSL[dd.getDay()]+" "+dd.getDate()+" "+MOIS[dd.getMonth()].replace(".",""),cx+40+230+36,yy+236)}
-    yy+=230+40;if(hasP){photoFrame(imgFor(r.photoId),cx+40,yy,cw-80,ph2,24,6,10,"");yy+=ph2+36}
+    yy+=230+40;if(hasP){var oc=CREDIT;CREDIT=r.photoCredit||"";photoFrame(imgFor(r.photoId),cx+40,yy,cw-80,ph2,24,6,10,"");CREDIT=oc;yy+=ph2+36}
     drawLines(tl,cx+40,yy,fs*1.06,"600 "+fs+"px "+FD,"600 "+fs+"px "+FD,NUIT);yy+=tl.length*fs*1.06+24;drawLines(il,cx+40,yy,54,"600 40px "+FB,"800 40px "+FB,ENCRE2)}
   else{var line=it.line,num=null,m=line.match(/^\*\*(\d+)\*\*\s*/);if(m){num=m[1];line=line.slice(m[0].length)}var parts=line.split(/\s+·\s+/),head=parts.shift(),sub=parts.join(" · ");
     var hl=layout(head,"600 96px "+FD,"600 96px "+FD,cw-80),hs=96;while(hl.length>3&&hs>60){hs-=6;hl=layout(head,"600 "+hs+"px "+FD,"600 "+hs+"px "+FD,cw-80)}var sl=sub?layout(sub,"600 44px "+FB,"800 44px "+FB,cw-80):[];
@@ -821,7 +867,7 @@ function drawCarousel(P,W,H,i){var items=carItems(P),n=items.length+2;i=Math.max
   carFooter(th);return n}
 
 /* ---------- Point d’entrée ---------- */
-function render(P,meteoData,slide){if(P.format==="carrousel"&&canCarousel(P.type)){if(cv.height!==1350)cv.height=1350;ctx.setTransform(1,0,0,1,0,0);ctx.textAlign="left";setLS(0);return drawCarousel(P,1080,1350,slide||0)}
+function render(P,meteoData,slide){CREDIT=P.photoCredit||"";if(P.format==="carrousel"&&canCarousel(P.type)){if(cv.height!==1350)cv.height=1350;ctx.setTransform(1,0,0,1,0,0);ctx.textAlign="left";setLS(0);return drawCarousel(P,1080,1350,slide||0)}
   var story=P.format==="story"||(TYPES[P.type]&&TYPES[P.type].storyOnly);var W=1080,H=story?1920:1350;if(cv.height!==H)cv.height=H;
   ctx.setTransform(1,0,0,1,0,0);ctx.textAlign="left";setLS(0);var Q=Object.assign({},P,{format:story?"story":"post"});
   if(isList(P.type))return drawList(Q,W,H);if(P.type==="teaser")return drawTeaser(Q,W,H);if(P.type==="meteo")return drawMeteo(Q,W,H,meteoData);
@@ -845,10 +891,10 @@ var SLIDE=0;
 function isCar(){return P.format==="carrousel"&&canCarousel(P.type)}
 function draw(force){if($("v-atelier").hidden&&!force)return;var car=isCar();$("preview").classList.toggle("story",!car&&(P.format==="story"||P.type==="meteo"||P.type==="jour"));var n=render(P,S.meteo[P.meteoDate],SLIDE);
   $("car-nav").hidden=!car;if(car){if(SLIDE>n-1){SLIDE=n-1;render(P,null,SLIDE)}$("car-pos").textContent="Slide "+(SLIDE+1)+" / "+n;$("car-prev").disabled=SLIDE<=0;$("car-next").disabled=SLIDE>=n-1}}
-window.__redraw=function(){draw()};
+var feedTimer=null;window.__redraw=function(){draw();if(!$("feed-box").hidden&&!$("v-semaine").hidden){clearTimeout(feedTimer);feedTimer=setTimeout(renderFeed,300)}};
 
 /* ---------- Navigation ---------- */
-var VIEWS=["semaine","idees","atelier","com","stats"];
+var VIEWS=["semaine","idees","atelier","messages","com","stats"];
 function show(v){VIEWS.forEach(function(x){$("v-"+x).hidden=x!==v});document.querySelectorAll(".tabs button").forEach(function(b){if(b.dataset.view===v)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});store("mcb-tab",v);window.scrollTo(0,0);if(v==="atelier")draw()}
 document.querySelectorAll(".tabs button").forEach(function(b){b.addEventListener("click",function(){show(b.dataset.view)})});
 (function(){var h=(location.hash||"").slice(1);show(VIEWS.indexOf(h)>=0?h:"semaine")})();
@@ -965,11 +1011,35 @@ function renderStrat(){renderHealth();renderJournal();var r=S.strat,b=$("strat-b
   var cal=(r.calendrier||[]).filter(function(c){return!c.jour||c.jour>=todayIso()});if(cal.length){b.appendChild(el("span",{class:"lbl",text:"Calendrier de la semaine"}));var l=el("div",{class:"contacts"});cal.forEach(function(c){l.appendChild(el("div",{class:"contact"},[el("span",{class:"hint",text:[c.jour?frDate(c.jour):"",c.format||""].filter(Boolean).join(" · ")}),el("b",{text:c.sujet||""}),c.pourquoi?el("span",{class:"hint",text:c.pourquoi}):null]))});b.appendChild(l)}
   [["optimisations","Pour progresser"],["relances","Relances à faire"]].forEach(function(k){var xs=strList(r[k[0]]);if(xs.length){b.appendChild(el("span",{class:"lbl",text:k[1]}));b.appendChild(el("ul",{class:"trend"},xs.map(function(x){return el("li",{text:x})})))}});
   if(r.sante)b.appendChild(el("span",{class:"hint",text:"Routines : "+r.sante}))}
-function renderComptes(){var suivis=S.comptes.filter(function(c){return c.statut==="suivi"&&!(c.message&&!c.contacteLe)}).sort(function(a,b){return(a.username||"").localeCompare(b.username||"")}),props=S.comptes.filter(function(c){return c.statut==="propose"||(c.statut==="suivi"&&c.message&&!c.contacteLe)});
+/* Messages à envoyer : comptes avec un message préparé et pas encore envoyé, et contacts du récap du jour */
+function renderMessages(){var box=$("msg-list");box.textContent="";var list=S.comptes.filter(function(c){return c.message&&!c.contacteLe&&c.statut!=="ignore"});
+  var rc=(S.recaps.filter(function(r){return r.date===todayIso()})[0]||{}).contacts||[];
+  var n=list.length+rc.length;$("n-msg").textContent=n?n+" à envoyer":"";$("msg-count").hidden=!n;$("msg-count").textContent=n||"";
+  if(!n){box.appendChild(el("p",{class:"hint",style:"margin:0",text:"Aucun message en attente. La recherche de comptes du lundi et la veille en préparent de nouveaux."}));return}
+  list.forEach(function(c){var fb=c.plateforme==="facebook",id=c.id||c.username;box.appendChild(el("div",{class:"contact msg"},[el("div",{class:"msg-who"},[el("span",{class:"pf "+(fb?"fb":c.plateforme==="contact"?"":"ig"),text:fb?"Facebook":c.plateforme==="contact"?"Site · téléphone":"Instagram"}),el("a",{href:compteUrl(c),target:"_blank",rel:"noopener"},[el("b",{text:(fb||c.plateforme==="contact"?"":"@")+((fb||c.plateforme==="contact")&&c.nom?c.nom:c.username)})]),c.tel?el("span",{class:"hint",text:c.tel}):null,c.village?el("span",{class:"hint",text:vil(c.village).short}):null]),c.raison?el("span",{class:"hint",text:c.raison}):null,el("p",{class:"recap-text",text:c.message}),el("div",{class:"row"},[el("button",{class:"btn primary",type:"button",text:"Copier le message",onclick:function(){copyText(c.message,"Message copié : colle-le dans la conversation")}}),el("a",{class:"btn",href:compteUrl(c),target:"_blank",rel:"noopener",text:"Ouvrir le profil"}),el("button",{class:"btn ghost",type:"button",text:"Message envoyé",onclick:function(){setCompte(id,{contacteLe:todayIso()},"C’est noté")}})])]))});
+  rc.forEach(function(c){box.appendChild(el("div",{class:"contact msg"},[el("div",{class:"msg-who"},[el("span",{class:"pf",text:"Veille du jour"}),el("b",{text:c.nom||""})]),c.raison?el("span",{class:"hint",text:c.raison}):null,c.message?el("p",{class:"recap-text",text:c.message}):null,c.message?el("div",{class:"row"},[el("button",{class:"btn primary",type:"button",text:"Copier le message",onclick:function(){copyText(c.message,"Message copié")}})]):null]))})}
+function renderComptes(){renderMessages();var suivis=S.comptes.filter(function(c){return c.statut==="suivi"&&!(c.message&&!c.contacteLe)}).sort(function(a,b){return(a.username||"").localeCompare(b.username||"")}),props=S.comptes.filter(function(c){return c.statut==="propose"||(c.statut==="suivi"&&c.message&&!c.contacteLe)});
   $("n-comptes").textContent=[suivis.length||"",props.length?props.length+" à traiter":""].filter(Boolean).join(" · ");
   var pb=$("comptes-proposes");pb.textContent="";if(props.length){pb.appendChild(el("span",{class:"lbl",text:"Proposés par la recherche"}));props.forEach(function(c){pb.appendChild(compteRow(c,true))})}
   var sb=$("comptes-suivis");sb.textContent="";sb.appendChild(suivis.length?el("span",{class:"lbl",text:"Suivis ("+suivis.length+")"}):el("div",{class:"hint",text:"Aucun compte suivi pour l’instant."}));suivis.forEach(function(c){sb.appendChild(compteRow(c,false))})}
 renderReseaux();renderStrat();
+/* Planning : calendrier ou aperçu du feed Instagram */
+function postDay(p){return p.statut==="publie"?(p.datePublie||p.datePrevue||""):(p.planif&&p.planif.statut==="programme"?p.planif.date:(p.datePrevue||""))}
+function isStoryPost(p){return p.format==="story"||(TYPES[p.type]&&TYPES[p.type].storyOnly)}
+function postState(p){if(p.statut==="publie")return["Publié","st-done"];if(planOn(p))return["Programmé "+p.planif.heure+"h","st-plan"];if(p.planif&&p.planif.statut==="erreur")return["Échec","st-err"];return["Brouillon","st-ready"]}
+function renderFeed(){var box=$("feed");box.textContent="";var today=todayIso();
+  var posts=S.posts.filter(function(p){return!isStoryPost(p)&&postDay(p)&&(p.statut==="publie"||postDay(p)>=today)}).sort(function(a,b){return postDay(b).localeCompare(postDay(a))||(b.planif&&b.planif.heure||0)-(a.planif&&a.planif.heure||0)});
+  $("feed-sub").textContent=" · "+S.posts.filter(function(p){return p.statut==="publie"&&!isStoryPost(p)}).length+" publiés · "+posts.filter(function(p){return p.statut!=="publie"}).length+" prévus";
+  var prevH=cv.height;posts.forEach(function(p){var c=document.createElement("canvas");c.width=270;c.height=338;var tc=c.getContext("2d");
+    if(p.importe&&!p.rows&&!p.titre){tc.fillStyle="#DCE8FF";tc.fillRect(0,0,270,338)}else{render(p,S.meteo[p.meteoDate],0);tc.drawImage(cv,0,0,1080,1350,0,0,270,338)}
+    var stt=postState(p);var tile=el("button",{type:"button",class:"ftile"+(p.statut==="publie"?"":" planned"),onclick:function(){openPost(p)},"aria-label":(p.titre||typ(p.type).name)+", "+stt[0]},[c,el("span",{class:"fbadge "+stt[1],text:frDate(postDay(p)).replace(/\.$/,"")+" · "+stt[0]}),p.format==="carrousel"?el("span",{class:"fcar",text:"⧉"}):null]);box.appendChild(tile)});
+  if(!posts.length)box.appendChild(el("p",{class:"hint",text:"Aucun post prévu ni publié pour l’instant."}));
+  var st=$("feed-stories");st.textContent="";S.posts.filter(function(p){return isStoryPost(p)&&postDay(p)>=today}).sort(function(a,b){return postDay(a).localeCompare(postDay(b))}).forEach(function(p){var s2=postState(p);st.appendChild(el("button",{type:"button",class:"rdv",onclick:function(){openPost(p)}},[el("span",{class:"ico",style:"background:#DCE8FF",text:"S"}),el("span",{class:"txt"},[el("b",{text:p.titre||typ(p.type).name}),el("small",{text:frDate(postDay(p))+(p.planif&&p.planif.heure?" · "+p.planif.heure+"h":"")})]),el("span",{class:"st "+s2[1],text:s2[0]})]))});
+  if(!st.children.length)st.appendChild(el("p",{class:"hint",style:"margin:0",text:"Aucune story prévue."}));
+  if(cv.height!==prevH||!$("v-atelier").hidden)draw(true)}
+function setPlanView(f){$("feed-box").hidden=!f;$("cal-box").hidden=f;$("pv-feed").setAttribute("aria-pressed",String(f));$("pv-cal").setAttribute("aria-pressed",String(!f));store("mcb-plan",f?"feed":"cal");if(f)renderFeed()}
+$("pv-cal").onclick=function(){setPlanView(false)};$("pv-feed").onclick=function(){setPlanView(true)};
+if(store("mcb-plan")==="feed")setPlanView(true);
 $("compte-form").addEventListener("submit",function(e){e.preventDefault();if(!S.db)return;var u=cleanUser($("c-user").value);if(!/^[a-z0-9._]{1,30}$/.test(u)){toast("Nom de compte invalide");return}
   var ref=S.db.collection("comptes").doc(u);ref.get().then(function(sn){return sn.exists?ref.update({statut:"suivi",village:$("c-village").value}):ref.set({username:u,village:$("c-village").value,statut:"suivi",ajouteLe:new Date().toISOString(),origine:"manuel"})}).then(function(){$("c-user").value="";toast("@"+u+" ajouté")},function(){toast("Ajout impossible pour l’instant")})});
 
@@ -985,6 +1055,7 @@ function buildTypeChips(){function chip(k){return el("button",{type:"button",cla
   VORDER.forEach(function(k){$("p-villages").appendChild(el("button",{type:"button",class:"chip","data-village":k,"aria-pressed":"false",onclick:function(){P.village=k;if(P.type==="semaine"&&P.format==="story"&&!(P.rows||[]).length)autoFill();syncForm();draw()}},[el("span",{class:"dot",style:"background:"+VILLAGES[k].color+";border:2px solid #0B1B3F;width:14px;height:14px"}),VILLAGES[k].short]))});
   V4.forEach(function(k){var id="tv-"+k;$("t-villages").appendChild(el("label",{class:"chip",for:id},[el("input",{type:"checkbox",id:id,value:k,style:"width:18px;height:18px;accent-color:#0F4CDB"}),el("span",{class:"dot",style:"background:"+VILLAGES[k].color}),VILLAGES[k].short]))})}
 buildTypeChips();
+COULEURS.forEach(function(c){var th=c[0]?themeFor({couleur:c[0],type:"agenda"}):null;$("p-couleurs").appendChild(el("button",{type:"button",class:"chip swatch","data-couleur":c[0],"aria-pressed":"false",title:c[1],onclick:function(){P.couleur=c[0];syncForm();draw()}},[el("span",{class:"sw",style:th?"background:"+th.bg:"background:conic-gradient(#0F4CDB 0 25%,#FFC93C 0 50%,#0B1B3F 0 75%,#FFFFFF 0)"}),c[1]]))});
 /* Raccourcis « Que veux-tu créer ? » */
 var CREATE=[["semaine","#0F4CDB","M4 6h16v14H4zM4 10h16M9 3v4M15 3v4"],["weekend","#FFC93C","M4 6h16v14H4zM4 10h16M12 13l1.2 2.4 2.6.4-1.9 1.8.5 2.6-2.4-1.3-2.4 1.3.5-2.6-1.9-1.8 2.6-.4z"],["meteo","#7FC8F8","M7 18a4 4 0 1 1 .6-8 5 5 0 0 1 9.6 1.5A3.3 3.3 0 0 1 17 18z"],["jour","#1F9E8F","M12 4v2M12 18v2M4 12h2M18 12h2M6.3 6.3l1.4 1.4M16.3 16.3l1.4 1.4M6.3 17.7l1.4-1.4M16.3 7.7l1.4-1.4M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"],["agenda","#E2557A","M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11zM12 8v4l2 1"],["bonplan","#FF8A3D","M3 12l9-9h8v8l-9 9zM16 8h.01"],["nouveau","#8D5CF6","M12 3l2.4 5 5.6.8-4 3.9.9 5.5L12 15.6 7.1 18.2l.9-5.5-4-3.9 5.6-.8z"],["pratique","#0B1B3F","M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 11v6M12 7.5h.01"],["question","#2BB673","M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5h.01M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z"],["teaser","#0B1B3F","M5 12h3l3-7 2 14 3-7h3"]];
 function startCreate(k){P=blankPost();if(k)setType(k);else{syncForm()}show("atelier");$("atelier-lead").textContent=k?TYPES[k].name+" · nouveau visuel":"Nouveau visuel : choisis un modèle."}
@@ -997,7 +1068,7 @@ function syncForm(){var t=typ(P.type),L=isList(P.type),T=P.type==="teaser",Mt=P.
   document.querySelectorAll("[data-type]").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.type===P.type))});
   document.querySelectorAll("#p-villages .chip").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.village===P.village))});
   $("fmt-post").setAttribute("aria-pressed",String(P.format!=="story"&&P.format!=="carrousel"));$("fmt-story").setAttribute("aria-pressed",String(P.format==="story"));$("fmt-car").setAttribute("aria-pressed",String(P.format==="carrousel"));$("fmt-post").disabled=!!t.storyOnly;$("fmt-car").disabled=!canCarousel(P.type);
-  $("cta-field").hidden=!isCar();$("p-cta").value=P.cta||"";$("p-cta").placeholder=carCta(Object.assign({},P,{cta:""})).replace("\n"," ");
+  $("cta-field").hidden=!isCar();$("couleur-field").hidden=!(isSimple(P.type)||isCar());document.querySelectorAll("#p-couleurs .chip").forEach(function(b){b.setAttribute("aria-pressed",String((b.dataset.couleur||"")===(P.couleur||"")))});$("p-credit").value=P.photoCredit||"";$("p-cta").value=P.cta||"";$("p-cta").placeholder=carCta(Object.assign({},P,{cta:""})).replace("\n"," ");
   $("village-field").hidden=!(simple||(P.type==="semaine"&&P.format==="story"));$("village-label").textContent=P.type==="semaine"?"Village de la story":"Village";
   $("list-fields").hidden=!L;$("teaser-fields").hidden=!T;$("meteo-fields").hidden=!Mt;$("details-field").hidden=!(simple||T||P.type==="weekend");$("sticker-field").hidden=P.type!=="bonplan";
   $("photo-field").hidden=L;$("btn-photo-rm").hidden=!P.photoId;
@@ -1012,7 +1083,7 @@ $("fmt-post").onclick=function(){if(typ(P.type).storyOnly){toast("Ce gabarit exi
 $("fmt-story").onclick=function(){switchFmt("story")};
 $("fmt-car").onclick=function(){if(!canCarousel(P.type)){toast("Ce modèle n’existe pas en carrousel");return}switchFmt("carrousel")};
 $("car-prev").onclick=function(){if(SLIDE>0){SLIDE--;draw()}};$("car-next").onclick=function(){SLIDE++;draw()};
-[["p-cta","cta"],["p-pill","pill"],["p-sticker","sticker"],["p-titre","titre"],["p-details","details"],["p-legende","legende"],["p-source","source"]].forEach(function(p){$(p[0]).addEventListener("input",function(){P[p[1]]=$(p[0]).value;if(p[1]!=="legende"&&p[1]!=="source")draw()})});
+[["p-credit","photoCredit"],["p-cta","cta"],["p-pill","pill"],["p-sticker","sticker"],["p-titre","titre"],["p-details","details"],["p-legende","legende"],["p-source","source"]].forEach(function(p){$(p[0]).addEventListener("input",function(){P[p[1]]=$(p[0]).value;if(p[1]!=="legende"&&p[1]!=="source")draw()})});
 $("p-date").addEventListener("change",function(){P.datePrevue=$("p-date").value;if(P.type==="meteo")P.meteoDate=addDays(P.datePrevue,1);syncForm();draw()});
 $("t-villages").addEventListener("change",function(){P.villages=[].slice.call(document.querySelectorAll("#t-villages input:checked")).map(function(x){return x.value});draw()});
 $("t-compteur").oninput=function(){P.compteur=this.value;draw()};$("t-visuel").onchange=function(){P.visuel=this.value;draw()};
@@ -1058,7 +1129,7 @@ function renderCands(){var box=$("cands");box.textContent="";var p=period(P.type
 function openPost(post){P=Object.assign(blankPost(),JSON.parse(JSON.stringify(post)));if(P.format==="carrousel"&&!canCarousel(P.type))P.format="post";SLIDE=0;if(P.type==="meteo"&&!P.meteoDate)P.meteoDate=addDays(P.datePrevue||todayIso(),1);syncForm();show("atelier");$("atelier-lead").textContent=typ(P.type).name+(P.datePrevue?" prévu le "+frDate(P.datePrevue):"")+(P.source?" · "+P.source:"")}
 $("btn-new").onclick=function(){P=blankPost();syncForm();draw();toast("Nouveau visuel")};
 /* Enregistrement */
-var FIELDS=["format","type","village","pill","sticker","titre","details","legende","datePrevue","source","photoId","ideeIds","rows","compteur","visuel","villages","meteoDate","statut","datePublie","stats","auto","mediaId","permalink","importe","planif","cta"];
+var FIELDS=["format","type","village","pill","sticker","titre","details","legende","datePrevue","source","photoId","ideeIds","rows","compteur","visuel","villages","meteoDate","statut","datePublie","stats","auto","mediaId","permalink","importe","planif","cta","couleur","photoCredit","photoQuery"];
 function postBody(){var b={};FIELDS.forEach(function(k){if(P[k]!==undefined)b[k]=P[k]});if(b.photoId&&String(b.photoId).indexOf("blob:")===0)b.photoId=null;(b.rows||[]).forEach(function(r){if(r.photoId&&String(r.photoId).indexOf("blob:")===0)r.photoId=null});b.updatedAt=new Date().toISOString();b.createdAt=P.createdAt||b.updatedAt;return JSON.parse(JSON.stringify(b))}
 function savePost(extra){if(!S.db){toast("Base indisponible : rouvre la page");return Promise.reject()}Object.assign(P,extra||{});var ref=P.id?S.db.collection("posts").doc(P.id):S.db.collection("posts").doc();P.id=ref.id;
   return ref.set(postBody()).then(function(){var ids=(P.ideeIds||[]).slice();(P.rows||[]).forEach(function(r){if(r.ideeId&&ids.indexOf(r.ideeId)<0)ids.push(r.ideeId)});ids.forEach(function(iid){S.db.collection("idees").doc(iid).update({statut:"utilisee",postId:P.id}).catch(function(){})});syncForm()})}
@@ -1165,9 +1236,9 @@ if(!C||!C.use)setConn(false,"Hors ligne");
 else{
   C.use("db").then(function(db){if(!db){setConn(false,"Base indisponible");return}S.db=db;setConn(true,"Synchronisé");
     snap("idees",function(d,live){S.ideas=d;renderIdeas();renderWeek();renderReseaux();if(live)purge("idees",d,function(i){return isPast(i)||oldUndated(i)})},db.collection("idees").limit(500));
-    snap("posts",function(d,live){S.posts=d;renderWeek();renderAna();if(live)purge("posts",d,stale)},db.collection("posts").limit(500));
+    snap("posts",function(d,live){S.posts=d;renderWeek();renderAna();if(!$("feed-box").hidden)renderFeed();if(live)purge("posts",d,stale)},db.collection("posts").limit(500));
     snap("stats",function(d){S.stats=d.filter(function(x){return x.date});renderAna()},db.collection("stats").limit(800));
-    snap("recaps",function(d,live){S.recaps=d.filter(function(x){return x.date});renderRecap();if(live)purge("recaps",d,function(r){return r.date<todayIso()})},db.collection("recaps").limit(60));
+    snap("recaps",function(d,live){S.recaps=d.filter(function(x){return x.date});renderRecap();renderMessages();if(live)purge("recaps",d,function(r){return r.date<todayIso()})},db.collection("recaps").limit(60));
     snap("comptes",function(d){S.comptes=d;renderComptes()},db.collection("comptes").limit(300));
     snap("meteo",function(d,live){S.meteo={};d.forEach(function(m){S.meteo[m.date||m.id]=m});renderWeek();if(P.type==="meteo"){syncForm();draw()}if(live)purge("meteo",d,function(m){return(m.date||m.id)<todayIso()})},db.collection("meteo").limit(30));
     db.doc("reglages/meta").onSnapshot(function(s){S.sync=s.exists?s.data():null;renderAna();renderWeek();renderHealth()});

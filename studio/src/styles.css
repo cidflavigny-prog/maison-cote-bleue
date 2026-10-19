@@ -48,7 +48,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 @media (max-width:560px){.hero-k{display:none}.create-btn span{display:none}.create-btn{padding:0 10px}.badge{display:none}}
 
 /* Rail d'outils (bas sur téléphone, gauche sur grand écran) */
-.tabs{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(6,1fr);padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
 .tabs button{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:3px;min-height:54px;justify-content:center;font-size:11.5px;font-weight:700;color:var(--faint);border-radius:10px;cursor:pointer}
 .tabs button svg{width:24px;height:24px;padding:4px;box-sizing:content-box;border-radius:10px}
 .tabs button:hover{color:var(--ink)}
@@ -278,3 +278,20 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
 .jat{color:var(--faint);font-size:12px;font-weight:700;padding-top:2px}
 .jtxt{overflow-wrap:anywhere}
 @media (max-width:520px){.jrow{grid-template-columns:1fr;gap:2px}.tabs button{font-size:10.5px}}
+.plan-seg{grid-template-columns:1fr 1fr;max-width:420px}
+.feedbox{display:flex;flex-direction:column;gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:16px}
+.feed-head{display:flex;align-items:center;gap:12px}.feed-head b{display:block}
+.feed-av{width:56px;height:56px;border-radius:50%;background:radial-gradient(circle at 45% 45%,#FFC93C 0 34%,#0F4CDB 35% 100%);box-shadow:0 0 0 3px var(--surface),0 0 0 5px #E2557A;flex:none}
+.feed{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;max-width:620px}
+.ftile{position:relative;padding:0;border:0;background:var(--surface-2);cursor:pointer;aspect-ratio:4/5;overflow:hidden;max-width:100%}
+.ftile canvas{width:100%;height:100%;display:block}
+.ftile.planned canvas{opacity:.92}
+.fbadge{position:absolute;left:6px;bottom:6px;right:6px;font-size:10.5px;font-weight:800;border-radius:6px;padding:3px 6px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fcar{position:absolute;top:6px;right:8px;color:#FFFFFF;font-size:18px;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.calbox{display:flex;flex-direction:column;gap:18px}
+.swatches .chip{padding:0 10px 0 6px}
+.sw{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--line-2);flex:none}
+.msg{gap:8px}.msg-who{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pf{font-size:11px;font-weight:800;border-radius:6px;padding:2px 7px;background:var(--surface-3);color:var(--muted)}
+.pf.ig{background:#FDE3EE;color:#A0185A}.pf.fb{background:#E3EBFF;color:#0F4CDB}
+@media (max-width:520px){.tabs button{font-size:10px}.tabs button svg{width:22px;height:22px;padding:3px}}
