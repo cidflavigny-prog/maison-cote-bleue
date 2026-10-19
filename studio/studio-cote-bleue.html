@@ -380,6 +380,14 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
       <summary><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 9h14M5 15h14M10 4 8 20M16 4l-2 16"/></svg>Veille réseaux du jour <span class="chipn" id="n-reseaux"></span></summary>
       <div class="panel" id="reseaux-body"></div>
     </details>
+    <details class="add" id="insp-box">
+      <summary><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"/></svg>Inspirations enregistrées <span class="chipn" id="n-insp"></span></summary>
+      <div class="panel">
+        <p class="hint" style="margin:0">À chaque veille, l’agent com met de côté les publications d’autres comptes qui marchent bien ou qu’on pourra reprendre plus tard, classées par catégorie. Rien n’est copié : on s’en inspire avec nos mots et nos visuels.</p>
+        <div class="chips" id="insp-cats" role="group" aria-label="Catégorie d’inspiration"></div>
+        <div id="insp-list" class="contacts"></div>
+      </div>
+    </details>
     <details class="add" id="add-idea">
       <summary><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Ajouter une idée à la main</summary>
       <form class="panel" id="idea-form">
@@ -902,7 +910,7 @@ function copyText(txt,okMsg,fallbackEl){var p=navigator.clipboard&&navigator.cli
 $("today-label").textContent="@maison.cotebleue · "+frDate(todayIso());
 
 /* ---------- État ---------- */
-var S={ideas:[],posts:[],stats:[],recaps:[],comptes:[],reseaux:null,meteo:{},sync:null,filter:"nouvelle",selecting:false,sel:{},weekOff:0,db:null,assets:null,downloads:null,sample:null};
+var S={ideas:[],insp:[],inspCat:"Toutes",posts:[],stats:[],recaps:[],comptes:[],reseaux:null,meteo:{},sync:null,filter:"nouvelle",selecting:false,sel:{},weekOff:0,db:null,assets:null,downloads:null,sample:null};
 function blankPost(){return{id:null,format:"post",type:"agenda",village:"cotebleue",pill:"",sticker:"",titre:"",details:"",legende:"",datePrevue:"",source:"",photoId:null,ideeIds:[],rows:[],compteur:"",visuel:"logo",villages:[],meteoDate:"",statut:"brouillon"}}
 var P=blankPost();
 var SLIDE=0;
@@ -1011,6 +1019,19 @@ function renderReseaux(){var r=S.reseaux,b=$("reseaux-body");b.textContent="";$(
   var tags=r.hashtags||[];if(tags.length){b.appendChild(el("span",{class:"lbl",text:"Hashtags du moment"}));var w=el("div",{class:"tagrow"});tags.forEach(function(t){var x=(t.tag||"").replace(/^#?/,"#");w.appendChild(el("button",{class:"tagchip",type:"button",title:t.note||"",text:x+(t.usage?" · "+t.usage:""),onclick:function(){copyText(x,x+" copié")}}))});b.appendChild(w);
     b.appendChild(el("button",{class:"btn",type:"button",text:"Copier tous les hashtags",onclick:function(){copyText(tags.map(function(t){return(t.tag||"").replace(/^#?/,"#")}).join(" "),"Hashtags copiés")}}))}
   var pubs=r.publications||[];if(pubs.length){b.appendChild(el("span",{class:"lbl",text:"Publications à regarder"}));var l=el("div",{class:"contacts"});pubs.forEach(function(p){l.appendChild(el("div",{class:"contact"},[el("a",{href:p.url,target:"_blank",rel:"noopener"},[el("b",{text:p.compte||"Voir la publication"})]),p.resume?el("span",{class:"hint",text:p.resume}):null,p.idee?el("span",{class:"hint",text:"Idée : "+p.idee}):null]))});b.appendChild(l)}}
+/* Inspirations : publications d'autres comptes mises de côté par la veille (collection « inspirations ») */
+var INSP_CATS=["Format à copier","Sujet à reprendre","Événement récurrent","Commerce à mettre en avant","Style visuel","Engagement fort"];
+function renderInsp(){var box=$("insp-list"),cats=$("insp-cats");if(!box)return;box.textContent="";cats.textContent="";
+  var all=S.insp.slice().sort(function(a,b){return(b.ajouteLe||"").localeCompare(a.ajouteLe||"")}),used=INSP_CATS.filter(function(c){return all.some(function(i){return i.categorie===c})});
+  $("n-insp").textContent=all.filter(function(i){return i.statut==="nouvelle"}).length||"";
+  ["Toutes"].concat(used).forEach(function(c){cats.appendChild(el("button",{type:"button",class:"chip","aria-pressed":String((S.inspCat||"Toutes")===c),text:c,onclick:function(){S.inspCat=c;renderInsp()}}))});
+  var list=all.filter(function(i){return!S.inspCat||S.inspCat==="Toutes"||i.categorie===S.inspCat});
+  if(!list.length){box.appendChild(el("p",{class:"hint",style:"margin:0",text:"Rien pour l’instant : la prochaine veille (dimanche, mardi ou jeudi matin) en ajoutera."}));return}
+  list.forEach(function(i){var ref=S.db.collection("inspirations").doc(i.id),eng=i.engagement||{};
+    box.appendChild(el("div",{class:"contact"},[
+      el("div",{class:"msg-who"},[el("span",{class:"pf ig",text:i.categorie||"Inspiration"}),i.url?el("a",{href:i.url,target:"_blank",rel:"noopener"},[el("b",{text:i.compte||"Voir la publication"})]):el("b",{text:i.compte||""}),el("span",{class:"hint",text:[i.date?frDate(String(i.date).slice(0,10)):"",eng.likes!=null?eng.likes+" j’aime":"",eng.comments!=null?eng.comments+" commentaires":"",i.statut==="gardee"?"gardée":i.statut==="utilisee"?"utilisée":""].filter(Boolean).join(" · ")})]),
+      i.resume?el("span",{text:i.resume}):null,i.pourquoi?el("span",{class:"hint",text:"Pourquoi : "+i.pourquoi}):null,i.idee?el("span",{class:"hint",text:"Pour nous : "+i.idee}):null,i.aReprendreLe?el("span",{class:"hint",text:"À ressortir vers le "+frDate(i.aReprendreLe)}):null,
+      el("div",{class:"row"},[el("button",{type:"button",class:"btn",text:i.statut==="gardee"?"Gardée":"Garder",onclick:function(){ref.update({statut:"gardee"})}}),el("button",{type:"button",class:"btn",text:"Utilisée",onclick:function(){ref.update({statut:"utilisee"})}}),el("button",{type:"button",class:"btn ghost",text:"Retirer",onclick:function(){ref.delete().then(function(){toast("Inspiration retirée")})}})])]))})}
 /* Point com du lundi */
 function strList(x){return(Array.isArray(x)?x:(x?String(x).split("\n"):[])).map(function(s){return String(s).replace(/^[-•]\s*/,"").trim()}).filter(Boolean)}
 function ago(isoS){if(!isoS)return"";var d=new Date(isoS);if(isNaN(d))return"";var t=iso(d),h=pad(d.getHours())+"h"+pad(d.getMinutes());return(t===todayIso()?"aujourd’hui":t===addDays(todayIso(),-1)?"hier":frDate(t))+" à "+h}
@@ -1258,6 +1279,7 @@ else{
     snap("stats",function(d){S.stats=d.filter(function(x){return x.date});renderAna()},db.collection("stats").limit(800));
     snap("recaps",function(d,live){S.recaps=d.filter(function(x){return x.date});renderRecap();renderMessages();if(live)purge("recaps",d,function(r){return r.date<todayIso()})},db.collection("recaps").limit(60));
     snap("comptes",function(d){S.comptes=d;renderComptes()},db.collection("comptes").limit(300));
+    snap("inspirations",function(d){S.insp=d;renderInsp()},db.collection("inspirations").limit(300));
     snap("meteo",function(d,live){S.meteo={};d.forEach(function(m){S.meteo[m.date||m.id]=m});renderWeek();if(P.type==="meteo"){syncForm();draw()}if(live)purge("meteo",d,function(m){return(m.date||m.id)<todayIso()})},db.collection("meteo").limit(30));
     db.doc("reglages/meta").onSnapshot(function(s){S.sync=s.exists?s.data():null;renderAna();renderWeek();renderHealth()});
     db.doc("reglages/reseaux").onSnapshot(function(s){S.reseaux=s.exists?s.data():null;renderReseaux();renderHealth()});

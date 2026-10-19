@@ -14,6 +14,8 @@ Page de travail publiée sur claude.ai (privée) : https://claude.ai/artifact/PH
 - **Idées** : infos déposées par la veille, filtres À traiter / À vérifier / Utilisées / Écartées, sélection → agenda, récap du jour, veille réseaux du jour, comptes à suivre et à contacter (avec message prêt à copier).
 - **Atelier** (éditeur façon Canva : réglages à gauche, plan de travail à droite avec format et téléchargement) : gabarits de la DA (agenda semaine, week-end, du jour, météo, événement, bon plan, nouveauté, info pratique, question, happening) en post 4:5 (1080×1350), story 9:16 (1080×1920) et carrousel (couverture, une slide par événement ou par ligne de détails, slide de fin ; 10 slides maximum ; sans numéro de slide). Ligne de carrousel expressive : `**1** 🥾 Titre · info · info` donne un gros autocollant émoji, « Étape 1 », un titre géant et une carte par info ; l’autocollant de la couverture (champ Autocollant) s’affiche en grand quand il n’y a pas de photo, photos encadrées (contour marine, ombre dure, fond de couleur conservé), légende proposée par Claude. Couleur de fond au choix (bleu, soleil, nuit, blanc, ciel, couleurs des villages) et crédit photo affiché avec « Photo non contractuelle ».
 - **Messages** : messages prêts à envoyer (comptes proposés et contacts de l'agent com), à copier puis marquer « envoyé », et la liste des comptes suivis.
+- **Inspirations** (onglet Idées) : les publications d'autres comptes mises de côté par la veille, classées par catégorie ; l'agent com du lundi en reprend au moins une dans le calendrier. Jamais republiées sans accord.
+- **Ligne éditoriale** : pas de politique ; pas que des mairies (au plus 1 idée ou ligne d'agenda sur 4 de source municipale, on cite l'organisateur).
 - **Com** : le Point com du lundi (bilan, calendrier, conseils, relances), l'état de chaque routine et un journal où les routines notent publications, échecs et vérifications (`reglages/strategie.journal`).
 - **Stats** : abonnés, portée, engagement par gabarit et par village (API Meta).
 
@@ -37,6 +39,7 @@ Page de travail publiée sur claude.ai (privée) : https://claude.ai/artifact/PH
 | `meteo` | un document par jour (`AAAA-MM-JJ`) : `villages{code, tmin, tmax}, mer{eau, eauVeille, vagues, vent, rafales, dir}` (valeur mer absente = colonne masquée ; `eauVeille` = eau reprise de la veille, affichée « ≈ ») | supprimé le jour passé |
 | `stats` | un document par jour : `abonnes, messages` | — |
 | `comptes` | comptes pros Instagram et Facebook : `plateforme, url, statut (suivi/propose/ignore), action, message, contacteLe, village, abonnes, dernierPost` | — |
+| `inspirations` | `compte, url, date, format, categorie (Format à copier, Sujet à reprendre, Événement récurrent, Commerce à mettre en avant, Style visuel, Engagement fort), resume, pourquoi, idee, engagement{likes, comments}, aReprendreLe, village, statut (nouvelle/gardee/utilisee), ajouteLe` | publications d'autres comptes mises de côté par la veille ; supprimées après 120 jours sauf « gardée » (200 au maximum) |
 | `reglages` | `objectifs`, `meta` (bilan des routines), `reseaux` (hashtags, tendances, publications du jour), `strategie` (Point com du lundi) | — |
 
 ## Voix de la marque
