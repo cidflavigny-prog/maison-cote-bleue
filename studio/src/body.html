@@ -26,10 +26,6 @@
     </div>
     <div class="note" id="week-note" hidden></div>
     <div class="daylist" id="days"></div>
-    <details class="add" id="strat-box">
-      <summary><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>Point com de la semaine <span class="chipn" id="n-strat"></span></summary>
-      <div class="panel" id="strat-body"></div>
-    </details>
     <div class="field"><h3>Brouillons sans date</h3><div class="list" id="drafts"></div></div>
   </section>
 
@@ -141,6 +137,7 @@
           <p class="note" id="meteo-info" style="margin:0"></p>
         </div>
         <div class="field" id="details-field"><label for="p-details" id="p-details-label">Détails</label><textarea id="p-details" rows="3"></textarea><span class="hint">Une ligne par info. Entoure de **deux étoiles** ce qui doit être en gras, par exemple **18h**.</span></div>
+        <div class="field" id="cta-field" hidden><label for="p-cta">Dernière slide (appel à l’action)</label><textarea id="p-cta" rows="2"></textarea><span class="hint">Le carrousel = une couverture, une slide par événement (ou par ligne des détails, ex. **1** Carry · …), puis cette slide de fin. 10 slides maximum.</span></div>
         <div class="field" id="photo-field">
           <label for="p-photo">Photo (encadrée, le fond garde sa couleur)</label>
           <div class="photo-row"><input type="file" id="p-photo" accept="image/*"><button type="button" class="btn ghost" id="btn-photo-rm" hidden>Retirer la photo</button></div>
@@ -166,6 +163,7 @@
           <div class="seg" role="group" aria-label="Format">
             <button type="button" id="fmt-post" aria-pressed="true">Post 4:5</button>
             <button type="button" id="fmt-story" aria-pressed="false">Story 9:16</button>
+            <button type="button" id="fmt-car" aria-pressed="false">Carrousel</button>
           </div>
           <span class="hint stage-status" id="post-status"></span>
           <div class="row stage-actions">
@@ -186,9 +184,21 @@
         <div class="preview" id="preview">
           <canvas id="canvas" width="1080" height="1350" aria-label="Aperçu du visuel"></canvas>
         </div>
+        <div class="car-nav" id="car-nav" hidden><button type="button" class="btn" id="car-prev" aria-label="Slide précédente">‹</button><span id="car-pos"></span><button type="button" class="btn" id="car-next" aria-label="Slide suivante">›</button></div>
         <div id="export-fallback" hidden class="hint" style="text-align:center"></div>
       </div>
     </div>
+  </section>
+
+  <!-- POINT COM -->
+  <section class="view" id="v-com" aria-labelledby="h-com" hidden>
+    <div>
+      <h2 id="h-com">Point com <span class="chipn" id="n-strat"></span></h2>
+      <p class="lead">Ta responsable com fait le point chaque lundi matin. Les routines notent ici ce qu’elles ont fait, au fil de la semaine.</p>
+    </div>
+    <div class="panel"><div class="week-head"><h3>Routines</h3><span class="source">dernier passage de chacune</span></div><div id="health" class="health"></div></div>
+    <div class="panel"><div class="week-head"><h3>Journal</h3><span class="source">le plus récent en haut</span></div><div id="journal" class="journal"></div></div>
+    <div class="panel" id="strat-body"></div>
   </section>
 
   <!-- STATS -->
@@ -228,6 +238,7 @@
   <button data-view="semaine" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Semaine</button>
   <button data-view="idees"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.8V16h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0 0 12 3z"/></svg><span>Idées<span class="count" id="idea-count" hidden></span></span></button>
   <button data-view="atelier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 15l3-3 2 2 3-3"/><circle cx="9" cy="8" r="1.5"/></svg>Atelier</button>
+  <button data-view="com"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11v3a1 1 0 0 0 1 1h2l5 4V6L7 10H5a1 1 0 0 0-1 1zM16 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12"/></svg><span>Com<span class="count" id="com-count" hidden></span></span></button>
   <button data-view="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Stats</button>
 </nav>
 <div class="toast" id="toast" hidden role="status"></div>

@@ -12,7 +12,8 @@ Page de travail publiée sur claude.ai (privée) : https://claude.ai/artifact/PH
   - dimanche : agenda de la semaine suivante (post), plus une story « Ça bouge à … » pour chaque village qui a au moins 3 événements ;
   - jeudi : agenda du week-end (post + story).
 - **Idées** : infos déposées par la veille, filtres À traiter / À vérifier / Utilisées / Écartées, sélection → agenda, récap du jour, veille réseaux du jour, comptes à suivre et à contacter (avec message prêt à copier).
-- **Atelier** (éditeur façon Canva : réglages à gauche, plan de travail à droite avec format et téléchargement) : gabarits de la DA (agenda semaine, week-end, du jour, météo, événement, bon plan, nouveauté, info pratique, question, happening) en post 4:5 (1080×1350) et story 9:16 (1080×1920), photos encadrées (contour marine, ombre dure, fond de couleur conservé), légende proposée par Claude.
+- **Atelier** (éditeur façon Canva : réglages à gauche, plan de travail à droite avec format et téléchargement) : gabarits de la DA (agenda semaine, week-end, du jour, météo, événement, bon plan, nouveauté, info pratique, question, happening) en post 4:5 (1080×1350), story 9:16 (1080×1920) et carrousel (couverture, une slide par événement ou par ligne de détails, slide de fin ; 10 slides maximum), photos encadrées (contour marine, ombre dure, fond de couleur conservé), légende proposée par Claude.
+- **Com** : le Point com du lundi (bilan, calendrier, conseils, relances), l'état de chaque routine et un journal où les routines notent publications, échecs et vérifications (`reglages/strategie.journal`).
 - **Stats** : abonnés, portée, engagement par gabarit et par village (API Meta).
 
 ### Code

@@ -143,7 +143,7 @@ function drawSimpleStory(P,W,H){var M=90,t=typ(P.type),v=vil(P.village),th=theme
 function rowsDates(P){return(P.rows||[]).map(function(r){return r.date}).concat(P.type==="jour"?[P.datePrevue||todayIso()]:[])}
 function defTitle(P){var v=vil(P.village);if(P.type==="semaine"&&P.format==="story"&&P.village!=="cotebleue")return"Ça bouge "+(P.village==="couronne"?"à la Couronne-Carro":"à "+v.short)+"\ncette semaine";
   return P.type==="semaine"?"Ça bouge\ncette semaine":P.type==="weekend"?"Ça bouge\nce week-end":P.type==="jour"?"Ça bouge\naujourd’hui":P.type==="meteo"?"Demain sur\nla Côte Bleue":"Quelque chose arrive\nsur la Côte Bleue"}
-function maxRows(P){if(P.type==="semaine")return P.format==="story"?6:5;if(P.type==="jour")return 5;return 6}
+function maxRows(P){if(P.format==="carrousel")return CAR_MAX_ITEMS;if(P.type==="semaine")return P.format==="story"?6:5;if(P.type==="jour")return 5;return 6}
 function perDayMax(P){return 3}
 function singleVillage(rows){var vs={};rows.forEach(function(r){vs[r.village]=1});var k=Object.keys(vs);return k.length===1&&k[0]!=="cotebleue"?k[0]:null}
 function drawList(P,W,H){var story=P.format==="story";var rows=(P.rows||[]).slice().sort(function(a,b){return a.date.localeCompare(b.date)});var pillTxt=P.pill||monthPill(rowsDates(P));var title=P.titre||defTitle(P);
@@ -243,8 +243,54 @@ function drawMeteo(P,W,H,data){var M=64;ctx.fillStyle=BLEU;ctx.fillRect(0,0,W,H)
   if(data){ctx.fillStyle=CIEL;ctx.font="700 24px "+FB;ctx.textBaseline="alphabetic";ctx.textAlign="left";ctx.fillText("Source : "+(data.source||"Open-Meteo")+" · open-meteo.com",M+4,y+mh+48)}
   if(!data){ctx.fillStyle=CIEL;ctx.font="700 26px "+FB;ctx.textAlign="center";ctx.fillText("Prévisions en attente : elles arrivent vers 7h",W/2,y+mh+70);ctx.textAlign="left"}}
 
+/* ---------- Carrousel : couverture, une slide par événement (ou par ligne de détails), slide de fin ---------- */
+var CAR_MAX_ITEMS=8;
+function canCarousel(k){return k!=="meteo"&&k!=="jour"&&k!=="teaser"}
+function carItems(P){if(isList(P.type))return(P.rows||[]).slice().sort(function(a,b){return(a.date||"").localeCompare(b.date||"")}).slice(0,CAR_MAX_ITEMS).map(function(r){return{row:r}});
+  return(P.details||"").split("\n").map(function(s){return s.trim()}).filter(Boolean).slice(0,CAR_MAX_ITEMS).map(function(l){return{line:l}})}
+function carCount(P){return carItems(P).length+2}
+function carCta(P){return P.cta||(P.type==="question"?"Réponds en commentaire\net tague qui vient avec toi":isList(P.type)?"Enregistre ce post\net envoie-le à qui cherche une sortie":"Enregistre ce post\net partage-le autour de toi")}
+function carBg(P){var th=isList(P.type)?themeOf("agenda"):themeOf(P.type);ctx.fillStyle=th.bg;ctx.fillRect(0,0,1080,1350);return th}
+function carCounter(i,n,th){var t=(i+1)+" / "+n;ctx.font="800 26px "+FB;var w=ctx.measureText(t).width+36;ctx.fillStyle=th.fg===BLANC?"rgba(255,255,255,.18)":"rgba(11,27,63,.08)";rr(1080-64-w,64,w,48,24);ctx.fill();ctx.fillStyle=th.fg;ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(t,1080-64-w/2,89);ctx.textAlign="left"}
+function carFooter(th){if(th.fg===BLANC){footer(64,1350-34-64,64,false,1080);return}logo(64,1350-34-64,64,BLEU);ctx.fillStyle=NUIT;ctx.font="800 28px "+FB;ctx.textBaseline="alphabetic";ctx.fillText("Maison Côte Bleue",64+82,1350-34-32);ctx.fillStyle=ENCRE2;ctx.font="600 22px "+FB;ctx.fillText("@maison.cotebleue",64+82,1350-34-4)}
+function drawCarousel(P,W,H,i){var items=carItems(P),n=items.length+2;i=Math.max(0,Math.min(i||0,n-1));var th=carBg(P),M=64,t=typ(P.type);
+  if(i===0){/* Couverture */
+    zigzag(760,170,1.75,SOLEIL,9);triangle(930,300,1.85,th.fg===BLANC?CIEL:SOLEIL);ring(140,1010,34,SOLEIL,14);
+    var pillTxt=P.pill||(isList(P.type)?monthPill(rowsDates(P)):t.pill||"Côte Bleue"),title=P.titre||(isList(P.type)?defTitle(P):t.title);
+    var hasPhoto=!!P.photoId,f=fitTitle(title,W-2*M,hasPhoto?260:440,hasPhoto?100:140,64),fH=f.lines.length*f.size*1.04;
+    var blk=26*1.75+30+fH+(hasPhoto?40+420:0)+60+70,y=Math.max(150,(H-120-blk)/2);
+    var ph=pill(M,y,pillTxt,th.pillBg,th.pillFg,th.pillShadow,th.pillBorder,26,3,4);y+=ph+30;drawTitle(f,M,y,th.fg,th.shadow);y+=fH+40;
+    if(hasPhoto){photoFrame(imgFor(P.photoId),M,y,W-2*M,420,28,8,14,"");y+=420+40}
+    var g=items.length?"Glisse pour voir les "+items.length+" →":"Glisse →";ctx.font="800 30px "+FB;var gw=ctx.measureText(g).width+56;ctx.fillStyle=NUIT;rr(M+6,y+6,gw,70,35);ctx.fill();ctx.fillStyle=SOLEIL;rr(M,y,gw,70,35);ctx.fill();ctx.lineWidth=3;ctx.strokeStyle=NUIT;ctx.stroke();ctx.fillStyle=NUIT;ctx.textBaseline="middle";ctx.fillText(g,M+28,y+37);
+    carCounter(0,n,th);carFooter(th);return n}
+  if(i===n-1){/* Fin : appel à l'action */
+    ring(W-160,250,60,SOLEIL,22);triangle(120,1040,2.4,th.fg===BLANC?CIEL:SOLEIL);
+    var cta=carCta(P),f2=fitTitle(cta,W-2*M-40,460,104,60),h2=f2.lines.length*f2.size*1.04,y2=(H-120-(300+40+h2+40+80))/2;
+    bigLogo(W/2,y2+150,130);y2+=340;var font="600 "+f2.size+"px "+FD;f2.lines.forEach(function(l,k){var w=l.reduce(function(a,tk){return a+tk.width},0);if(th.shadow)drawLines([l],(W-w)/2+f2.size*.07,y2+k*f2.size*1.04+f2.size*.07,f2.size*1.04,font,font,th.shadow);drawLines([l],(W-w)/2,y2+k*f2.size*1.04,f2.size*1.04,font,font,th.fg)});y2+=h2+40;
+    var ab="Abonne-toi : @maison.cotebleue";ctx.font="800 32px "+FB;var aw=ctx.measureText(ab).width+60;ctx.fillStyle=th.fg===BLANC?BLANC:BLEU;rr((W-aw)/2,y2,aw,76,38);ctx.fill();ctx.fillStyle=th.fg===BLANC?BLEU:BLANC;ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(ab,W/2,y2+40);ctx.textAlign="left";
+    carCounter(i,n,th);return n}
+  /* Slide d'un élément */
+  var it=items[i-1];zigzag(W-240,H-210,1.6,SOLEIL,9);carCounter(i,n,th);
+  var cx=M,cw=W-2*M,cy=200,chMax=H-200-150;
+  if(it.row){var r=it.row,v=vil(r.village),hasP=!!r.photoId,ph2=hasP?420:0;
+    ctx.font="600 30px "+FB;var tl=layout(r.titre||"[Événement]","600 76px "+FD,"600 76px "+FD,cw-80);var fs=76;while(tl.length>3&&fs>52){fs-=6;tl=layout(r.titre||"","600 "+fs+"px "+FD,"600 "+fs+"px "+FD,cw-80)}
+    var il=layout(r.infos||"","600 40px "+FB,"800 40px "+FB,cw-80),ch=48+230+40+(hasP?ph2+36:0)+tl.length*fs*1.06+24+il.length*54+56;ch=Math.min(ch,chMax);var y=cy+Math.max(0,(chMax-ch)/2);
+    card(cx,y,cw,ch,32);var yy=y+48;
+    if(r.date){var d=parseIso(r.date);dateBlock(cx+40,yy,230,230,JC[d.getDay()],String(d.getDate()),40,120)}
+    logo(cx+40+230+36,yy+20,120,v.color);ctx.fillStyle=v.color;ctx.font="800 30px "+FB;setLS(4);ctx.textBaseline="alphabetic";ctx.fillText(ellip(v.name.toUpperCase(),"800 30px "+FB,cw-40-230-36-40),cx+40+230+36,yy+200);setLS(0);
+    if(r.date){ctx.fillStyle=ENCRE2;ctx.font="700 28px "+FB;var dd=parseIso(r.date);ctx.fillText(JOURSL[dd.getDay()]+" "+dd.getDate()+" "+MOIS[dd.getMonth()].replace(".",""),cx+40+230+36,yy+236)}
+    yy+=230+40;if(hasP){photoFrame(imgFor(r.photoId),cx+40,yy,cw-80,ph2,24,6,10,"");yy+=ph2+36}
+    drawLines(tl,cx+40,yy,fs*1.06,"600 "+fs+"px "+FD,"600 "+fs+"px "+FD,NUIT);yy+=tl.length*fs*1.06+24;drawLines(il,cx+40,yy,54,"600 40px "+FB,"800 40px "+FB,ENCRE2)}
+  else{var line=it.line,num=null,m=line.match(/^\*\*(\d+)\*\*\s*/);if(m){num=m[1];line=line.slice(m[0].length)}var parts=line.split(/\s+·\s+/),head=parts.shift(),sub=parts.join(" · ");
+    var hl=layout(head,"600 96px "+FD,"600 96px "+FD,cw-80),hs=96;while(hl.length>3&&hs>60){hs-=6;hl=layout(head,"600 "+hs+"px "+FD,"600 "+hs+"px "+FD,cw-80)}var sl=sub?layout(sub,"600 44px "+FB,"800 44px "+FB,cw-80):[];
+    var ch3=48+(num?220+40:0)+hl.length*hs*1.06+(sl.length?30+sl.length*60:0)+56,y3=cy+Math.max(0,(chMax-ch3)/2);card(cx,y3,cw,ch3,32);var y4=y3+48;
+    if(num){ctx.fillStyle=NUIT;ctx.beginPath();ctx.arc(cx+40+110+8,y4+110+8,110,0,Math.PI*2);ctx.fill();ctx.fillStyle=SOLEIL;ctx.beginPath();ctx.arc(cx+40+110,y4+110,110,0,Math.PI*2);ctx.fill();ctx.lineWidth=4;ctx.strokeStyle=NUIT;ctx.stroke();ctx.fillStyle=NUIT;ctx.font="600 130px "+FD;ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(num,cx+40+110,y4+118);ctx.textAlign="left";y4+=220+40}
+    drawLines(hl,cx+40,y4,hs*1.06,"600 "+hs+"px "+FD,"600 "+hs+"px "+FD,BLEU);y4+=hl.length*hs*1.06;if(sl.length){y4+=30;drawLines(sl,cx+40,y4,60,"600 44px "+FB,"800 44px "+FB,ENCRE2)}}
+  carFooter(th);return n}
+
 /* ---------- Point d’entrée ---------- */
-function render(P,meteoData){var story=P.format==="story"||(TYPES[P.type]&&TYPES[P.type].storyOnly);var W=1080,H=story?1920:1350;if(cv.height!==H)cv.height=H;
+function render(P,meteoData,slide){if(P.format==="carrousel"&&canCarousel(P.type)){if(cv.height!==1350)cv.height=1350;ctx.setTransform(1,0,0,1,0,0);ctx.textAlign="left";setLS(0);return drawCarousel(P,1080,1350,slide||0)}
+  var story=P.format==="story"||(TYPES[P.type]&&TYPES[P.type].storyOnly);var W=1080,H=story?1920:1350;if(cv.height!==H)cv.height=H;
   ctx.setTransform(1,0,0,1,0,0);ctx.textAlign="left";setLS(0);var Q=Object.assign({},P,{format:story?"story":"post"});
   if(isList(P.type))return drawList(Q,W,H);if(P.type==="teaser")return drawTeaser(Q,W,H);if(P.type==="meteo")return drawMeteo(Q,W,H,meteoData);
   if(story)drawSimpleStory(Q,W,H);else drawSimplePost(Q,W,H)}

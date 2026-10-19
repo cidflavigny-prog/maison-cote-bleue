@@ -51,7 +51,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 @media (max-width:560px){.hero-k{display:none}.create-btn span{display:none}.create-btn{padding:0 10px}.badge{display:none}}
 
 /* Rail d'outils (bas sur téléphone, gauche sur grand écran) */
-.tabs{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
 .tabs button{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:3px;min-height:54px;justify-content:center;font-size:11.5px;font-weight:700;color:var(--faint);border-radius:10px;cursor:pointer}
 .tabs button svg{width:24px;height:24px;padding:4px;box-sizing:content-box;border-radius:10px}
 .tabs button:hover{color:var(--ink)}
@@ -144,7 +144,7 @@ details.add .panel{border:0;border-radius:0 0 var(--r) var(--r);box-shadow:none}
 .studio{display:grid;grid-template-columns:1fr;gap:16px}
 .preview-col{display:flex;flex-direction:column;gap:10px;min-width:0}
 .stage-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:8px 10px}
-.stage-bar .seg{flex:none;width:auto;grid-template-columns:auto auto}
+.stage-bar .seg{flex:none;width:auto;grid-template-columns:auto auto auto}
 .stage-bar .seg button{padding:0 14px;min-height:38px}
 .stage-status{flex:1;min-width:120px}
 .stage-actions .btn{min-height:40px}
@@ -266,6 +266,21 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
 .st-err{background:#FDE0E0;color:#8F1D1D}
 .planif{gap:12px}
 .planif-head{display:flex;flex-direction:column;gap:2px}
+.car-nav{display:flex;align-items:center;justify-content:center;gap:14px;font-weight:800;font-variant-numeric:tabular-nums}
+.car-nav .btn{min-height:40px;width:48px;padding:0;font-size:22px}
+.week-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.health{display:flex;flex-direction:column;gap:10px}
+.hrow{display:flex;gap:12px;align-items:flex-start}
+.hdot{width:12px;height:12px;border-radius:50%;flex:none;margin-top:5px;background:var(--line-2)}
+.hdot.ok{background:#2BB673}.hdot.ko{background:#E5484D}.hdot.wait{background:var(--line-2)}
+.htxt{display:flex;flex-direction:column;gap:2px;min-width:0}.htxt .hint{overflow-wrap:anywhere}
+.journal{display:flex;flex-direction:column;gap:0}
+.jrow{display:grid;grid-template-columns:150px 1fr;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.jrow:last-child{border-bottom:0}
+.jrow.alerte .jtxt{color:#C2323A;font-weight:700}
+.jat{color:var(--faint);font-size:12px;font-weight:700;padding-top:2px}
+.jtxt{overflow-wrap:anywhere}
+@media (max-width:520px){.jrow{grid-template-columns:1fr;gap:2px}.tabs button{font-size:10.5px}}
 </style>
 
 <div class="wrap">
@@ -296,10 +311,6 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
     </div>
     <div class="note" id="week-note" hidden></div>
     <div class="daylist" id="days"></div>
-    <details class="add" id="strat-box">
-      <summary><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>Point com de la semaine <span class="chipn" id="n-strat"></span></summary>
-      <div class="panel" id="strat-body"></div>
-    </details>
     <div class="field"><h3>Brouillons sans date</h3><div class="list" id="drafts"></div></div>
   </section>
 
@@ -411,6 +422,7 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
           <p class="note" id="meteo-info" style="margin:0"></p>
         </div>
         <div class="field" id="details-field"><label for="p-details" id="p-details-label">Détails</label><textarea id="p-details" rows="3"></textarea><span class="hint">Une ligne par info. Entoure de **deux étoiles** ce qui doit être en gras, par exemple **18h**.</span></div>
+        <div class="field" id="cta-field" hidden><label for="p-cta">Dernière slide (appel à l’action)</label><textarea id="p-cta" rows="2"></textarea><span class="hint">Le carrousel = une couverture, une slide par événement (ou par ligne des détails, ex. **1** Carry · …), puis cette slide de fin. 10 slides maximum.</span></div>
         <div class="field" id="photo-field">
           <label for="p-photo">Photo (encadrée, le fond garde sa couleur)</label>
           <div class="photo-row"><input type="file" id="p-photo" accept="image/*"><button type="button" class="btn ghost" id="btn-photo-rm" hidden>Retirer la photo</button></div>
@@ -436,6 +448,7 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
           <div class="seg" role="group" aria-label="Format">
             <button type="button" id="fmt-post" aria-pressed="true">Post 4:5</button>
             <button type="button" id="fmt-story" aria-pressed="false">Story 9:16</button>
+            <button type="button" id="fmt-car" aria-pressed="false">Carrousel</button>
           </div>
           <span class="hint stage-status" id="post-status"></span>
           <div class="row stage-actions">
@@ -456,9 +469,21 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
         <div class="preview" id="preview">
           <canvas id="canvas" width="1080" height="1350" aria-label="Aperçu du visuel"></canvas>
         </div>
+        <div class="car-nav" id="car-nav" hidden><button type="button" class="btn" id="car-prev" aria-label="Slide précédente">‹</button><span id="car-pos"></span><button type="button" class="btn" id="car-next" aria-label="Slide suivante">›</button></div>
         <div id="export-fallback" hidden class="hint" style="text-align:center"></div>
       </div>
     </div>
+  </section>
+
+  <!-- POINT COM -->
+  <section class="view" id="v-com" aria-labelledby="h-com" hidden>
+    <div>
+      <h2 id="h-com">Point com <span class="chipn" id="n-strat"></span></h2>
+      <p class="lead">Ta responsable com fait le point chaque lundi matin. Les routines notent ici ce qu’elles ont fait, au fil de la semaine.</p>
+    </div>
+    <div class="panel"><div class="week-head"><h3>Routines</h3><span class="source">dernier passage de chacune</span></div><div id="health" class="health"></div></div>
+    <div class="panel"><div class="week-head"><h3>Journal</h3><span class="source">le plus récent en haut</span></div><div id="journal" class="journal"></div></div>
+    <div class="panel" id="strat-body"></div>
   </section>
 
   <!-- STATS -->
@@ -498,6 +523,7 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
   <button data-view="semaine" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Semaine</button>
   <button data-view="idees"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.8V16h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0 0 12 3z"/></svg><span>Idées<span class="count" id="idea-count" hidden></span></span></button>
   <button data-view="atelier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 15l3-3 2 2 3-3"/><circle cx="9" cy="8" r="1.5"/></svg>Atelier</button>
+  <button data-view="com"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11v3a1 1 0 0 0 1 1h2l5 4V6L7 10H5a1 1 0 0 0-1 1zM16 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12"/></svg><span>Com<span class="count" id="com-count" hidden></span></span></button>
   <button data-view="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Stats</button>
 </nav>
 <div class="toast" id="toast" hidden role="status"></div>
@@ -649,7 +675,7 @@ function drawSimpleStory(P,W,H){var M=90,t=typ(P.type),v=vil(P.village),th=theme
 function rowsDates(P){return(P.rows||[]).map(function(r){return r.date}).concat(P.type==="jour"?[P.datePrevue||todayIso()]:[])}
 function defTitle(P){var v=vil(P.village);if(P.type==="semaine"&&P.format==="story"&&P.village!=="cotebleue")return"Ça bouge "+(P.village==="couronne"?"à la Couronne-Carro":"à "+v.short)+"\ncette semaine";
   return P.type==="semaine"?"Ça bouge\ncette semaine":P.type==="weekend"?"Ça bouge\nce week-end":P.type==="jour"?"Ça bouge\naujourd’hui":P.type==="meteo"?"Demain sur\nla Côte Bleue":"Quelque chose arrive\nsur la Côte Bleue"}
-function maxRows(P){if(P.type==="semaine")return P.format==="story"?6:5;if(P.type==="jour")return 5;return 6}
+function maxRows(P){if(P.format==="carrousel")return CAR_MAX_ITEMS;if(P.type==="semaine")return P.format==="story"?6:5;if(P.type==="jour")return 5;return 6}
 function perDayMax(P){return 3}
 function singleVillage(rows){var vs={};rows.forEach(function(r){vs[r.village]=1});var k=Object.keys(vs);return k.length===1&&k[0]!=="cotebleue"?k[0]:null}
 function drawList(P,W,H){var story=P.format==="story";var rows=(P.rows||[]).slice().sort(function(a,b){return a.date.localeCompare(b.date)});var pillTxt=P.pill||monthPill(rowsDates(P));var title=P.titre||defTitle(P);
@@ -749,8 +775,54 @@ function drawMeteo(P,W,H,data){var M=64;ctx.fillStyle=BLEU;ctx.fillRect(0,0,W,H)
   if(data){ctx.fillStyle=CIEL;ctx.font="700 24px "+FB;ctx.textBaseline="alphabetic";ctx.textAlign="left";ctx.fillText("Source : "+(data.source||"Open-Meteo")+" · open-meteo.com",M+4,y+mh+48)}
   if(!data){ctx.fillStyle=CIEL;ctx.font="700 26px "+FB;ctx.textAlign="center";ctx.fillText("Prévisions en attente : elles arrivent vers 7h",W/2,y+mh+70);ctx.textAlign="left"}}
 
+/* ---------- Carrousel : couverture, une slide par événement (ou par ligne de détails), slide de fin ---------- */
+var CAR_MAX_ITEMS=8;
+function canCarousel(k){return k!=="meteo"&&k!=="jour"&&k!=="teaser"}
+function carItems(P){if(isList(P.type))return(P.rows||[]).slice().sort(function(a,b){return(a.date||"").localeCompare(b.date||"")}).slice(0,CAR_MAX_ITEMS).map(function(r){return{row:r}});
+  return(P.details||"").split("\n").map(function(s){return s.trim()}).filter(Boolean).slice(0,CAR_MAX_ITEMS).map(function(l){return{line:l}})}
+function carCount(P){return carItems(P).length+2}
+function carCta(P){return P.cta||(P.type==="question"?"Réponds en commentaire\net tague qui vient avec toi":isList(P.type)?"Enregistre ce post\net envoie-le à qui cherche une sortie":"Enregistre ce post\net partage-le autour de toi")}
+function carBg(P){var th=isList(P.type)?themeOf("agenda"):themeOf(P.type);ctx.fillStyle=th.bg;ctx.fillRect(0,0,1080,1350);return th}
+function carCounter(i,n,th){var t=(i+1)+" / "+n;ctx.font="800 26px "+FB;var w=ctx.measureText(t).width+36;ctx.fillStyle=th.fg===BLANC?"rgba(255,255,255,.18)":"rgba(11,27,63,.08)";rr(1080-64-w,64,w,48,24);ctx.fill();ctx.fillStyle=th.fg;ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(t,1080-64-w/2,89);ctx.textAlign="left"}
+function carFooter(th){if(th.fg===BLANC){footer(64,1350-34-64,64,false,1080);return}logo(64,1350-34-64,64,BLEU);ctx.fillStyle=NUIT;ctx.font="800 28px "+FB;ctx.textBaseline="alphabetic";ctx.fillText("Maison Côte Bleue",64+82,1350-34-32);ctx.fillStyle=ENCRE2;ctx.font="600 22px "+FB;ctx.fillText("@maison.cotebleue",64+82,1350-34-4)}
+function drawCarousel(P,W,H,i){var items=carItems(P),n=items.length+2;i=Math.max(0,Math.min(i||0,n-1));var th=carBg(P),M=64,t=typ(P.type);
+  if(i===0){/* Couverture */
+    zigzag(760,170,1.75,SOLEIL,9);triangle(930,300,1.85,th.fg===BLANC?CIEL:SOLEIL);ring(140,1010,34,SOLEIL,14);
+    var pillTxt=P.pill||(isList(P.type)?monthPill(rowsDates(P)):t.pill||"Côte Bleue"),title=P.titre||(isList(P.type)?defTitle(P):t.title);
+    var hasPhoto=!!P.photoId,f=fitTitle(title,W-2*M,hasPhoto?260:440,hasPhoto?100:140,64),fH=f.lines.length*f.size*1.04;
+    var blk=26*1.75+30+fH+(hasPhoto?40+420:0)+60+70,y=Math.max(150,(H-120-blk)/2);
+    var ph=pill(M,y,pillTxt,th.pillBg,th.pillFg,th.pillShadow,th.pillBorder,26,3,4);y+=ph+30;drawTitle(f,M,y,th.fg,th.shadow);y+=fH+40;
+    if(hasPhoto){photoFrame(imgFor(P.photoId),M,y,W-2*M,420,28,8,14,"");y+=420+40}
+    var g=items.length?"Glisse pour voir les "+items.length+" →":"Glisse →";ctx.font="800 30px "+FB;var gw=ctx.measureText(g).width+56;ctx.fillStyle=NUIT;rr(M+6,y+6,gw,70,35);ctx.fill();ctx.fillStyle=SOLEIL;rr(M,y,gw,70,35);ctx.fill();ctx.lineWidth=3;ctx.strokeStyle=NUIT;ctx.stroke();ctx.fillStyle=NUIT;ctx.textBaseline="middle";ctx.fillText(g,M+28,y+37);
+    carCounter(0,n,th);carFooter(th);return n}
+  if(i===n-1){/* Fin : appel à l'action */
+    ring(W-160,250,60,SOLEIL,22);triangle(120,1040,2.4,th.fg===BLANC?CIEL:SOLEIL);
+    var cta=carCta(P),f2=fitTitle(cta,W-2*M-40,460,104,60),h2=f2.lines.length*f2.size*1.04,y2=(H-120-(300+40+h2+40+80))/2;
+    bigLogo(W/2,y2+150,130);y2+=340;var font="600 "+f2.size+"px "+FD;f2.lines.forEach(function(l,k){var w=l.reduce(function(a,tk){return a+tk.width},0);if(th.shadow)drawLines([l],(W-w)/2+f2.size*.07,y2+k*f2.size*1.04+f2.size*.07,f2.size*1.04,font,font,th.shadow);drawLines([l],(W-w)/2,y2+k*f2.size*1.04,f2.size*1.04,font,font,th.fg)});y2+=h2+40;
+    var ab="Abonne-toi : @maison.cotebleue";ctx.font="800 32px "+FB;var aw=ctx.measureText(ab).width+60;ctx.fillStyle=th.fg===BLANC?BLANC:BLEU;rr((W-aw)/2,y2,aw,76,38);ctx.fill();ctx.fillStyle=th.fg===BLANC?BLEU:BLANC;ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(ab,W/2,y2+40);ctx.textAlign="left";
+    carCounter(i,n,th);return n}
+  /* Slide d'un élément */
+  var it=items[i-1];zigzag(W-240,H-210,1.6,SOLEIL,9);carCounter(i,n,th);
+  var cx=M,cw=W-2*M,cy=200,chMax=H-200-150;
+  if(it.row){var r=it.row,v=vil(r.village),hasP=!!r.photoId,ph2=hasP?420:0;
+    ctx.font="600 30px "+FB;var tl=layout(r.titre||"[Événement]","600 76px "+FD,"600 76px "+FD,cw-80);var fs=76;while(tl.length>3&&fs>52){fs-=6;tl=layout(r.titre||"","600 "+fs+"px "+FD,"600 "+fs+"px "+FD,cw-80)}
+    var il=layout(r.infos||"","600 40px "+FB,"800 40px "+FB,cw-80),ch=48+230+40+(hasP?ph2+36:0)+tl.length*fs*1.06+24+il.length*54+56;ch=Math.min(ch,chMax);var y=cy+Math.max(0,(chMax-ch)/2);
+    card(cx,y,cw,ch,32);var yy=y+48;
+    if(r.date){var d=parseIso(r.date);dateBlock(cx+40,yy,230,230,JC[d.getDay()],String(d.getDate()),40,120)}
+    logo(cx+40+230+36,yy+20,120,v.color);ctx.fillStyle=v.color;ctx.font="800 30px "+FB;setLS(4);ctx.textBaseline="alphabetic";ctx.fillText(ellip(v.name.toUpperCase(),"800 30px "+FB,cw-40-230-36-40),cx+40+230+36,yy+200);setLS(0);
+    if(r.date){ctx.fillStyle=ENCRE2;ctx.font="700 28px "+FB;var dd=parseIso(r.date);ctx.fillText(JOURSL[dd.getDay()]+" "+dd.getDate()+" "+MOIS[dd.getMonth()].replace(".",""),cx+40+230+36,yy+236)}
+    yy+=230+40;if(hasP){photoFrame(imgFor(r.photoId),cx+40,yy,cw-80,ph2,24,6,10,"");yy+=ph2+36}
+    drawLines(tl,cx+40,yy,fs*1.06,"600 "+fs+"px "+FD,"600 "+fs+"px "+FD,NUIT);yy+=tl.length*fs*1.06+24;drawLines(il,cx+40,yy,54,"600 40px "+FB,"800 40px "+FB,ENCRE2)}
+  else{var line=it.line,num=null,m=line.match(/^\*\*(\d+)\*\*\s*/);if(m){num=m[1];line=line.slice(m[0].length)}var parts=line.split(/\s+·\s+/),head=parts.shift(),sub=parts.join(" · ");
+    var hl=layout(head,"600 96px "+FD,"600 96px "+FD,cw-80),hs=96;while(hl.length>3&&hs>60){hs-=6;hl=layout(head,"600 "+hs+"px "+FD,"600 "+hs+"px "+FD,cw-80)}var sl=sub?layout(sub,"600 44px "+FB,"800 44px "+FB,cw-80):[];
+    var ch3=48+(num?220+40:0)+hl.length*hs*1.06+(sl.length?30+sl.length*60:0)+56,y3=cy+Math.max(0,(chMax-ch3)/2);card(cx,y3,cw,ch3,32);var y4=y3+48;
+    if(num){ctx.fillStyle=NUIT;ctx.beginPath();ctx.arc(cx+40+110+8,y4+110+8,110,0,Math.PI*2);ctx.fill();ctx.fillStyle=SOLEIL;ctx.beginPath();ctx.arc(cx+40+110,y4+110,110,0,Math.PI*2);ctx.fill();ctx.lineWidth=4;ctx.strokeStyle=NUIT;ctx.stroke();ctx.fillStyle=NUIT;ctx.font="600 130px "+FD;ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(num,cx+40+110,y4+118);ctx.textAlign="left";y4+=220+40}
+    drawLines(hl,cx+40,y4,hs*1.06,"600 "+hs+"px "+FD,"600 "+hs+"px "+FD,BLEU);y4+=hl.length*hs*1.06;if(sl.length){y4+=30;drawLines(sl,cx+40,y4,60,"600 44px "+FB,"800 44px "+FB,ENCRE2)}}
+  carFooter(th);return n}
+
 /* ---------- Point d’entrée ---------- */
-function render(P,meteoData){var story=P.format==="story"||(TYPES[P.type]&&TYPES[P.type].storyOnly);var W=1080,H=story?1920:1350;if(cv.height!==H)cv.height=H;
+function render(P,meteoData,slide){if(P.format==="carrousel"&&canCarousel(P.type)){if(cv.height!==1350)cv.height=1350;ctx.setTransform(1,0,0,1,0,0);ctx.textAlign="left";setLS(0);return drawCarousel(P,1080,1350,slide||0)}
+  var story=P.format==="story"||(TYPES[P.type]&&TYPES[P.type].storyOnly);var W=1080,H=story?1920:1350;if(cv.height!==H)cv.height=H;
   ctx.setTransform(1,0,0,1,0,0);ctx.textAlign="left";setLS(0);var Q=Object.assign({},P,{format:story?"story":"post"});
   if(isList(P.type))return drawList(Q,W,H);if(P.type==="teaser")return drawTeaser(Q,W,H);if(P.type==="meteo")return drawMeteo(Q,W,H,meteoData);
   if(story)drawSimpleStory(Q,W,H);else drawSimplePost(Q,W,H)}
@@ -769,11 +841,14 @@ $("today-label").textContent="@maison.cotebleue · "+frDate(todayIso());
 var S={ideas:[],posts:[],stats:[],recaps:[],comptes:[],reseaux:null,meteo:{},sync:null,filter:"nouvelle",selecting:false,sel:{},weekOff:0,db:null,assets:null,downloads:null,sample:null};
 function blankPost(){return{id:null,format:"post",type:"agenda",village:"cotebleue",pill:"",sticker:"",titre:"",details:"",legende:"",datePrevue:"",source:"",photoId:null,ideeIds:[],rows:[],compteur:"",visuel:"logo",villages:[],meteoDate:"",statut:"brouillon"}}
 var P=blankPost();
-function draw(force){if($("v-atelier").hidden&&!force)return;$("preview").classList.toggle("story",P.format==="story"||P.type==="meteo"||P.type==="jour");render(P,S.meteo[P.meteoDate])}
+var SLIDE=0;
+function isCar(){return P.format==="carrousel"&&canCarousel(P.type)}
+function draw(force){if($("v-atelier").hidden&&!force)return;var car=isCar();$("preview").classList.toggle("story",!car&&(P.format==="story"||P.type==="meteo"||P.type==="jour"));var n=render(P,S.meteo[P.meteoDate],SLIDE);
+  $("car-nav").hidden=!car;if(car){if(SLIDE>n-1){SLIDE=n-1;render(P,null,SLIDE)}$("car-pos").textContent="Slide "+(SLIDE+1)+" / "+n;$("car-prev").disabled=SLIDE<=0;$("car-next").disabled=SLIDE>=n-1}}
 window.__redraw=function(){draw()};
 
 /* ---------- Navigation ---------- */
-var VIEWS=["semaine","idees","atelier","stats"];
+var VIEWS=["semaine","idees","atelier","com","stats"];
 function show(v){VIEWS.forEach(function(x){$("v-"+x).hidden=x!==v});document.querySelectorAll(".tabs button").forEach(function(b){if(b.dataset.view===v)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});store("mcb-tab",v);window.scrollTo(0,0);if(v==="atelier")draw()}
 document.querySelectorAll(".tabs button").forEach(function(b){b.addEventListener("click",function(){show(b.dataset.view)})});
 (function(){var h=(location.hash||"").slice(1);show(VIEWS.indexOf(h)>=0?h:"semaine")})();
@@ -874,8 +949,17 @@ function renderReseaux(){var r=S.reseaux,b=$("reseaux-body");b.textContent="";$(
   var pubs=r.publications||[];if(pubs.length){b.appendChild(el("span",{class:"lbl",text:"Publications à regarder"}));var l=el("div",{class:"contacts"});pubs.forEach(function(p){l.appendChild(el("div",{class:"contact"},[el("a",{href:p.url,target:"_blank",rel:"noopener"},[el("b",{text:p.compte||"Voir la publication"})]),p.resume?el("span",{class:"hint",text:p.resume}):null,p.idee?el("span",{class:"hint",text:"Idée : "+p.idee}):null]))});b.appendChild(l)}}
 /* Point com du lundi */
 function strList(x){return(Array.isArray(x)?x:(x?String(x).split("\n"):[])).map(function(s){return String(s).replace(/^[-•]\s*/,"").trim()}).filter(Boolean)}
-function renderStrat(){var r=S.strat,b=$("strat-body");b.textContent="";$("n-strat").textContent=r&&r.semaine&&addDays(r.semaine,7)>todayIso()?"nouveau":"";
-  if(!r){b.appendChild(el("p",{class:"hint",style:"margin:0",text:"Chaque lundi matin, ta responsable com fait le point : bilan de la semaine passée, calendrier de la semaine, idées pour progresser et relances à faire."}));return}
+function ago(isoS){if(!isoS)return"";var d=new Date(isoS);if(isNaN(d))return"";var t=iso(d),h=pad(d.getHours())+"h"+pad(d.getMinutes());return(t===todayIso()?"aujourd’hui":t===addDays(todayIso(),-1)?"hier":frDate(t))+" à "+h}
+function renderHealth(){var m=S.sync||{},r=S.reseaux||{},q=S.strat||{},box=$("health");box.textContent="";
+  var rows=[["Météo (7h)",m.meteoAt,m.meteoMessage,m.meteoOk!==false],["Publication programmée",m.publiAt,m.publiMessage,!/échou|erreur/i.test(m.publiMessage||"")],["Veille (dim, mar, jeu)",r.majLe,r.message,true],["Point com (lundi)",q.majLe,q.sante?"":"",true]];
+  rows.forEach(function(x){box.appendChild(el("div",{class:"hrow"},[el("span",{class:"hdot "+(x[1]?(x[3]?"ok":"ko"):"wait")}),el("div",{class:"htxt"},[el("b",{text:x[0]}),el("span",{class:"hint",text:x[1]?ago(x[1])+(x[2]?" · "+x[2]:""):"pas encore passée"})])]))});
+  if(q.sante)box.appendChild(el("p",{class:"note",style:"margin:0",text:q.sante}))}
+function renderJournal(){var j=((S.strat&&S.strat.journal)||[]).slice().sort(function(a,b){return(b.at||"").localeCompare(a.at||"")}).slice(0,30),box=$("journal");box.textContent="";
+  var fresh=j.filter(function(x){return(x.at||"").slice(0,10)===todayIso()}).length;$("com-count").hidden=!fresh;$("com-count").textContent=fresh||"";
+  if(!j.length){box.appendChild(el("p",{class:"hint",style:"margin:0",text:"Rien pour l’instant : les routines y noteront chaque publication, chaque échec et chaque vérification."}));return}
+  j.forEach(function(x){box.appendChild(el("div",{class:"jrow"+(x.niveau==="alerte"?" alerte":"")},[el("span",{class:"jat",text:ago(x.at)}),el("span",{class:"jtxt",text:x.texte||""})]))})}
+function renderStrat(){renderHealth();renderJournal();var r=S.strat,b=$("strat-body");b.textContent="";$("n-strat").textContent=r&&r.semaine&&addDays(r.semaine,7)>todayIso()?"nouveau":"";
+  if(!r||!r.semaine){b.appendChild(el("p",{class:"hint",style:"margin:0",text:"Chaque lundi matin, ta responsable com fait le point : bilan de la semaine passée, calendrier de la semaine, idées pour progresser et relances à faire."}));return}
   b.appendChild(el("span",{class:"hint",text:"Point du "+frDate(r.semaine||(r.majLe||"").slice(0,10))}));
   if(r.bilan){b.appendChild(el("span",{class:"lbl",text:"Bilan"}));b.appendChild(el("p",{class:"recap-text",text:r.bilan}))}
   var cal=(r.calendrier||[]).filter(function(c){return!c.jour||c.jour>=todayIso()});if(cal.length){b.appendChild(el("span",{class:"lbl",text:"Calendrier de la semaine"}));var l=el("div",{class:"contacts"});cal.forEach(function(c){l.appendChild(el("div",{class:"contact"},[el("span",{class:"hint",text:[c.jour?frDate(c.jour):"",c.format||""].filter(Boolean).join(" · ")}),el("b",{text:c.sujet||""}),c.pourquoi?el("span",{class:"hint",text:c.pourquoi}):null]))});b.appendChild(l)}
@@ -907,12 +991,13 @@ function startCreate(k){P=blankPost();if(k)setType(k);else{syncForm()}show("atel
 CREATE.forEach(function(c){if(!TYPES[c[0]])return;var dark=c[0]==="pratique"||c[0]==="teaser",ns="http://www.w3.org/2000/svg",svg=document.createElementNS(ns,"svg"),p=document.createElementNS(ns,"path");svg.setAttribute("viewBox","0 0 24 24");svg.setAttribute("aria-hidden","true");p.setAttribute("d",c[2]);p.setAttribute("fill","none");p.setAttribute("stroke",dark?"#FFFFFF":"#0B1B3F");p.setAttribute("stroke-width","1.8");p.setAttribute("stroke-linecap","round");p.setAttribute("stroke-linejoin","round");svg.appendChild(p);
   $("create-row").appendChild(el("button",{type:"button",class:"create",onclick:function(){startCreate(c[0])}},[el("span",{class:"create-ico",style:"background:"+c[1]},[svg]),el("span",{class:"create-lbl",text:TYPES[c[0]].name})]))});
 $("btn-create").onclick=function(){startCreate(null)};
-function setType(k){var t=TYPES[k];P.type=k;P.pill="";if(t.storyOnly)P.format="story";if(!P.datePrevue)P.datePrevue=todayIso();if(k==="meteo"&&!P.meteoDate)P.meteoDate=addDays(P.datePrevue,1);
+function setType(k){var t=TYPES[k];P.type=k;P.pill="";SLIDE=0;if(t.storyOnly)P.format="story";if(P.format==="carrousel"&&!canCarousel(k))P.format="post";if(!P.datePrevue)P.datePrevue=todayIso();if(k==="meteo"&&!P.meteoDate)P.meteoDate=addDays(P.datePrevue,1);
   if(isList(k)&&!(P.rows&&P.rows.length)){var rest=autoFill();if(rest>0)toast(rest+" autre(s) événement(s) à cocher dans la liste")}syncForm();draw()}
 function syncForm(){var t=typ(P.type),L=isList(P.type),T=P.type==="teaser",Mt=P.type==="meteo",simple=isSimple(P.type);
   document.querySelectorAll("[data-type]").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.type===P.type))});
   document.querySelectorAll("#p-villages .chip").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.village===P.village))});
-  $("fmt-post").setAttribute("aria-pressed",String(P.format!=="story"));$("fmt-story").setAttribute("aria-pressed",String(P.format==="story"));$("fmt-post").disabled=!!t.storyOnly;
+  $("fmt-post").setAttribute("aria-pressed",String(P.format!=="story"&&P.format!=="carrousel"));$("fmt-story").setAttribute("aria-pressed",String(P.format==="story"));$("fmt-car").setAttribute("aria-pressed",String(P.format==="carrousel"));$("fmt-post").disabled=!!t.storyOnly;$("fmt-car").disabled=!canCarousel(P.type);
+  $("cta-field").hidden=!isCar();$("p-cta").value=P.cta||"";$("p-cta").placeholder=carCta(Object.assign({},P,{cta:""})).replace("\n"," ");
   $("village-field").hidden=!(simple||(P.type==="semaine"&&P.format==="story"));$("village-label").textContent=P.type==="semaine"?"Village de la story":"Village";
   $("list-fields").hidden=!L;$("teaser-fields").hidden=!T;$("meteo-fields").hidden=!Mt;$("details-field").hidden=!(simple||T||P.type==="weekend");$("sticker-field").hidden=P.type!=="bonplan";
   $("photo-field").hidden=L;$("btn-photo-rm").hidden=!P.photoId;
@@ -922,10 +1007,12 @@ function syncForm(){var t=typ(P.type),L=isList(P.type),T=P.type==="teaser",Mt=P.
   if(L)renderRows();if(T){$("t-compteur").value=P.compteur||"";$("t-visuel").value=P.visuel||"logo";document.querySelectorAll("#t-villages input").forEach(function(cb){cb.checked=(P.villages||[]).indexOf(cb.value)>=0})}
   if(Mt){var m=S.meteo[P.meteoDate];$("meteo-info").textContent=m?"Prévisions Open-Meteo pour le "+frDate(P.meteoDate)+", mises à jour "+(m.majLe?"le "+frDate(m.majLe.slice(0,10))+" à "+m.majLe.slice(11,16):"")+".":"Prévisions du "+frDate(P.meteoDate)+" pas encore arrivées : la routine les récupère vers 7h la veille au matin."}
   $("btn-delete").hidden=!P.id;$("post-status").textContent=P.statut==="publie"?"Publié le "+frDate(P.datePublie):(P.id?"Brouillon enregistré":"Nouveau visuel, pas encore enregistré");$("btn-published").textContent=P.statut==="publie"?"Publié":"Marquer publié";if(planOn(P)||(P.planif&&P.planif.statut==="erreur"))$("post-status").textContent=planTxt(P.planif);syncPlan()}
-function switchFmt(f){if(P.format===f)return;var sib=P.type==="weekend"?sibling():null;if(sib){openPost(sib);return}P.format=f;if(P.type==="weekend"&&P.id){P.id=null;P.statut="brouillon";autoFill();toast("Nouveau visuel "+(f==="story"?"story":"post")+" : enregistre-le")}syncForm();draw()}
+function switchFmt(f){if(P.format===f)return;if(f==="carrousel"||P.format==="carrousel"){P.format=f;SLIDE=0;if(isList(P.type)&&f==="carrousel"&&!(P.rows||[]).length)autoFill();syncForm();draw();return}var sib=P.type==="weekend"?sibling():null;if(sib){openPost(sib);return}P.format=f;if(P.type==="weekend"&&P.id){P.id=null;P.statut="brouillon";autoFill();toast("Nouveau visuel "+(f==="story"?"story":"post")+" : enregistre-le")}syncForm();draw()}
 $("fmt-post").onclick=function(){if(typ(P.type).storyOnly){toast("Ce gabarit existe en story");return}switchFmt("post")};
 $("fmt-story").onclick=function(){switchFmt("story")};
-[["p-pill","pill"],["p-sticker","sticker"],["p-titre","titre"],["p-details","details"],["p-legende","legende"],["p-source","source"]].forEach(function(p){$(p[0]).addEventListener("input",function(){P[p[1]]=$(p[0]).value;if(p[1]!=="legende"&&p[1]!=="source")draw()})});
+$("fmt-car").onclick=function(){if(!canCarousel(P.type)){toast("Ce modèle n’existe pas en carrousel");return}switchFmt("carrousel")};
+$("car-prev").onclick=function(){if(SLIDE>0){SLIDE--;draw()}};$("car-next").onclick=function(){SLIDE++;draw()};
+[["p-cta","cta"],["p-pill","pill"],["p-sticker","sticker"],["p-titre","titre"],["p-details","details"],["p-legende","legende"],["p-source","source"]].forEach(function(p){$(p[0]).addEventListener("input",function(){P[p[1]]=$(p[0]).value;if(p[1]!=="legende"&&p[1]!=="source")draw()})});
 $("p-date").addEventListener("change",function(){P.datePrevue=$("p-date").value;if(P.type==="meteo")P.meteoDate=addDays(P.datePrevue,1);syncForm();draw()});
 $("t-villages").addEventListener("change",function(){P.villages=[].slice.call(document.querySelectorAll("#t-villages input:checked")).map(function(x){return x.value});draw()});
 $("t-compteur").oninput=function(){P.compteur=this.value;draw()};$("t-visuel").onchange=function(){P.visuel=this.value;draw()};
@@ -968,10 +1055,10 @@ function renderCands(){var box=$("cands");box.textContent="";var p=period(P.type
     if(two){var cb2=el("input",{type:"checkbox",id:"co-"+i.id});cb2.checked=inOth;cb2.onchange=function(){var rows=((sib&&sib.rows)||[]).slice();if(cb2.checked){var nr=ideaToRow(i,p);if(!fits(rows,otherFmt(),nr.date)){cb2.checked=false;toast(fullMsg(otherFmt(),nr.date));return}rows=sortRows(rows.concat([nr]))}else rows=rows.filter(function(r){return r.ideeId!==i.id});if(sib)sib.rows=rows;setSiblingRows(sib,rows);toast(cb2.checked?"Ajouté sur "+(otherFmt()==="story"?"la story":"le post")+" (touche « "+(otherFmt()==="story"?"Story 9:16":"Post 4:5")+" » pour le voir)":"Retiré de "+(otherFmt()==="story"?"la story":"du post"))};kids.push(el("label",{class:"tg",for:"co-"+i.id},[cb2,oth]))}
     var meta=[frDate(i.fin&&i.fin!==i.quand&&i.quand<p.from?p.from:i.quand),vil(i.village).short,i.sourceNom||""].filter(Boolean).join(" · ");
     box.appendChild(el("div",{class:"cand"+(inCur||inOth?" on":"")},[el("div",{class:"who"},[el("b",{text:i.titre||""}),el("span",{class:"hint",text:meta}),i.aVerifier?el("span",{class:"verif",text:"À vérifier"}):null,i.sourceUrl?el("a",{href:i.sourceUrl,target:"_blank",rel:"noopener",class:"hint",text:"Voir la source"}):null]),el("div",{class:"tgs"},kids)]))})}
-function openPost(post){P=Object.assign(blankPost(),JSON.parse(JSON.stringify(post)));if(P.format==="carrousel")P.format="post";if(P.type==="meteo"&&!P.meteoDate)P.meteoDate=addDays(P.datePrevue||todayIso(),1);syncForm();show("atelier");$("atelier-lead").textContent=typ(P.type).name+(P.datePrevue?" prévu le "+frDate(P.datePrevue):"")+(P.source?" · "+P.source:"")}
+function openPost(post){P=Object.assign(blankPost(),JSON.parse(JSON.stringify(post)));if(P.format==="carrousel"&&!canCarousel(P.type))P.format="post";SLIDE=0;if(P.type==="meteo"&&!P.meteoDate)P.meteoDate=addDays(P.datePrevue||todayIso(),1);syncForm();show("atelier");$("atelier-lead").textContent=typ(P.type).name+(P.datePrevue?" prévu le "+frDate(P.datePrevue):"")+(P.source?" · "+P.source:"")}
 $("btn-new").onclick=function(){P=blankPost();syncForm();draw();toast("Nouveau visuel")};
 /* Enregistrement */
-var FIELDS=["format","type","village","pill","sticker","titre","details","legende","datePrevue","source","photoId","ideeIds","rows","compteur","visuel","villages","meteoDate","statut","datePublie","stats","auto","mediaId","permalink","importe","planif"];
+var FIELDS=["format","type","village","pill","sticker","titre","details","legende","datePrevue","source","photoId","ideeIds","rows","compteur","visuel","villages","meteoDate","statut","datePublie","stats","auto","mediaId","permalink","importe","planif","cta"];
 function postBody(){var b={};FIELDS.forEach(function(k){if(P[k]!==undefined)b[k]=P[k]});if(b.photoId&&String(b.photoId).indexOf("blob:")===0)b.photoId=null;(b.rows||[]).forEach(function(r){if(r.photoId&&String(r.photoId).indexOf("blob:")===0)r.photoId=null});b.updatedAt=new Date().toISOString();b.createdAt=P.createdAt||b.updatedAt;return JSON.parse(JSON.stringify(b))}
 function savePost(extra){if(!S.db){toast("Base indisponible : rouvre la page");return Promise.reject()}Object.assign(P,extra||{});var ref=P.id?S.db.collection("posts").doc(P.id):S.db.collection("posts").doc();P.id=ref.id;
   return ref.set(postBody()).then(function(){var ids=(P.ideeIds||[]).slice();(P.rows||[]).forEach(function(r){if(r.ideeId&&ids.indexOf(r.ideeId)<0)ids.push(r.ideeId)});ids.forEach(function(iid){S.db.collection("idees").doc(iid).update({statut:"utilisee",postId:P.id}).catch(function(){})});syncForm()})}
@@ -988,13 +1075,18 @@ $("btn-planif").onclick=function(){var box=$("planif-box"),open=box.hidden;box.h
   $("pl-date").value=q.statut==="programme"&&q.date?q.date:(P.type==="meteo"?todayIso():(P.datePrevue&&P.datePrevue>=todayIso()?P.datePrevue:todayIso()));$("pl-heure").value=String(q.heure||18);syncPlan()};
 $("pl-ok").onclick=function(){var d=$("pl-date").value,h=+$("pl-heure").value;if(!d){toast("Choisis le jour");return}var at=d+"T"+pad2(h)+":00";if(new Date(at)<=new Date()){toast("Ce créneau est déjà passé : choisis une heure plus tard");return}
   if(!S.assets||!S.db){toast("Envoi impossible pour l’instant : rouvre la page");return}var b=this;b.disabled=true;draw(true);
+  if(isCar()){slideBlobs(function(blobs){var ids=[];blobs.reduce(function(pr,bl,i){return pr.then(function(){return S.assets.upload(new File([bl],carName(i),{type:"image/png"})).then(function(r){ids.push(r.id)})})},Promise.resolve()).then(function(){return savePost({planif:{date:d,heure:h,at:at,statut:"programme",assetId:ids[0],assetIds:ids,format:"carrousel",programmeLe:new Date().toISOString()}})}).then(function(){b.disabled=false;syncPlan();$("planif-box").hidden=true;$("btn-planif").setAttribute("aria-expanded","false");toast("Carrousel de "+ids.length+" slides programmé pour "+frDate(d).replace(/\.$/,"")+" à "+h+"h")},function(){b.disabled=false;toast("La programmation a échoué : réessaie")})});return}
   cv.toBlob(function(blob){if(!blob){b.disabled=false;toast("Image impossible à générer");return}var f=new File([blob],fileName(),{type:"image/png"});
     S.assets.upload(f).then(function(r){return savePost({planif:{date:d,heure:h,at:at,statut:"programme",assetId:r.id,format:P.format==="story"||typ(P.type).storyOnly?"story":"post",programmeLe:new Date().toISOString()}})}).then(function(){b.disabled=false;syncPlan();$("planif-box").hidden=true;$("btn-planif").setAttribute("aria-expanded","false");toast("Programmé pour "+frDate(d).replace(/\.$/,"")+" à "+h+"h")},function(){b.disabled=false;toast("La programmation a échoué : réessaie")})},"image/png")};
 $("pl-cancel").onclick=function(){if(!planOn(P))return;savePost({planif:Object.assign({},P.planif,{statut:"annule"})}).then(function(){syncPlan();toast("Programmation annulée")})};
 $("btn-published").onclick=function(){if(P.statut==="publie")return;savePost({statut:"publie",datePublie:todayIso()}).then(function(){toast("Publié ! Les stats arriveront avec la routine du matin.")})};
 function fileName(){var v=vil(P.village).short.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"-");return"mcb-"+(P.datePrevue||todayIso())+"-"+P.type+(P.type==="meteo"||isList(P.type)?"":"-"+v)+(P.format==="story"||typ(P.type).storyOnly?"-story":"")+".png"}
 function fallbackImg(blob){var fb=$("export-fallback");fb.hidden=false;fb.textContent="";var r=new FileReader();r.onload=function(){fb.appendChild(el("img",{src:r.result,alt:"Visuel à enregistrer",class:"fallback-img"}));fb.appendChild(el("div",{text:"Appuie longuement sur l’image pour l’enregistrer dans ta galerie."}))};r.readAsDataURL(blob)}
-$("btn-export").onclick=function(){draw(true);cv.toBlob(function(blob){if(!blob){toast("Image impossible à générer");return}if(!S.downloads)return fallbackImg(blob);
+/* Toutes les slides d’un carrousel, l’une après l’autre */
+function slideBlobs(cb){var n=carCount(P),out=[];function step(i){if(i>=n){render(P,null,SLIDE);cb(out);return}render(P,null,i);cv.toBlob(function(b){out.push(b);step(i+1)},"image/png")}step(0)}
+function carName(i){return fileName().replace(/\.png$/,"-carrousel-"+(i+1)+".png")}
+function fallbackImgs(blobs){var fb=$("export-fallback");fb.hidden=false;fb.textContent="";fb.appendChild(el("div",{text:"Appuie longuement sur chaque image pour l’enregistrer, dans l’ordre."}));blobs.forEach(function(b){var r=new FileReader();r.onload=function(){fb.appendChild(el("img",{src:r.result,alt:"Slide du carrousel",class:"fallback-img"}))};r.readAsDataURL(b)})}
+$("btn-export").onclick=function(){if(isCar()){slideBlobs(function(blobs){if(!S.downloads)return fallbackImgs(blobs);var i=0;(function next(){if(i>=blobs.length){toast(blobs.length+" slides enregistrées. Dans Instagram, choisis-les dans l’ordre.");return}S.downloads.save({filename:carName(i),data:blobs[i]}).then(function(){i++;next()},function(e){if(e&&e.code==="unavailable")fallbackImgs(blobs)})})()});return}draw(true);cv.toBlob(function(blob){if(!blob){toast("Image impossible à générer");return}if(!S.downloads)return fallbackImg(blob);
   S.downloads.save({filename:fileName(),data:blob}).then(function(r){if(r&&r.status==="saved")toast("Image enregistrée. Ouvre Instagram pour publier.")},function(e){if(e&&e.code==="unavailable")fallbackImg(blob)})},"image/png")};
 $("btn-copy").onclick=function(){var txt=$("p-legende").value;if(!txt){toast("La légende est vide");return}copyText(txt,"Légende copiée",$("p-legende"))};
 /* Sources citées en fin de légende, avec tag Instagram quand le compte est connu */
@@ -1078,8 +1170,8 @@ else{
     snap("recaps",function(d,live){S.recaps=d.filter(function(x){return x.date});renderRecap();if(live)purge("recaps",d,function(r){return r.date<todayIso()})},db.collection("recaps").limit(60));
     snap("comptes",function(d){S.comptes=d;renderComptes()},db.collection("comptes").limit(300));
     snap("meteo",function(d,live){S.meteo={};d.forEach(function(m){S.meteo[m.date||m.id]=m});renderWeek();if(P.type==="meteo"){syncForm();draw()}if(live)purge("meteo",d,function(m){return(m.date||m.id)<todayIso()})},db.collection("meteo").limit(30));
-    db.doc("reglages/meta").onSnapshot(function(s){S.sync=s.exists?s.data():null;renderAna();renderWeek()});
-    db.doc("reglages/reseaux").onSnapshot(function(s){S.reseaux=s.exists?s.data():null;renderReseaux()});
+    db.doc("reglages/meta").onSnapshot(function(s){S.sync=s.exists?s.data():null;renderAna();renderWeek();renderHealth()});
+    db.doc("reglages/reseaux").onSnapshot(function(s){S.reseaux=s.exists?s.data():null;renderReseaux();renderHealth()});
     db.doc("reglages/strategie").onSnapshot(function(s){S.strat=s.exists?s.data():null;renderStrat()});
   });
   C.use("assets").then(function(a){S.assets=a});C.use("downloads").then(function(d){S.downloads=d});
