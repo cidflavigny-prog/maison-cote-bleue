@@ -262,12 +262,12 @@ function carBg(P){var th=isList(P.type)&&!P.couleur?themeOf("agenda"):themeFor(P
 function carFooter(th){if(th.fg===BLANC){footer(64,1350-34-64,64,false,1080);return}logo(64,1350-34-64,64,BLEU);ctx.fillStyle=NUIT;ctx.font="800 28px "+FB;ctx.textBaseline="alphabetic";ctx.fillText("Maison Côte Bleue",64+82,1350-34-32);ctx.fillStyle=ENCRE2;ctx.font="600 22px "+FB;ctx.fillText("@maison.cotebleue",64+82,1350-34-4)}
 function drawCarousel(P,W,H,i){var items=carItems(P),n=items.length+2;i=Math.max(0,Math.min(i||0,n-1));var th=carBg(P),M=64,t=typ(P.type);
   if(i===0){/* Couverture */
-    zigzag(760,170,1.75,SOLEIL,9);triangle(930,300,1.85,th.fg===BLANC?CIEL:SOLEIL);ring(140,1010,34,SOLEIL,14);
+    zigzag(760,170,1.75,SOLEIL,9);triangle(930,300,1.85,th.fg===BLANC?CIEL:SOLEIL);if(!P.photoId)ring(140,1010,34,SOLEIL,14);
     var pillTxt=P.pill||(isList(P.type)?monthPill(rowsDates(P)):t.pill||"Côte Bleue"),title=P.titre||(isList(P.type)?defTitle(P):t.title);
     var hasPhoto=!!P.photoId,f=fitTitle(title,W-2*M,hasPhoto?260:440,hasPhoto?100:140,64),fH=f.lines.length*f.size*1.04;
-    var blk=26*1.75+30+fH+(hasPhoto?40+420:0)+60+70,y=Math.max(150,(H-120-blk)/2);
+    var blk=26*1.75+30+fH+(hasPhoto?40+600:0)+60+70,y=Math.max(150,(H-120-blk)/2);
     var ph=pill(M,y,pillTxt,th.pillBg,th.pillFg,th.pillShadow,th.pillBorder,26,3,4);y+=ph+30;drawTitle(f,M,y,th.fg,th.shadow);y+=fH+40;
-    if(hasPhoto){photoFrame(imgFor(P.photoId),M,y,W-2*M,420,28,8,14,"");y+=420+40}
+    if(hasPhoto){photoFrame(imgFor(P.photoId),M,y,W-2*M,600,28,8,14,"");y+=600+40}
     else if(P.sticker){/* Sans photo : gros autocollant (émoji ou mot court) en bas à droite */
       ctx.save();ctx.translate(W-240,H-330);ctx.rotate(.12);ctx.fillStyle=NUIT;ctx.beginPath();ctx.arc(14,14,170,0,Math.PI*2);ctx.fill();ctx.fillStyle=SOLEIL;ctx.beginPath();ctx.arc(0,0,170,0,Math.PI*2);ctx.fill();ctx.lineWidth=6;ctx.strokeStyle=NUIT;ctx.stroke();
       ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle=NUIT;ctx.font=/\p{Extended_Pictographic}/u.test(P.sticker)?"190px 'Apple Color Emoji','Noto Color Emoji','Segoe UI Emoji',sans-serif":"600 90px "+FD;ctx.fillText(P.sticker,0,10);ctx.restore();ctx.textAlign="left"}
