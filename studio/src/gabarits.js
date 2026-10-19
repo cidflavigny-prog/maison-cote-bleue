@@ -241,7 +241,7 @@ function drawMeteo(P,W,H,data){var M=64;ctx.fillStyle=BLEU;ctx.fillRect(0,0,W,H)
   if(mer&&mer.dir!=null){ctx.fillStyle=NUIT;ctx.fillRect(M+28,y+176,W-2*M-56,3);ctx.font="800 30px "+FB;ctx.fillText(ellip(windFrom(mer.dir)+(mer.rafales!=null?" · rafales à "+Math.round(mer.rafales)+" km/h":""),"800 30px "+FB,W-2*M-56),M+28,y+218)}
   if(isMistral(mer)){var t="Mistral";var w=pillW(t,24);pill(W-M-w-10,y-20,t,NUIT,BLANC,null,null,24)}
   if(data){ctx.fillStyle=CIEL;ctx.font="700 24px "+FB;ctx.textBaseline="alphabetic";ctx.textAlign="left";ctx.fillText("Source : "+(data.source||"Open-Meteo")+" · open-meteo.com",M+4,y+mh+48)}
-  if(!data){ctx.fillStyle=CIEL;ctx.font="700 26px "+FB;ctx.textAlign="center";ctx.fillText("Prévisions en attente : elles arrivent vers 17h30",W/2,y+mh+70);ctx.textAlign="left"}}
+  if(!data){ctx.fillStyle=CIEL;ctx.font="700 26px "+FB;ctx.textAlign="center";ctx.fillText("Prévisions en attente : elles arrivent vers 7h",W/2,y+mh+70);ctx.textAlign="left"}}
 
 /* ---------- Point d’entrée ---------- */
 function render(P,meteoData){var story=P.format==="story"||(TYPES[P.type]&&TYPES[P.type].storyOnly);var W=1080,H=story?1920:1350;if(cv.height!==H)cv.height=H;

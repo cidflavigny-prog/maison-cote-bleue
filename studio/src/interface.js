@@ -33,7 +33,7 @@ function rdvsFor(day){var wd=parseIso(day).getDay(),out=[];
   if(wd===4){out.push({type:"weekend",format:"post",label:"Agenda du week-end",sub:"post · ven. au dim."});out.push({type:"weekend",format:"story",label:"Agenda du week-end",sub:"story"})}
   if(day>=METEO_DEBUT)out.push({type:"meteo",format:"story",label:"Météo de demain",sub:"story · 18h",meteoDate:addDays(day,1)});return out}
 function rdvStatus(r,day,p){if(p)return p.statut==="publie"?["Publié","st-done"]:[p.auto?"Prêt à vérifier":"Brouillon","st-ready"];
-  if(r.type==="meteo")return S.meteo[r.meteoDate]?["Prévisions prêtes","st-ready"]:(day<todayIso()?["Passé","st-wait"]:["Prévisions à 17h30","st-wait"]);
+  if(r.type==="meteo")return S.meteo[r.meteoDate]?["Prévisions prêtes","st-ready"]:(day<todayIso()?["Passé","st-wait"]:["Prévisions vers 7h","st-wait"]);
   return day<todayIso()?["Non fait","st-wait"]:["À créer","st-todo"]}
 function openRdv(r,day){var p=postMatch(day,r.type,r.format,r.village);if(p)return openPost(p);
   P=blankPost();P.type=r.type;P.format=r.format;P.datePrevue=day;if(r.village)P.village=r.village;if(r.meteoDate)P.meteoDate=r.meteoDate;if(isList(r.type))autoFill();syncForm();show("atelier");$("atelier-lead").textContent=r.label+" du "+frDate(day)+" : vérifie, ajuste puis enregistre."}
@@ -163,7 +163,7 @@ function syncForm(){var t=typ(P.type),L=isList(P.type),T=P.type==="teaser",Mt=P.
   $("p-sticker").value=P.sticker||"";$("p-titre").value=P.titre||"";$("p-titre").placeholder=simple?t.title:defTitle(P).replace("\n"," ");$("p-titre-label").textContent=P.type==="nouveau"?"Nom du commerce":P.type==="question"?"Question":"Titre";
   $("p-details").value=P.details||"";$("p-details").placeholder=(t.details||"").replace(/\*\*/g,"");$("p-legende").value=P.legende||"";$("p-date").value=P.datePrevue||"";$("p-source").value=P.source||"";
   if(L)renderRows();if(T){$("t-compteur").value=P.compteur||"";$("t-visuel").value=P.visuel||"logo";document.querySelectorAll("#t-villages input").forEach(function(cb){cb.checked=(P.villages||[]).indexOf(cb.value)>=0})}
-  if(Mt){var m=S.meteo[P.meteoDate];$("meteo-info").textContent=m?"Prévisions Open-Meteo pour le "+frDate(P.meteoDate)+", mises à jour "+(m.majLe?"le "+frDate(m.majLe.slice(0,10))+" à "+m.majLe.slice(11,16):"")+".":"Prévisions du "+frDate(P.meteoDate)+" pas encore arrivées : la routine les récupère vers 17h30 la veille."}
+  if(Mt){var m=S.meteo[P.meteoDate];$("meteo-info").textContent=m?"Prévisions Open-Meteo pour le "+frDate(P.meteoDate)+", mises à jour "+(m.majLe?"le "+frDate(m.majLe.slice(0,10))+" à "+m.majLe.slice(11,16):"")+".":"Prévisions du "+frDate(P.meteoDate)+" pas encore arrivées : la routine les récupère vers 7h la veille au matin."}
   $("btn-delete").hidden=!P.id;$("post-status").textContent=P.statut==="publie"?"Publié le "+frDate(P.datePublie):(P.id?"Brouillon enregistré":"Nouveau visuel, pas encore enregistré");$("btn-published").textContent=P.statut==="publie"?"Publié":"Marquer publié"}
 function switchFmt(f){if(P.format===f)return;var sib=P.type==="weekend"?sibling():null;if(sib){openPost(sib);return}P.format=f;if(P.type==="weekend"&&P.id){P.id=null;P.statut="brouillon";autoFill();toast("Nouveau visuel "+(f==="story"?"story":"post")+" : enregistre-le")}syncForm();draw()}
 $("fmt-post").onclick=function(){if(typ(P.type).storyOnly){toast("Ce gabarit existe en story");return}switchFmt("post")};

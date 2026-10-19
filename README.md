@@ -8,7 +8,7 @@ Direction artistique v1 : piste « Mistral », Fredoka + Nunito, une couleur par
 Page de travail publiée sur claude.ai (privée) : https://claude.ai/artifact/PHdBhtBXs2sjmZ9g7TrFkd
 
 - **Accueil (Semaine)** : bandeau « Que veux-tu créer aujourd’hui ? » avec un raccourci rond par gabarit, puis les rendez-vous fixes et leur état (à créer, prêt à vérifier, publié).
-  - chaque soir 18h : story météo du lendemain ;
+  - chaque matin vers 7h : story météo du lendemain, à programmer pour 18h ;
   - dimanche : agenda de la semaine suivante (post), plus une story « Ça bouge à … » pour chaque village qui a au moins 3 événements ;
   - jeudi : agenda du week-end (post + story).
 - **Idées** : infos déposées par la veille, filtres À traiter / À vérifier / Utilisées / Écartées, sélection → agenda, récap du jour, veille réseaux du jour, comptes à suivre et à contacter (avec message prêt à copier).
@@ -48,7 +48,7 @@ Décision d'Océane (19 octobre 2026), valable jusqu'à nouvel ordre de sa part 
 | Dim, mar, jeu 6h47 | Veille : publications des comptes pros via l'API Meta, hashtags, tendances, recherche web, récap, idées, ménage ; brouillons d'agenda le dimanche (semaine) et le jeudi (week-end), plus 2 idées de sortie le jeudi | « Maison cote bleue » (jeton Meta en secret réseau pour `graph.facebook.com`) |
 | Lundi 7h20 | Recherche de comptes Instagram et Facebook à suivre ou contacter, avec message proposé | « Maison cote bleue » |
 | Lundi 8h12 | Point com : chiffres Meta, bilan de la semaine, calendrier éditorial, conseils, relances, santé des routines → `reglages/strategie` (onglet Semaine → Point com) | « Maison cote bleue » |
-| 17h30 chaque jour | Météo de demain (Open-Meteo, mer avec réserve sur 3 jours) → story du soir | « Maison cote bleue » |
+| 7h04 chaque jour | Météo de demain (Open-Meteo, mer avec réserve sur 3 jours) → story à télécharger et programmer pour 18h | « Maison cote bleue » |
 | — | Anciennes routines en pause : veille quotidienne Cowork, stats Instagram quotidiennes (reprises dans le Point com) | — |
 
 Compte Instagram `17841462383522173`, page Facebook `1307148845825864`.
