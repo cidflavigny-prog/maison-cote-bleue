@@ -16,6 +16,7 @@ Page de travail publiée sur claude.ai (privée) : https://claude.ai/artifact/PH
 - **Messages** : messages prêts à envoyer (comptes proposés et contacts de l'agent com), à copier puis marquer « envoyé », et la liste des comptes suivis.
 - **Inspirations** (onglet Idées) : les publications d'autres comptes mises de côté par la veille, classées par catégorie ; l'agent com du lundi en reprend au moins une dans le calendrier. Jamais republiées sans accord.
 - **Ligne éditoriale** : pas de politique ; pas que des mairies (au plus 1 idée ou ligne d'agenda sur 4 de source municipale, on cite l'organisateur).
+- **Parler à l’agent com** (onglet Com) : une discussion avec Claude, qui reçoit le planning, les idées, le Point com, les inspirations et la charte. Messages dans la collection `discussion`. Elle peut noter une consigne durable (`reglages/charte.consignes`, lue par la veille et le Point com) et ajouter une idée (origine « agent-com »).
 - **Com** : le Point com du lundi (bilan, calendrier, conseils, relances), l'état de chaque routine et un journal où les routines notent publications, échecs et vérifications (`reglages/strategie.journal`).
 - **Stats** : abonnés, portée, engagement par gabarit et par village (API Meta).
 

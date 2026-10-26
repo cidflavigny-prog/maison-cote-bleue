@@ -225,6 +225,13 @@
       <h2 id="h-com">Point com <span class="chipn" id="n-strat"></span></h2>
       <p class="lead">Ta responsable com fait le point chaque lundi matin. Les routines notent ici ce qu’elles ont fait, au fil de la semaine.</p>
     </div>
+    <div class="panel chat" id="chat-box" hidden>
+      <div class="week-head"><h3>Parle à ton agent com</h3><button type="button" class="btn ghost" id="chat-clear">Effacer la discussion</button></div>
+      <p class="hint" style="margin:0">Elle connaît ton planning, tes idées, le Point com et ta charte. Demande-lui un avis, une légende, un plan. Dis-lui « retiens que… » pour donner une consigne que les routines appliqueront ensuite.</p>
+      <div class="chat-log" id="chat-log" aria-live="polite"></div>
+      <div class="chips" id="chat-sugg" role="group" aria-label="Suggestions"></div>
+      <div class="chat-in"><label for="chat-text" class="sr">Ton message</label><textarea id="chat-text" rows="2" placeholder="Écris à ton agent com…"></textarea><button type="button" class="btn primary" id="chat-send">Envoyer</button></div>
+    </div>
     <div class="panel"><div class="week-head"><h3>Routines</h3><span class="source">dernier passage de chacune</span></div><div id="health" class="health"></div></div>
     <div class="panel"><div class="week-head"><h3>Journal</h3><span class="source">le plus récent en haut</span></div><div id="journal" class="journal"></div></div>
     <div class="panel" id="strat-body"></div>

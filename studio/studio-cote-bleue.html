@@ -301,6 +301,17 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
 .hl-row{display:flex;gap:12px;overflow-x:auto;scrollbar-width:none;padding:2px 2px 4px;max-width:620px}.hl-row::-webkit-scrollbar{display:none}
 .hl{flex:none;width:70px;display:flex;flex-direction:column;align-items:center;gap:5px;font-size:11.5px;font-weight:700;text-align:center;line-height:1.15}
 .hl canvas{width:64px;height:64px;border-radius:50%;outline:1.5px solid var(--line-2);outline-offset:3px}
+.chat{gap:12px}
+.chat-log{display:flex;flex-direction:column;gap:10px;max-height:min(60vh,560px);overflow-y:auto;padding:4px 2px}
+.bub{max-width:88%;padding:10px 14px;border-radius:16px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.45}
+.bub.me{align-self:flex-end;background:var(--brand);color:var(--brand-ink);border-bottom-right-radius:4px}
+.bub.ai{align-self:flex-start;background:var(--surface-2);border-bottom-left-radius:4px}
+.bub.ai.wait{color:var(--faint);font-style:italic}
+.bub-note{align-self:flex-start;font-size:12px;color:var(--faint)}
+.chat-in{display:flex;gap:8px;align-items:flex-end}
+.chat-in textarea{min-height:48px;flex:1}
+.chat-in .btn{min-height:48px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 </style>
 
 <div class="wrap">
@@ -529,6 +540,13 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
     <div>
       <h2 id="h-com">Point com <span class="chipn" id="n-strat"></span></h2>
       <p class="lead">Ta responsable com fait le point chaque lundi matin. Les routines notent ici ce qu’elles ont fait, au fil de la semaine.</p>
+    </div>
+    <div class="panel chat" id="chat-box" hidden>
+      <div class="week-head"><h3>Parle à ton agent com</h3><button type="button" class="btn ghost" id="chat-clear">Effacer la discussion</button></div>
+      <p class="hint" style="margin:0">Elle connaît ton planning, tes idées, le Point com et ta charte. Demande-lui un avis, une légende, un plan. Dis-lui « retiens que… » pour donner une consigne que les routines appliqueront ensuite.</p>
+      <div class="chat-log" id="chat-log" aria-live="polite"></div>
+      <div class="chips" id="chat-sugg" role="group" aria-label="Suggestions"></div>
+      <div class="chat-in"><label for="chat-text" class="sr">Ton message</label><textarea id="chat-text" rows="2" placeholder="Écris à ton agent com…"></textarea><button type="button" class="btn primary" id="chat-send">Envoyer</button></div>
     </div>
     <div class="panel"><div class="week-head"><h3>Routines</h3><span class="source">dernier passage de chacune</span></div><div id="health" class="health"></div></div>
     <div class="panel"><div class="week-head"><h3>Journal</h3><span class="source">le plus récent en haut</span></div><div id="journal" class="journal"></div></div>
@@ -914,7 +932,7 @@ function copyText(txt,okMsg,fallbackEl){var p=navigator.clipboard&&navigator.cli
 $("today-label").textContent="@maison.cotebleue · "+frDate(todayIso());
 
 /* ---------- État ---------- */
-var S={ideas:[],insp:[],inspCat:"Toutes",posts:[],stats:[],recaps:[],comptes:[],reseaux:null,meteo:{},sync:null,filter:"nouvelle",selecting:false,sel:{},weekOff:0,db:null,assets:null,downloads:null,sample:null};
+var S={ideas:[],insp:[],chat:[],chatLive:"",charte:null,inspCat:"Toutes",posts:[],stats:[],recaps:[],comptes:[],reseaux:null,meteo:{},sync:null,filter:"nouvelle",selecting:false,sel:{},weekOff:0,db:null,assets:null,downloads:null,sample:null};
 function blankPost(){return{id:null,format:"post",type:"agenda",village:"cotebleue",pill:"",sticker:"",titre:"",details:"",legende:"",datePrevue:"",source:"",photoId:null,ideeIds:[],rows:[],compteur:"",visuel:"logo",villages:[],meteoDate:"",statut:"brouillon"}}
 var P=blankPost();
 var SLIDE=0;
@@ -1036,6 +1054,51 @@ function renderInsp(){var box=$("insp-list"),cats=$("insp-cats");if(!box)return;
       el("div",{class:"msg-who"},[el("span",{class:"pf ig",text:i.categorie||"Inspiration"}),i.url?el("a",{href:i.url,target:"_blank",rel:"noopener"},[el("b",{text:i.compte||"Voir la publication"})]):el("b",{text:i.compte||""}),el("span",{class:"hint",text:[i.date?frDate(String(i.date).slice(0,10)):"",eng.likes!=null?eng.likes+" j’aime":"",eng.comments!=null?eng.comments+" commentaires":"",i.statut==="gardee"?"gardée":i.statut==="utilisee"?"utilisée":""].filter(Boolean).join(" · ")})]),
       i.resume?el("span",{text:i.resume}):null,i.pourquoi?el("span",{class:"hint",text:"Pourquoi : "+i.pourquoi}):null,i.idee?el("span",{class:"hint",text:"Pour nous : "+i.idee}):null,i.aReprendreLe?el("span",{class:"hint",text:"À ressortir vers le "+frDate(i.aReprendreLe)}):null,
       el("div",{class:"row"},[el("button",{type:"button",class:"btn",text:i.statut==="gardee"?"Gardée":"Garder",onclick:function(){ref.update({statut:"gardee"})}}),el("button",{type:"button",class:"btn",text:"Utilisée",onclick:function(){ref.update({statut:"utilisee"})}}),el("button",{type:"button",class:"btn ghost",text:"Retirer",onclick:function(){ref.delete().then(function(){toast("Inspiration retirée")})}})])]))})}
+/* Discussion avec l'agent com : messages dans la collection « discussion », réponses via sample */
+var CHAT_SUGG=["Qu’est-ce qu’on poste demain ?","Une idée de post pour mettre un commerce en avant","Fais-moi le bilan de la semaine en 3 lignes","Retiens que…"],chatCtl=null,chatArmed=false;
+var CHAT_RULES="Tu es l’agent communication de Maison Côte Bleue (@maison.cotebleue), le média local gratuit Instagram et Facebook de Carry-le-Rouet, Sausset-les-Pins, Ensuès-la-Redonne et La Couronne-Carro. Tu parles avec Océane, la fondatrice, dans son studio : tutoie-la, sois concrète, bienveillante et franche, réponds en français.\n"+
+"Règles permanentes : tout texte destiné à l’extérieur (messages aux commerçants, associations, commentaires) parle au nom du média, jamais d’une personne : jamais « Océane », jamais « je », toujours « nous », « Maison Côte Bleue », signé « L’équipe Maison Côte Bleue ». Dans les posts, on tutoie les habitants. Aucun contenu politique. Pas que des mairies : priorité aux commerces, restaurants, bars, associations, jeux, soirées et sorties. On cite ses sources, on n’invente jamais un horaire, un prix ou un fait : si tu ne sais pas, dis-le et propose de le vérifier. Alcool : rappel de modération. Applique aussi les consignes de la charte ci-dessous.\n"+
+"Ce que tu peux faire ici : conseiller, rédiger (légendes, messages, idées de posts, plans), analyser les données du studio ci-dessous. Tu ne peux ni publier, ni programmer, ni naviguer sur internet depuis cette discussion : la veille (dimanche, mardi, jeudi), la météo et la publication programmée sont des routines automatiques ; Océane programme un visuel depuis l’Atelier. Outils : « noter_consigne » quand Océane te donne une règle durable ou te demande de retenir quelque chose (les routines la liront ensuite) ; « ajouter_idee » quand elle te donne une info d’événement, de bon plan ou de nouveauté à garder dans ses idées. Confirme en une phrase ce que tu as noté.\n"+
+"Forme : texte simple, sans Markdown (pas d’astérisques, pas de titres), phrases courtes, listes avec des tirets, la réponse courte d’abord.";
+function chatContext(){var t=todayIso(),r=S.strat||{},c=S.charte||{};
+  var posts=S.posts.filter(function(p){var d=p.datePrevue||"";return p.statut!=="publie"?(!d||d>=t):((p.datePublie||"")>=addDays(t,-7))}).slice(0,40).map(function(p){return{titre:p.titre||(p.type==="meteo"?"Météo":""),type:p.type,format:p.format,village:p.village,date:p.datePrevue||"",statut:p.statut,programme:p.planif&&p.planif.statut==="programme"?p.planif.at:undefined}});
+  var ideas=S.ideas.filter(function(i){return i.statut!=="ecartee"&&i.statut!=="utilisee"&&((i.fin||i.quand||"9999")>=t)}).slice(0,50).map(function(i){return{titre:i.titre,type:i.type,village:i.village,quand:i.quand||"",fin:i.fin||"",source:i.sourceNom||"",aVerifier:!!i.aVerifier}});
+  var msgs=S.comptes.filter(function(x){return x.message&&!x.contacteLe&&x.statut!=="ignore"}).map(function(x){return x.nom||x.username});
+  var insp=(S.insp||[]).slice(0,15).map(function(i){return{compte:i.compte,categorie:i.categorie,resume:i.resume,idee:i.idee}});
+  var data={aujourdhui:t,charte:{voix:c.voix,ligneEditoriale:c.ligneEditoriale,consignes:c.consignes||[]},pointCom:{semaine:r.semaine,bilan:r.bilan,chiffres:r.chiffres,calendrier:r.calendrier,optimisations:r.optimisations,relances:r.relances,sante:r.sante,journal:(r.journal||[]).slice(-10)},posts:posts,idees:ideas,messagesAEnvoyer:msgs,inspirations:insp};
+  return JSON.stringify(data).slice(0,30000)}
+function renderChat(){var log=$("chat-log");if(!log)return;var stick=log.scrollHeight-log.scrollTop-log.clientHeight<60;log.textContent="";
+  var list=S.chat.slice().sort(function(a,b){return(a.at||"").localeCompare(b.at||"")}).slice(-60);
+  if(!list.length&&!chatCtl)log.appendChild(el("p",{class:"hint",style:"margin:0",text:"Pose ta première question, ou choisis une suggestion."}));
+  list.forEach(function(m){log.appendChild(el("div",{class:"bub "+(m.role==="user"?"me":"ai"),text:m.text||""}))});
+  if(chatCtl){log.appendChild(el("div",{class:"bub ai"+(S.chatLive?"":" wait"),id:"chat-live",text:S.chatLive||"Elle réfléchit…"}))}
+  if(stick||chatCtl)log.scrollTop=log.scrollHeight}
+function chatTools(){return[
+  {name:"noter_consigne",description:"Enregistre une consigne durable d’Océane dans la charte du média (lue par toutes les routines : veille, météo, Point com, publication). Renvoie la liste des consignes.",inputSchema:{type:"object",properties:{consigne:{type:"string",description:"La consigne, en une phrase claire."}},required:["consigne"]},
+   execute:function(a){var txt=String(a.consigne||"").trim();if(!txt)throw new Error("consigne vide");var ref=S.db.doc("reglages/charte");return ref.get().then(function(sn){var c=sn.exists?sn.data():{};var l=(c.consignes||[]).concat([{texte:txt,le:todayIso()}]).slice(-30);return ref.update({consignes:l,majLe:new Date().toISOString()}).then(function(){return l.map(function(x){return x.texte})})})}},
+  {name:"ajouter_idee",description:"Ajoute une idée (événement, bon plan, nouveauté, info pratique) dans l’onglet Idées du studio. Renvoie l’identifiant créé.",inputSchema:{type:"object",properties:{titre:{type:"string"},type:{type:"string",enum:["agenda","bonplan","nouveau","pratique","question"]},village:{type:"string",enum:["carry","sausset","redonne","couronne","cotebleue"]},quand:{type:"string",description:"Date AAAA-MM-JJ, vide si aucune"},details:{type:"string",description:"1 à 3 lignes séparées par des retours à la ligne"},source:{type:"string",description:"D’où vient l’info (Océane si c’est elle)"}},required:["titre","type","village"]},
+   execute:function(a){var t=todayIso(),id=t+"-chat-"+String(a.titre||"idee").toLowerCase().normalize("NFD").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,40);
+     var q=/^\d{4}-\d{2}-\d{2}$/.test(String(a.quand||""))?String(a.quand):"";
+     return S.db.collection("idees").doc(id).set({date:t,type:TYPES[a.type]?String(a.type):"agenda",village:VILLAGES[a.village]?String(a.village):"cotebleue",titre:String(a.titre||"").slice(0,80),details:String(a.details||""),texte:"",quand:q,fin:"",story:"",sourceNom:String(a.source||"Océane"),sourceUrl:"",aVerifier:true,statut:"nouvelle",origine:"agent-com",createdAt:new Date().toISOString()}).then(function(){return{id:id}})}}]}
+function chatSend(text){text=String(text||"").trim();if(!text||chatCtl||!S.sample||!S.db)return;$("chat-text").value="";
+  var col=S.db.collection("discussion"),now=new Date().toISOString();col.doc(now.replace(/[:.]/g,"-")+"-u").set({role:"user",text:text,at:now});
+  var hist=S.chat.slice().sort(function(a,b){return(a.at||"").localeCompare(b.at||"")}).slice(-16).map(function(m){return{role:m.role==="user"?"user":"assistant",content:m.text||" "}});
+  hist.push({role:"user",content:text});while(hist.length&&hist[0].role!=="user")hist.shift();
+  var turns=[{role:"user",content:CHAT_RULES+"\n\nDONNÉES DU STUDIO (JSON) :\n"+chatContext()}].concat(hist);
+  chatCtl=new AbortController();S.chatLive="";$("chat-send").textContent="Stop";renderChat();
+  var done=function(t,note){chatCtl=null;S.chatLive="";$("chat-send").textContent="Envoyer";if(t){var at=new Date().toISOString();col.doc(at.replace(/[:.]/g,"-")+"-a").set({role:"assistant",text:t,at:at})}else renderChat();if(note)toast(note)};
+  S.sample.limits().catch(function(){return null}).then(function(lim){var opts={signal:chatCtl.signal,cache:false,onText:function(u){S.chatLive=u.text;var b=$("chat-live");if(b){b.textContent=u.text;b.classList.remove("wait");var lg=$("chat-log");lg.scrollTop=lg.scrollHeight}}};
+    if(lim&&lim.tools){opts.tools=chatTools();delete opts.cache}
+    return S.sample(turns,opts)}).then(function(r){done(r.text.trim(),r.truncated?"Réponse coupée : demande-lui plus court":"")},function(e){var c=e&&e.code;
+      if(c==="not_granted"||c==="sampling_disabled"||c==="not_declared"||c==="capability_disabled"){$("chat-box").hidden=true;done("","");return}
+      done(e&&e.text?e.text.trim():"",c==="cancelled"?"":c==="rate_limited"?"Trop de demandes, réessaie dans un moment":c==="refused"?"Elle n’a pas pu répondre à cette demande : reformule-la":"La réponse n’a pas pu arriver, réessaie")})}
+function setupChat(){if(!S.sample||!S.db)return;$("chat-box").hidden=false;var sg=$("chat-sugg");sg.textContent="";
+  CHAT_SUGG.forEach(function(q){sg.appendChild(el("button",{type:"button",class:"chip",text:q,onclick:function(){if(/…$/.test(q)){var ta=$("chat-text");ta.value=q.replace(/…$/," ");ta.focus()}else chatSend(q)}}))});
+  $("chat-send").onclick=function(){if(chatCtl){chatCtl.abort();return}chatSend($("chat-text").value)};
+  $("chat-text").onkeydown=function(e){if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();$("chat-send").click()}};
+  $("chat-clear").onclick=function(){if(!chatArmed){chatArmed=true;this.textContent="Confirmer l’effacement";var b=this;setTimeout(function(){chatArmed=false;b.textContent="Effacer la discussion"},4000);return}
+    chatArmed=false;this.textContent="Effacer la discussion";var col=S.db.collection("discussion");S.chat.forEach(function(m){col.doc(m.id).delete()});toast("Discussion effacée")};
+  renderChat()}
 /* Point com du lundi */
 function strList(x){return(Array.isArray(x)?x:(x?String(x).split("\n"):[])).map(function(s){return String(s).replace(/^[-•]\s*/,"").trim()}).filter(Boolean)}
 function ago(isoS){if(!isoS)return"";var d=new Date(isoS);if(isNaN(d))return"";var t=iso(d),h=pad(d.getHours())+"h"+pad(d.getMinutes());return(t===todayIso()?"aujourd’hui":t===addDays(todayIso(),-1)?"hier":frDate(t))+" à "+h}
@@ -1287,13 +1350,16 @@ else{
     snap("recaps",function(d,live){S.recaps=d.filter(function(x){return x.date});renderRecap();renderMessages();if(live)purge("recaps",d,function(r){return r.date<todayIso()})},db.collection("recaps").limit(60));
     snap("comptes",function(d){S.comptes=d;renderComptes()},db.collection("comptes").limit(300));
     snap("inspirations",function(d){S.insp=d;renderInsp()},db.collection("inspirations").limit(300));
+    snap("discussion",function(d){S.chat=d;renderChat()},db.collection("discussion").limit(300));
+    db.doc("reglages/charte").onSnapshot(function(s){S.charte=s.exists?s.data():null});
+    setupChat();
     snap("meteo",function(d,live){S.meteo={};d.forEach(function(m){S.meteo[m.date||m.id]=m});renderWeek();if(P.type==="meteo"){syncForm();draw()}if(live)purge("meteo",d,function(m){return(m.date||m.id)<todayIso()})},db.collection("meteo").limit(30));
     db.doc("reglages/meta").onSnapshot(function(s){S.sync=s.exists?s.data():null;renderAna();renderWeek();renderHealth()});
     db.doc("reglages/reseaux").onSnapshot(function(s){S.reseaux=s.exists?s.data():null;renderReseaux();renderHealth()});
     db.doc("reglages/strategie").onSnapshot(function(s){S.strat=s.exists?s.data():null;renderStrat()});
   });
   C.use("assets").then(function(a){S.assets=a});C.use("downloads").then(function(d){S.downloads=d});
-  C.use("sample").then(function(s){S.sample=s;if(!s)$("btn-legende").hidden=true});
+  C.use("sample").then(function(s){S.sample=s;if(!s)$("btn-legende").hidden=true;else setupChat()});
 }
 // Rendu sans écran pour les routines (outils/rendu.mjs) : renvoie le PNG d'un visuel en data URL.
 window.MCBRendu=function(post,meteo,slide){var Q=Object.assign(blankPost(),post);render(Q,meteo,slide||0);return cv.toDataURL("image/png")};
