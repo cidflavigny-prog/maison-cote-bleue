@@ -19,7 +19,7 @@ function draw(force){if($("v-atelier").hidden&&!force)return;var car=isCar();$("
 var feedTimer=null;window.__redraw=function(){draw();if(!$("feed-box").hidden&&!$("v-semaine").hidden){clearTimeout(feedTimer);feedTimer=setTimeout(renderFeed,300)}};
 
 /* ---------- Navigation ---------- */
-var VIEWS=["semaine","idees","atelier","messages","com","stats"];
+var VIEWS=["semaine","com","atelier","messages","stats","idees"];
 function show(v){VIEWS.forEach(function(x){$("v-"+x).hidden=x!==v});document.querySelectorAll(".tabs button").forEach(function(b){if(b.dataset.view===v)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});store("mcb-tab",v);window.scrollTo(0,0);if(v==="atelier")draw()}
 document.querySelectorAll(".tabs button").forEach(function(b){b.addEventListener("click",function(){show(b.dataset.view)})});
 (function(){var h=(location.hash||"").slice(1);show(VIEWS.indexOf(h)>=0?h:"semaine")})();

@@ -541,8 +541,8 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
   <!-- MESSAGES -->
   <section class="view" id="v-messages" aria-labelledby="h-msg" hidden>
     <div>
-      <h2 id="h-msg">Messages</h2>
-      <p class="lead">Les messages prêts à envoyer aux commerçants, associations et pages du coin. Copie, envoie depuis Instagram ou Facebook, puis touche « Message envoyé ». Rien ne part tout seul.</p>
+      <h2 id="h-msg">To do</h2>
+      <p class="lead">Ce que toi seule peux faire (Instagram et Facebook l’interdisent à un robot) : envoyer les messages préparés par l’agent et t’abonner aux comptes proposés. Copie, envoie depuis l’application, puis touche « Message envoyé ».</p>
     </div>
     <div class="panel"><div class="week-head"><h3>À envoyer</h3><span class="chipn" id="n-msg"></span></div><div id="msg-list" class="contacts"></div></div>
     <details class="add" id="comptes-box" open>
@@ -619,9 +619,9 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
 
 <nav class="tabs" aria-label="Sections">
   <button data-view="semaine" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Planning</button>
-  <button data-view="atelier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 15l3-3 2 2 3-3"/><circle cx="9" cy="8" r="1.5"/></svg>Atelier</button>
-  <button data-view="messages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H8l-4 4z"/><path d="M8 9h8M8 12h5"/></svg><span>Messages<span class="count" id="msg-count" hidden></span></span></button>
   <button data-view="com"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11v3a1 1 0 0 0 1 1h2l5 4V6L7 10H5a1 1 0 0 0-1 1zM16 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12"/></svg><span>Com<span class="count" id="com-count" hidden></span></span></button>
+  <button data-view="atelier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 15l3-3 2 2 3-3"/><circle cx="9" cy="8" r="1.5"/></svg>Atelier</button>
+  <button data-view="messages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H8l-4 4z"/><path d="M8 9h8M8 12h5"/></svg><span>To do<span class="count" id="msg-count" hidden></span></span></button>
   <button data-view="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Stats</button>
 </nav>
 <div class="toast" id="toast" hidden role="status"></div>
@@ -972,7 +972,7 @@ function draw(force){if($("v-atelier").hidden&&!force)return;var car=isCar();$("
 var feedTimer=null;window.__redraw=function(){draw();if(!$("feed-box").hidden&&!$("v-semaine").hidden){clearTimeout(feedTimer);feedTimer=setTimeout(renderFeed,300)}};
 
 /* ---------- Navigation ---------- */
-var VIEWS=["semaine","idees","atelier","messages","com","stats"];
+var VIEWS=["semaine","com","atelier","messages","stats","idees"];
 function show(v){VIEWS.forEach(function(x){$("v-"+x).hidden=x!==v});document.querySelectorAll(".tabs button").forEach(function(b){if(b.dataset.view===v)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});store("mcb-tab",v);window.scrollTo(0,0);if(v==="atelier")draw()}
 document.querySelectorAll(".tabs button").forEach(function(b){b.addEventListener("click",function(){show(b.dataset.view)})});
 (function(){var h=(location.hash||"").slice(1);show(VIEWS.indexOf(h)>=0?h:"semaine")})();
