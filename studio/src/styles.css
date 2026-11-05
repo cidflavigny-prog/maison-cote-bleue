@@ -335,3 +335,11 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
 .bstate .hdot{margin-top:6px}
 .btodo{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
 @media (max-width:899px){.studio .preview-col{order:-1}.preview-col .preview{order:1}.preview-col .car-nav{order:2}.preview-col .stage-bar{order:3}.preview-col #planif-box{order:4}.preview-col #export-fallback{order:5}.preview{padding:14px 10px;min-height:0}}
+.chat-photo{min-height:48px;padding:0 12px}
+.chat-att{display:flex;gap:8px;flex-wrap:wrap}
+.att{position:relative;width:64px;height:64px;border-radius:10px;overflow:hidden;background:var(--surface-2)}
+.att img{width:100%;height:100%;object-fit:cover;display:block}
+.att button{position:absolute;top:2px;right:2px;width:24px;height:24px;border-radius:50%;border:0;background:rgba(11,27,63,.75);color:#fff;font-weight:800;cursor:pointer;line-height:1}
+.att.wait{opacity:.5}
+.bub-ph{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.bub-ph img{width:84px;height:84px;object-fit:cover;border-radius:8px;display:block}
