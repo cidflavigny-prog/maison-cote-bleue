@@ -353,3 +353,4 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
 #v-agent .chat-in{position:sticky;bottom:calc(76px + env(safe-area-inset-bottom,0px));background:var(--bg);padding:8px 0}
 @media (min-width:900px){#v-agent .chat-in{bottom:0}}
 #v-agent .chat-att{position:sticky;bottom:calc(140px + env(safe-area-inset-bottom,0px));background:var(--bg)}
+.bub-note.err{color:#C2323A;font-weight:700;font-size:13px}
