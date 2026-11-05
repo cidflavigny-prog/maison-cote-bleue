@@ -334,3 +334,4 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
 .bstate{display:flex;gap:10px;align-items:flex-start;font-weight:700}
 .bstate .hdot{margin-top:6px}
 .btodo{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+@media (max-width:899px){.studio .preview-col{order:-1}.preview-col .preview{order:1}.preview-col .car-nav{order:2}.preview-col .stage-bar{order:3}.preview-col #planif-box{order:4}.preview-col #export-fallback{order:5}.preview{padding:14px 10px;min-height:0}}
