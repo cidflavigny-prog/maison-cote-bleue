@@ -176,6 +176,21 @@ function setupChat(){if(!S.sample||!S.db)return;$("chat-box").hidden=false;var s
   $("chat-clear").onclick=function(){if(!chatArmed){chatArmed=true;this.textContent="Confirmer l’effacement";var b=this;setTimeout(function(){chatArmed=false;b.textContent="Effacer la discussion"},4000);return}
     chatArmed=false;this.textContent="Effacer la discussion";var col=S.db.collection("discussion");S.chat.forEach(function(m){col.doc(m.id).delete()});toast("Discussion effacée")};
   renderChat()}
+/* Point com simplifié : 3 chiffres, l'état, ce qu'Océane a à faire, le conseil n°1 */
+function renderBrief(){var b=$("brief");if(!b)return;b.textContent="";var r=S.strat||{},t=todayIso(),ch=r.chiffres||{};
+  var pub7=S.posts.filter(function(p){return p.statut==="publie"&&(p.datePublie||"")>=addDays(t,-6)}),feed7=pub7.filter(function(p){return!isStoryPost(p)}).length;
+  var up=S.posts.filter(function(p){return planOn(p)&&p.statut!=="publie"&&(p.planif.date||"")>=t}).length;
+  var ev=ch.evolution;b.appendChild(el("div",{class:"bkpis"},[
+    el("div",{class:"bkpi"},[el("span",{class:"v",text:ch.abonnes!=null?String(ch.abonnes):"–"}),el("span",{class:"k",text:"abonnés"+(ev!=null?" ("+(ev>=0?"+":"")+ev+")":"")})]),
+    el("div",{class:"bkpi"},[el("span",{class:"v",text:String(pub7.length)}),el("span",{class:"k",text:"publiés en 7 jours, dont "+feed7+" dans le fil"})]),
+    el("div",{class:"bkpi"},[el("span",{class:"v",text:String(up)}),el("span",{class:"k",text:"programmés à venir"})])]));
+  var j=(r.journal||[]),recent=j.filter(function(x){return x.niveau==="alerte"&&(x.at||"")>=new Date(Date.now()-36e5*36).toISOString()}),fails=S.posts.filter(function(p){return p.planif&&p.planif.statut==="erreur"&&(p.planif.date||"")>=addDays(t,-1)});
+  var ok=!recent.length&&!fails.length;b.appendChild(el("div",{class:"bstate"},[el("span",{class:"hdot "+(ok?"ok":"ko")}),el("span",{text:ok?"Tout roule : l’agent com trouve, programme et publie tout seul.":(fails.length?fails.length+" publication(s) en échec : "+(fails[0].planif.erreur||"voir le journal"):recent[recent.length-1].texte)})]));
+  var msgs=S.comptes.filter(function(c){return c.message&&!c.contacteLe&&c.statut!=="ignore"}).length,props=S.comptes.filter(function(c){return c.statut==="propose"}).length,todo=[];
+  if(msgs)todo.push(el("li",{},[el("a",{href:"#",text:msgs+(msgs>1?" messages à envoyer":" message à envoyer"),onclick:function(e){e.preventDefault();show("messages")}}),el("span",{text:" aux commerçants (Instagram ne permet pas de le faire par un robot)"})]));
+  if(props)todo.push(el("li",{text:props+(props>1?" comptes proposés":" compte proposé")+" à suivre depuis ton téléphone"}));
+  b.appendChild(el("span",{class:"lbl",text:"Ce que tu as à faire"}));b.appendChild(todo.length?el("ul",{class:"btodo"},todo):el("p",{class:"hint",style:"margin:0",text:"Rien : l’agent s’occupe de tout."}));
+  var tip=strList(r.optimisations)[0];if(tip){b.appendChild(el("span",{class:"lbl",text:"Le conseil de la semaine"}));b.appendChild(el("p",{style:"margin:0",text:tip}))}}
 /* Point com du lundi */
 function strList(x){return(Array.isArray(x)?x:(x?String(x).split("\n"):[])).map(function(s){return String(s).replace(/^[-•]\s*/,"").trim()}).filter(Boolean)}
 function ago(isoS){if(!isoS)return"";var d=new Date(isoS);if(isNaN(d))return"";var t=iso(d),h=pad(d.getHours())+"h"+pad(d.getMinutes());return(t===todayIso()?"aujourd’hui":t===addDays(todayIso(),-1)?"hier":frDate(t))+" à "+h}
@@ -187,7 +202,7 @@ function renderJournal(){var j=((S.strat&&S.strat.journal)||[]).slice().sort(fun
   var fresh=j.filter(function(x){return(x.at||"").slice(0,10)===todayIso()}).length;$("com-count").hidden=!fresh;$("com-count").textContent=fresh||"";
   if(!j.length){box.appendChild(el("p",{class:"hint",style:"margin:0",text:"Rien pour l’instant : les routines y noteront chaque publication, chaque échec et chaque vérification."}));return}
   j.forEach(function(x){box.appendChild(el("div",{class:"jrow"+(x.niveau==="alerte"?" alerte":"")},[el("span",{class:"jat",text:ago(x.at)}),el("span",{class:"jtxt",text:x.texte||""})]))})}
-function renderStrat(){renderHealth();renderJournal();var r=S.strat,b=$("strat-body");b.textContent="";$("n-strat").textContent=r&&r.semaine&&addDays(r.semaine,7)>todayIso()?"nouveau":"";
+function renderStrat(){renderHealth();renderJournal();renderBrief();var r=S.strat,b=$("strat-body");b.textContent="";$("n-strat").textContent=r&&r.semaine&&addDays(r.semaine,7)>todayIso()?"nouveau":"";
   if(!r||!r.semaine){b.appendChild(el("p",{class:"hint",style:"margin:0",text:"Chaque lundi matin, ta responsable com fait le point : bilan de la semaine passée, calendrier de la semaine, idées pour progresser et relances à faire."}));return}
   b.appendChild(el("span",{class:"hint",text:"Point du "+frDate(r.semaine||(r.majLe||"").slice(0,10))}));
   if(r.bilan){b.appendChild(el("span",{class:"lbl",text:"Bilan"}));b.appendChild(el("p",{class:"recap-text",text:r.bilan}))}
@@ -223,9 +238,33 @@ function renderFeed(){var box=$("feed");box.textContent="";var today=todayIso();
   var st=$("feed-stories");st.textContent="";S.posts.filter(function(p){return isStoryPost(p)&&postDay(p)>=today}).sort(function(a,b){return postDay(a).localeCompare(postDay(b))}).forEach(function(p){var s2=postState(p);st.appendChild(el("button",{type:"button",class:"rdv",onclick:function(){openPost(p)}},[el("span",{class:"ico",style:"background:#DCE8FF",text:"S"}),el("span",{class:"txt"},[el("b",{text:p.titre||typ(p.type).name}),el("small",{text:frDate(postDay(p))+(p.planif&&p.planif.heure?" · "+p.planif.heure+"h":"")})]),el("span",{class:"st "+s2[1],text:s2[0]})]))});
   if(!st.children.length)st.appendChild(el("p",{class:"hint",style:"margin:0",text:"Aucune story prévue."}));
   if(cv.height!==prevH||!$("v-atelier").hidden)draw(true)}
-function setPlanView(f){$("feed-box").hidden=!f;$("cal-box").hidden=f;$("pv-feed").setAttribute("aria-pressed",String(f));$("pv-cal").setAttribute("aria-pressed",String(!f));store("mcb-plan",f?"feed":"cal");if(f)renderFeed()}
-$("pv-cal").onclick=function(){setPlanView(false)};$("pv-feed").onclick=function(){setPlanView(true)};
-if(store("mcb-plan")==="feed")setPlanView(true);
+/* Planning : « Programmé » (par défaut), calendrier ou feed */
+function setPlanView(v){if(v===true)v="feed";if(v===false)v="cal";if(v!=="cal"&&v!=="feed")v="prog";$("prog-box").hidden=v!=="prog";$("cal-box").hidden=v!=="cal";$("feed-box").hidden=v!=="feed";
+  ["prog","cal","feed"].forEach(function(k){$("pv-"+k).setAttribute("aria-pressed",String(k===v))});store("mcb-plan",v);if(v==="feed")renderFeed();if(v==="prog")renderProg()}
+$("pv-prog").onclick=function(){setPlanView("prog")};$("pv-cal").onclick=function(){setPlanView("cal")};$("pv-feed").onclick=function(){setPlanView("feed")};
+function fmtName(p){return p.format==="carrousel"?"Carrousel":isStoryPost(p)?"Story":"Post"}
+function progThumb(p){var story=isStoryPost(p),box=el("span",{class:"pthumb"+(story?" story":"")}),id=p.planif&&p.planif.assetId;
+  if(id){box.appendChild(el("img",{src:"/_blob/"+id,alt:"",loading:"lazy"}));return box}
+  var c=document.createElement("canvas"),W=story?1080:1080,H=story?1920:1350;c.width=W/6;c.height=H/6;var prev=cv.height;try{render(p,S.meteo[p.meteoDate],0);c.getContext("2d").drawImage(cv,0,0,cv.width,cv.height,0,0,c.width,c.height)}catch(e){}box.appendChild(c);return box}
+function progItem(p){var st=postState(p),h=p.planif&&p.planif.heure?String(p.planif.heure).replace(/h$/,"")+"h":"";
+  var meta=[el("span",{class:"pf",text:fmtName(p)}),el("span",{text:vil(p.village).short}),el("span",{class:"st "+st[1],text:p.statut==="publie"?"Publié":st[0].replace(/ \d+h$/,"")})];
+  if(p.statut==="publie"&&p.permalink)meta.push(el("a",{href:p.permalink,target:"_blank",rel:"noopener",text:"Voir sur Instagram",onclick:function(e){e.stopPropagation()}}));
+  if(p.planif&&p.planif.statut==="erreur"&&p.planif.erreur)meta.push(el("span",{text:p.planif.erreur}));
+  if(p.stats&&p.stats.portee!=null)meta.push(el("span",{text:p.stats.portee+" vues · "+(p.stats.likes||0)+" j’aime"}));
+  return el("button",{type:"button",class:"pitem",onclick:function(){openPost(p)}},[el("span",{class:"phour",text:p.statut==="publie"&&!h?"✓":(h||"·")}),progThumb(p),el("span",{class:"pinfo"},[el("b",{text:p.type==="meteo"?"Météo de demain":(p.titre||typ(p.type).name)}),el("span",{class:"pmeta"},meta)])])}
+function renderProg(){var box=$("prog-box");if(!box||box.hidden)return;box.textContent="";var t=todayIso(),prevH=cv.height;
+  var up=S.posts.filter(function(p){return p.planif&&(p.planif.statut==="programme"||p.planif.statut==="en_cours"||p.planif.statut==="erreur")&&p.statut!=="publie"&&(p.planif.date||"")>=t});
+  var pub=S.posts.filter(function(p){return p.statut==="publie"&&(p.datePublie||"")>=addDays(t,-6)});
+  var hr=function(p){return Number(String(p.planif&&p.planif.heure||0).replace(/\D/g,""))||0};
+  var next=up.slice().sort(function(a,b){return(a.planif.at||"").localeCompare(b.planif.at||"")})[0];
+  $("prog-lead").textContent=up.length?(up.length+(up.length>1?" publications programmées":" publication programmée")+". Prochaine : "+(next.type==="meteo"?"la météo":"« "+(next.titre||typ(next.type).name)+" »")+" "+(next.planif.date===t?"aujourd’hui":frDate(next.planif.date))+" à "+hr(next)+"h, sur Instagram et Facebook."):"Rien de programmé pour l’instant : l’agent com programme chaque matin vers 9h les publications du jour.";
+  var days={};up.forEach(function(p){(days[p.planif.date]=days[p.planif.date]||[]).push(p)});pub.filter(function(p){return p.datePublie===t}).forEach(function(p){(days[t]=days[t]||[]).push(p)});
+  var keys=Object.keys(days).sort();if(!keys.length)box.appendChild(el("div",{class:"pempty",text:"Aucune publication à venir. La prochaine sera programmée demain matin."}));
+  keys.forEach(function(d){var list=days[d].sort(function(a,b){return hr(a)-hr(b)});var sec=el("div",{class:"pday"},[el("h3",{class:d===t?"now":"",text:d===t?"Aujourd’hui":d===addDays(t,1)?"Demain":frDate(d)})]);list.forEach(function(p){sec.appendChild(progItem(p))});box.appendChild(sec)});
+  var past=pub.filter(function(p){return p.datePublie!==t}).sort(function(a,b){return(b.datePublie||"").localeCompare(a.datePublie||"")||hr(b)-hr(a)});
+  if(past.length){var sec=el("div",{class:"pday"},[el("h3",{text:"Publié ces 7 derniers jours"})]);past.forEach(function(p){sec.appendChild(progItem(p))});box.appendChild(sec)}
+  if(cv.height!==prevH||!$("v-atelier").hidden)draw(true)}
+setPlanView(store("mcb-plan")||"prog");
 $("compte-form").addEventListener("submit",function(e){e.preventDefault();if(!S.db)return;var u=cleanUser($("c-user").value);if(!/^[a-z0-9._]{1,30}$/.test(u)){toast("Nom de compte invalide");return}
   var ref=S.db.collection("comptes").doc(u);ref.get().then(function(sn){return sn.exists?ref.update({statut:"suivi",village:$("c-village").value}):ref.set({username:u,village:$("c-village").value,statut:"suivi",ajouteLe:new Date().toISOString(),origine:"manuel"})}).then(function(){$("c-user").value="";toast("@"+u+" ajouté")},function(){toast("Ajout impossible pour l’instant")})});
 
@@ -422,10 +461,10 @@ if(!C||!C.use)setConn(false,"Hors ligne");
 else{
   C.use("db").then(function(db){if(!db){setConn(false,"Base indisponible");return}S.db=db;setConn(true,"Synchronisé");
     snap("idees",function(d,live){S.ideas=d;renderIdeas();renderWeek();renderReseaux();if(live)purge("idees",d,function(i){return isPast(i)||oldUndated(i)})},db.collection("idees").limit(500));
-    snap("posts",function(d,live){S.posts=d;renderWeek();renderAna();if(!$("feed-box").hidden)renderFeed();if(live)purge("posts",d,stale)},db.collection("posts").limit(500));
+    snap("posts",function(d,live){S.posts=d;renderWeek();renderAna();renderProg();renderBrief();if(!$("feed-box").hidden)renderFeed();if(live)purge("posts",d,stale)},db.collection("posts").limit(500));
     snap("stats",function(d){S.stats=d.filter(function(x){return x.date});renderAna()},db.collection("stats").limit(800));
     snap("recaps",function(d,live){S.recaps=d.filter(function(x){return x.date});renderRecap();renderMessages();if(live)purge("recaps",d,function(r){return r.date<todayIso()})},db.collection("recaps").limit(60));
-    snap("comptes",function(d){S.comptes=d;renderComptes()},db.collection("comptes").limit(300));
+    snap("comptes",function(d){S.comptes=d;renderComptes();renderBrief()},db.collection("comptes").limit(300));
     snap("inspirations",function(d){S.insp=d;renderInsp()},db.collection("inspirations").limit(300));
     snap("discussion",function(d){S.chat=d;renderChat()},db.collection("discussion").limit(300));
     db.doc("reglages/charte").onSnapshot(function(s){S.charte=s.exists?s.data():null});

@@ -312,6 +312,31 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
 .chat-in textarea{min-height:48px;flex:1}
 .chat-in .btn{min-height:48px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.plan-seg3{grid-template-columns:1fr 1fr 1fr;max-width:480px}
+.progbox{display:flex;flex-direction:column;gap:18px}
+.pday{display:flex;flex-direction:column;gap:10px}
+.pday h3{font-size:16px;color:var(--muted)}
+.pday h3.now{color:var(--brand)}
+.pitem{display:flex;gap:14px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:10px;text-align:left;width:100%;cursor:pointer;color:var(--ink)}
+.pitem:hover{box-shadow:var(--shadow-lg)}
+.pthumb{flex:none;width:76px;height:95px;border-radius:8px;overflow:hidden;background:var(--surface-2);display:flex;align-items:center;justify-content:center}
+.pthumb.story{width:60px;height:107px}
+.pthumb img,.pthumb canvas{width:100%;height:100%;object-fit:cover;display:block}
+.pinfo{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.pinfo b{overflow-wrap:anywhere;font-size:15px}
+.pmeta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--faint)}
+.phour{font-family:var(--f-display);font-weight:600;font-size:22px;flex:none;min-width:52px;text-align:center;color:var(--brand)}
+.pempty{border:1.5px dashed var(--line-2);border-radius:var(--r);padding:14px;color:var(--muted);background:var(--surface)}
+.create-row.light .create{color:var(--ink)}
+.create-row.light .create-ico{box-shadow:0 0 0 3px var(--line)}
+.brief{gap:14px}
+.bkpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.bkpi{background:var(--surface-2);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.bkpi .v{font-family:var(--f-display);font-weight:600;font-size:28px;line-height:1.1;font-variant-numeric:tabular-nums}
+.bkpi .k{font-size:12px;color:var(--faint);font-weight:700}
+.bstate{display:flex;gap:10px;align-items:flex-start;font-weight:700}
+.bstate .hdot{margin-top:6px}
+.btodo{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
 </style>
 
 <div class="wrap">
@@ -327,16 +352,12 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
 
   <!-- SEMAINE -->
   <section class="view" id="v-semaine" aria-labelledby="h-sem">
-    <div class="hero">
-      <p class="hero-k">Maison Côte Bleue · Carry · Sausset · Ensuès · La Couronne-Carro</p>
-      <p class="hero-t">Que veux-tu créer aujourd’hui ?</p>
-      <div class="create-row" id="create-row" role="group" aria-label="Créer un visuel"></div>
-    </div>
     <div>
-      <h2 id="h-sem">Planning éditorial</h2>
-      <p class="lead">Tes rendez-vous fixes (météo chaque soir, agenda de la semaine le dimanche, du week-end le jeudi) et tout ce qui est prévu. Touche un visuel pour l’ouvrir dans l’atelier.</p>
+      <h2 id="h-sem">Au programme</h2>
+      <p class="lead" id="prog-lead">Ce que l’agent com a programmé : chaque visuel part tout seul sur Instagram et Facebook à l’heure indiquée.</p>
     </div>
-    <div class="seg plan-seg" role="group" aria-label="Affichage du planning"><button type="button" id="pv-cal" aria-pressed="true">Calendrier</button><button type="button" id="pv-feed" aria-pressed="false">Aperçu du feed</button></div>
+    <div class="seg plan-seg3" role="group" aria-label="Affichage du planning"><button type="button" id="pv-prog" aria-pressed="true">Programmé</button><button type="button" id="pv-cal" aria-pressed="false">Calendrier</button><button type="button" id="pv-feed" aria-pressed="false">Feed</button></div>
+    <div id="prog-box" class="progbox"></div>
     <div id="feed-box" class="feedbox" hidden>
       <div class="feed-head"><div class="feed-av"></div><div><b>maison.cotebleue</b><span class="hint" id="feed-sub"></span></div></div>
       <div class="hl-row" id="feed-hl" aria-label="Stories à la une"></div>
@@ -353,6 +374,10 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
     <div class="daylist" id="days"></div>
     <div class="field"><h3>Brouillons sans date</h3><div class="list" id="drafts"></div></div>
     </div>
+    <details class="add" id="create-box">
+      <summary><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Créer un visuel à la main</summary>
+      <div class="panel"><div class="create-row light" id="create-row" role="group" aria-label="Créer un visuel"></div></div>
+    </details>
   </section>
 
   <!-- IDÉES -->
@@ -539,18 +564,24 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
   <section class="view" id="v-com" aria-labelledby="h-com" hidden>
     <div>
       <h2 id="h-com">Point com <span class="chipn" id="n-strat"></span></h2>
-      <p class="lead">Ta responsable com fait le point chaque lundi matin. Les routines notent ici ce qu’elles ont fait, au fil de la semaine.</p>
+      <p class="lead">L’essentiel en un coup d’œil. Le détail est plus bas.</p>
     </div>
+    <div class="panel brief" id="brief"></div>
     <div class="panel chat" id="chat-box" hidden>
       <div class="week-head"><h3>Parle à ton agent com</h3><button type="button" class="btn ghost" id="chat-clear">Effacer la discussion</button></div>
-      <p class="hint" style="margin:0">Elle connaît ton planning, tes idées, le Point com et ta charte. Demande-lui un avis, une légende, un plan. Dis-lui « retiens que… » pour donner une consigne que les routines appliqueront ensuite.</p>
+      <p class="hint" style="margin:0">Elle connaît ton planning, tes idées, le Point com et ta charte. Dis-lui « retiens que… » pour donner une consigne que les routines appliqueront.</p>
       <div class="chat-log" id="chat-log" aria-live="polite"></div>
       <div class="chips" id="chat-sugg" role="group" aria-label="Suggestions"></div>
       <div class="chat-in"><label for="chat-text" class="sr">Ton message</label><textarea id="chat-text" rows="2" placeholder="Écris à ton agent com…"></textarea><button type="button" class="btn primary" id="chat-send">Envoyer</button></div>
     </div>
-    <div class="panel"><div class="week-head"><h3>Routines</h3><span class="source">dernier passage de chacune</span></div><div id="health" class="health"></div></div>
-    <div class="panel"><div class="week-head"><h3>Journal</h3><span class="source">le plus récent en haut</span></div><div id="journal" class="journal"></div></div>
-    <div class="panel" id="strat-body"></div>
+    <details class="add">
+      <summary>Le détail : routines, journal et Point com complet</summary>
+      <div class="panel">
+        <div class="week-head"><h3>Routines</h3><span class="source">dernier passage de chacune</span></div><div id="health" class="health"></div>
+        <div class="week-head"><h3>Journal</h3><span class="source">le plus récent en haut</span></div><div id="journal" class="journal"></div>
+        <div id="strat-body" class="contacts"></div>
+      </div>
+    </details>
   </section>
 
   <!-- STATS -->
@@ -1099,6 +1130,21 @@ function setupChat(){if(!S.sample||!S.db)return;$("chat-box").hidden=false;var s
   $("chat-clear").onclick=function(){if(!chatArmed){chatArmed=true;this.textContent="Confirmer l’effacement";var b=this;setTimeout(function(){chatArmed=false;b.textContent="Effacer la discussion"},4000);return}
     chatArmed=false;this.textContent="Effacer la discussion";var col=S.db.collection("discussion");S.chat.forEach(function(m){col.doc(m.id).delete()});toast("Discussion effacée")};
   renderChat()}
+/* Point com simplifié : 3 chiffres, l'état, ce qu'Océane a à faire, le conseil n°1 */
+function renderBrief(){var b=$("brief");if(!b)return;b.textContent="";var r=S.strat||{},t=todayIso(),ch=r.chiffres||{};
+  var pub7=S.posts.filter(function(p){return p.statut==="publie"&&(p.datePublie||"")>=addDays(t,-6)}),feed7=pub7.filter(function(p){return!isStoryPost(p)}).length;
+  var up=S.posts.filter(function(p){return planOn(p)&&p.statut!=="publie"&&(p.planif.date||"")>=t}).length;
+  var ev=ch.evolution;b.appendChild(el("div",{class:"bkpis"},[
+    el("div",{class:"bkpi"},[el("span",{class:"v",text:ch.abonnes!=null?String(ch.abonnes):"–"}),el("span",{class:"k",text:"abonnés"+(ev!=null?" ("+(ev>=0?"+":"")+ev+")":"")})]),
+    el("div",{class:"bkpi"},[el("span",{class:"v",text:String(pub7.length)}),el("span",{class:"k",text:"publiés en 7 jours, dont "+feed7+" dans le fil"})]),
+    el("div",{class:"bkpi"},[el("span",{class:"v",text:String(up)}),el("span",{class:"k",text:"programmés à venir"})])]));
+  var j=(r.journal||[]),recent=j.filter(function(x){return x.niveau==="alerte"&&(x.at||"")>=new Date(Date.now()-36e5*36).toISOString()}),fails=S.posts.filter(function(p){return p.planif&&p.planif.statut==="erreur"&&(p.planif.date||"")>=addDays(t,-1)});
+  var ok=!recent.length&&!fails.length;b.appendChild(el("div",{class:"bstate"},[el("span",{class:"hdot "+(ok?"ok":"ko")}),el("span",{text:ok?"Tout roule : l’agent com trouve, programme et publie tout seul.":(fails.length?fails.length+" publication(s) en échec : "+(fails[0].planif.erreur||"voir le journal"):recent[recent.length-1].texte)})]));
+  var msgs=S.comptes.filter(function(c){return c.message&&!c.contacteLe&&c.statut!=="ignore"}).length,props=S.comptes.filter(function(c){return c.statut==="propose"}).length,todo=[];
+  if(msgs)todo.push(el("li",{},[el("a",{href:"#",text:msgs+(msgs>1?" messages à envoyer":" message à envoyer"),onclick:function(e){e.preventDefault();show("messages")}}),el("span",{text:" aux commerçants (Instagram ne permet pas de le faire par un robot)"})]));
+  if(props)todo.push(el("li",{text:props+(props>1?" comptes proposés":" compte proposé")+" à suivre depuis ton téléphone"}));
+  b.appendChild(el("span",{class:"lbl",text:"Ce que tu as à faire"}));b.appendChild(todo.length?el("ul",{class:"btodo"},todo):el("p",{class:"hint",style:"margin:0",text:"Rien : l’agent s’occupe de tout."}));
+  var tip=strList(r.optimisations)[0];if(tip){b.appendChild(el("span",{class:"lbl",text:"Le conseil de la semaine"}));b.appendChild(el("p",{style:"margin:0",text:tip}))}}
 /* Point com du lundi */
 function strList(x){return(Array.isArray(x)?x:(x?String(x).split("\n"):[])).map(function(s){return String(s).replace(/^[-•]\s*/,"").trim()}).filter(Boolean)}
 function ago(isoS){if(!isoS)return"";var d=new Date(isoS);if(isNaN(d))return"";var t=iso(d),h=pad(d.getHours())+"h"+pad(d.getMinutes());return(t===todayIso()?"aujourd’hui":t===addDays(todayIso(),-1)?"hier":frDate(t))+" à "+h}
@@ -1110,7 +1156,7 @@ function renderJournal(){var j=((S.strat&&S.strat.journal)||[]).slice().sort(fun
   var fresh=j.filter(function(x){return(x.at||"").slice(0,10)===todayIso()}).length;$("com-count").hidden=!fresh;$("com-count").textContent=fresh||"";
   if(!j.length){box.appendChild(el("p",{class:"hint",style:"margin:0",text:"Rien pour l’instant : les routines y noteront chaque publication, chaque échec et chaque vérification."}));return}
   j.forEach(function(x){box.appendChild(el("div",{class:"jrow"+(x.niveau==="alerte"?" alerte":"")},[el("span",{class:"jat",text:ago(x.at)}),el("span",{class:"jtxt",text:x.texte||""})]))})}
-function renderStrat(){renderHealth();renderJournal();var r=S.strat,b=$("strat-body");b.textContent="";$("n-strat").textContent=r&&r.semaine&&addDays(r.semaine,7)>todayIso()?"nouveau":"";
+function renderStrat(){renderHealth();renderJournal();renderBrief();var r=S.strat,b=$("strat-body");b.textContent="";$("n-strat").textContent=r&&r.semaine&&addDays(r.semaine,7)>todayIso()?"nouveau":"";
   if(!r||!r.semaine){b.appendChild(el("p",{class:"hint",style:"margin:0",text:"Chaque lundi matin, ta responsable com fait le point : bilan de la semaine passée, calendrier de la semaine, idées pour progresser et relances à faire."}));return}
   b.appendChild(el("span",{class:"hint",text:"Point du "+frDate(r.semaine||(r.majLe||"").slice(0,10))}));
   if(r.bilan){b.appendChild(el("span",{class:"lbl",text:"Bilan"}));b.appendChild(el("p",{class:"recap-text",text:r.bilan}))}
@@ -1146,9 +1192,33 @@ function renderFeed(){var box=$("feed");box.textContent="";var today=todayIso();
   var st=$("feed-stories");st.textContent="";S.posts.filter(function(p){return isStoryPost(p)&&postDay(p)>=today}).sort(function(a,b){return postDay(a).localeCompare(postDay(b))}).forEach(function(p){var s2=postState(p);st.appendChild(el("button",{type:"button",class:"rdv",onclick:function(){openPost(p)}},[el("span",{class:"ico",style:"background:#DCE8FF",text:"S"}),el("span",{class:"txt"},[el("b",{text:p.titre||typ(p.type).name}),el("small",{text:frDate(postDay(p))+(p.planif&&p.planif.heure?" · "+p.planif.heure+"h":"")})]),el("span",{class:"st "+s2[1],text:s2[0]})]))});
   if(!st.children.length)st.appendChild(el("p",{class:"hint",style:"margin:0",text:"Aucune story prévue."}));
   if(cv.height!==prevH||!$("v-atelier").hidden)draw(true)}
-function setPlanView(f){$("feed-box").hidden=!f;$("cal-box").hidden=f;$("pv-feed").setAttribute("aria-pressed",String(f));$("pv-cal").setAttribute("aria-pressed",String(!f));store("mcb-plan",f?"feed":"cal");if(f)renderFeed()}
-$("pv-cal").onclick=function(){setPlanView(false)};$("pv-feed").onclick=function(){setPlanView(true)};
-if(store("mcb-plan")==="feed")setPlanView(true);
+/* Planning : « Programmé » (par défaut), calendrier ou feed */
+function setPlanView(v){if(v===true)v="feed";if(v===false)v="cal";if(v!=="cal"&&v!=="feed")v="prog";$("prog-box").hidden=v!=="prog";$("cal-box").hidden=v!=="cal";$("feed-box").hidden=v!=="feed";
+  ["prog","cal","feed"].forEach(function(k){$("pv-"+k).setAttribute("aria-pressed",String(k===v))});store("mcb-plan",v);if(v==="feed")renderFeed();if(v==="prog")renderProg()}
+$("pv-prog").onclick=function(){setPlanView("prog")};$("pv-cal").onclick=function(){setPlanView("cal")};$("pv-feed").onclick=function(){setPlanView("feed")};
+function fmtName(p){return p.format==="carrousel"?"Carrousel":isStoryPost(p)?"Story":"Post"}
+function progThumb(p){var story=isStoryPost(p),box=el("span",{class:"pthumb"+(story?" story":"")}),id=p.planif&&p.planif.assetId;
+  if(id){box.appendChild(el("img",{src:"/_blob/"+id,alt:"",loading:"lazy"}));return box}
+  var c=document.createElement("canvas"),W=story?1080:1080,H=story?1920:1350;c.width=W/6;c.height=H/6;var prev=cv.height;try{render(p,S.meteo[p.meteoDate],0);c.getContext("2d").drawImage(cv,0,0,cv.width,cv.height,0,0,c.width,c.height)}catch(e){}box.appendChild(c);return box}
+function progItem(p){var st=postState(p),h=p.planif&&p.planif.heure?String(p.planif.heure).replace(/h$/,"")+"h":"";
+  var meta=[el("span",{class:"pf",text:fmtName(p)}),el("span",{text:vil(p.village).short}),el("span",{class:"st "+st[1],text:p.statut==="publie"?"Publié":st[0].replace(/ \d+h$/,"")})];
+  if(p.statut==="publie"&&p.permalink)meta.push(el("a",{href:p.permalink,target:"_blank",rel:"noopener",text:"Voir sur Instagram",onclick:function(e){e.stopPropagation()}}));
+  if(p.planif&&p.planif.statut==="erreur"&&p.planif.erreur)meta.push(el("span",{text:p.planif.erreur}));
+  if(p.stats&&p.stats.portee!=null)meta.push(el("span",{text:p.stats.portee+" vues · "+(p.stats.likes||0)+" j’aime"}));
+  return el("button",{type:"button",class:"pitem",onclick:function(){openPost(p)}},[el("span",{class:"phour",text:p.statut==="publie"&&!h?"✓":(h||"·")}),progThumb(p),el("span",{class:"pinfo"},[el("b",{text:p.type==="meteo"?"Météo de demain":(p.titre||typ(p.type).name)}),el("span",{class:"pmeta"},meta)])])}
+function renderProg(){var box=$("prog-box");if(!box||box.hidden)return;box.textContent="";var t=todayIso(),prevH=cv.height;
+  var up=S.posts.filter(function(p){return p.planif&&(p.planif.statut==="programme"||p.planif.statut==="en_cours"||p.planif.statut==="erreur")&&p.statut!=="publie"&&(p.planif.date||"")>=t});
+  var pub=S.posts.filter(function(p){return p.statut==="publie"&&(p.datePublie||"")>=addDays(t,-6)});
+  var hr=function(p){return Number(String(p.planif&&p.planif.heure||0).replace(/\D/g,""))||0};
+  var next=up.slice().sort(function(a,b){return(a.planif.at||"").localeCompare(b.planif.at||"")})[0];
+  $("prog-lead").textContent=up.length?(up.length+(up.length>1?" publications programmées":" publication programmée")+". Prochaine : "+(next.type==="meteo"?"la météo":"« "+(next.titre||typ(next.type).name)+" »")+" "+(next.planif.date===t?"aujourd’hui":frDate(next.planif.date))+" à "+hr(next)+"h, sur Instagram et Facebook."):"Rien de programmé pour l’instant : l’agent com programme chaque matin vers 9h les publications du jour.";
+  var days={};up.forEach(function(p){(days[p.planif.date]=days[p.planif.date]||[]).push(p)});pub.filter(function(p){return p.datePublie===t}).forEach(function(p){(days[t]=days[t]||[]).push(p)});
+  var keys=Object.keys(days).sort();if(!keys.length)box.appendChild(el("div",{class:"pempty",text:"Aucune publication à venir. La prochaine sera programmée demain matin."}));
+  keys.forEach(function(d){var list=days[d].sort(function(a,b){return hr(a)-hr(b)});var sec=el("div",{class:"pday"},[el("h3",{class:d===t?"now":"",text:d===t?"Aujourd’hui":d===addDays(t,1)?"Demain":frDate(d)})]);list.forEach(function(p){sec.appendChild(progItem(p))});box.appendChild(sec)});
+  var past=pub.filter(function(p){return p.datePublie!==t}).sort(function(a,b){return(b.datePublie||"").localeCompare(a.datePublie||"")||hr(b)-hr(a)});
+  if(past.length){var sec=el("div",{class:"pday"},[el("h3",{text:"Publié ces 7 derniers jours"})]);past.forEach(function(p){sec.appendChild(progItem(p))});box.appendChild(sec)}
+  if(cv.height!==prevH||!$("v-atelier").hidden)draw(true)}
+setPlanView(store("mcb-plan")||"prog");
 $("compte-form").addEventListener("submit",function(e){e.preventDefault();if(!S.db)return;var u=cleanUser($("c-user").value);if(!/^[a-z0-9._]{1,30}$/.test(u)){toast("Nom de compte invalide");return}
   var ref=S.db.collection("comptes").doc(u);ref.get().then(function(sn){return sn.exists?ref.update({statut:"suivi",village:$("c-village").value}):ref.set({username:u,village:$("c-village").value,statut:"suivi",ajouteLe:new Date().toISOString(),origine:"manuel"})}).then(function(){$("c-user").value="";toast("@"+u+" ajouté")},function(){toast("Ajout impossible pour l’instant")})});
 
@@ -1345,10 +1415,10 @@ if(!C||!C.use)setConn(false,"Hors ligne");
 else{
   C.use("db").then(function(db){if(!db){setConn(false,"Base indisponible");return}S.db=db;setConn(true,"Synchronisé");
     snap("idees",function(d,live){S.ideas=d;renderIdeas();renderWeek();renderReseaux();if(live)purge("idees",d,function(i){return isPast(i)||oldUndated(i)})},db.collection("idees").limit(500));
-    snap("posts",function(d,live){S.posts=d;renderWeek();renderAna();if(!$("feed-box").hidden)renderFeed();if(live)purge("posts",d,stale)},db.collection("posts").limit(500));
+    snap("posts",function(d,live){S.posts=d;renderWeek();renderAna();renderProg();renderBrief();if(!$("feed-box").hidden)renderFeed();if(live)purge("posts",d,stale)},db.collection("posts").limit(500));
     snap("stats",function(d){S.stats=d.filter(function(x){return x.date});renderAna()},db.collection("stats").limit(800));
     snap("recaps",function(d,live){S.recaps=d.filter(function(x){return x.date});renderRecap();renderMessages();if(live)purge("recaps",d,function(r){return r.date<todayIso()})},db.collection("recaps").limit(60));
-    snap("comptes",function(d){S.comptes=d;renderComptes()},db.collection("comptes").limit(300));
+    snap("comptes",function(d){S.comptes=d;renderComptes();renderBrief()},db.collection("comptes").limit(300));
     snap("inspirations",function(d){S.insp=d;renderInsp()},db.collection("inspirations").limit(300));
     snap("discussion",function(d){S.chat=d;renderChat()},db.collection("discussion").limit(300));
     db.doc("reglages/charte").onSnapshot(function(s){S.charte=s.exists?s.data():null});

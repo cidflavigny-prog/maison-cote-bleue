@@ -17,6 +17,8 @@ Page de travail publiée sur claude.ai (privée) : https://claude.ai/artifact/PH
 - **Inspirations** (onglet Idées) : les publications d'autres comptes mises de côté par la veille, classées par catégorie ; l'agent com du lundi en reprend au moins une dans le calendrier. Jamais republiées sans accord.
 - **Ligne éditoriale** : pas de politique ; pas que des mairies (au plus 1 idée ou ligne d'agenda sur 4 de source municipale, on cite l'organisateur).
 - **Parler à l’agent com** (onglet Com) : une discussion avec Claude, qui reçoit le planning, les idées, le Point com, les inspirations et la charte. Messages dans la collection `discussion`. Elle peut noter une consigne durable (`reglages/charte.consignes`, lue par la veille et le Point com) et ajouter une idée (origine « agent-com »).
+- **Planning → Programmé** (vue par défaut) : ce qui est programmé, jour par jour avec l'heure, l'image réellement envoyée et son statut, puis ce qui a été publié ces 7 derniers jours (lien Instagram, vues). Calendrier et Feed restent en onglets.
+- **Point com simplifié** : 3 chiffres (abonnés, publiés en 7 jours, programmés), l'état en une phrase, ce qu'Océane a à faire (messages, comptes à suivre), le conseil de la semaine ; le détail (routines, journal, Point com complet) est replié.
 - **Com** : le Point com du lundi (bilan, calendrier, conseils, relances), l'état de chaque routine et un journal où les routines notent publications, échecs et vérifications (`reglages/strategie.journal`).
 - **Stats** : abonnés, portée, engagement par gabarit et par village (API Meta).
 
