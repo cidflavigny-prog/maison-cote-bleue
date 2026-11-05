@@ -226,14 +226,7 @@
       <p class="lead">L’essentiel en un coup d’œil. Le détail est plus bas.</p>
     </div>
     <div class="panel brief" id="brief"></div>
-    <div class="panel chat" id="chat-box" hidden>
-      <div class="week-head"><h3>Parle à ton agent com</h3><button type="button" class="btn ghost" id="chat-clear">Effacer la discussion</button></div>
-      <p class="hint" style="margin:0">Elle connaît ton planning, tes idées, le Point com et ta charte, et elle a la main sur l’Atelier : demande-lui de créer, modifier, programmer ou déprogrammer un visuel. Dis-lui « retiens que… » pour donner une consigne durable.</p>
-      <div class="chat-log" id="chat-log" aria-live="polite"></div>
-      <div class="chips" id="chat-sugg" role="group" aria-label="Suggestions"></div>
-      <div class="chat-att" id="chat-att" hidden></div>
-      <div class="chat-in"><label class="btn chat-photo" for="chat-photo" title="Joindre une photo" aria-label="Joindre une photo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></label><input type="file" id="chat-photo" accept="image/*" multiple hidden><label for="chat-text" class="sr">Ton message</label><textarea id="chat-text" rows="2" placeholder="Écris à ton agent com… (📷 pour joindre une photo)"></textarea><button type="button" class="btn primary" id="chat-send">Envoyer</button></div>
-    </div>
+    <button type="button" class="btn primary talk-btn" id="com-talk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>Parler à ton agent com (texte et photos)</button>
     <details class="add">
       <summary>Le détail : routines, journal et Point com complet</summary>
       <div class="panel">
@@ -242,6 +235,18 @@
         <div id="strat-body" class="contacts"></div>
       </div>
     </details>
+  </section>
+
+  <!-- AGENT COM -->
+  <section class="view" id="v-agent" aria-labelledby="h-agent" hidden>
+    <div class="panel chat" id="chat-box" hidden>
+      <div class="week-head"><h2 id="h-agent">Ton agent com</h2><button type="button" class="btn ghost" id="chat-clear">Effacer</button></div>
+      <div class="chat-log" id="chat-log" aria-live="polite"></div>
+      <div class="chips" id="chat-sugg" role="group" aria-label="Suggestions"></div>
+      <div class="chat-att" id="chat-att" hidden></div>
+      <div class="chat-in"><label class="btn chat-photo" for="chat-photo" title="Joindre une photo" aria-label="Joindre une photo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></label><input type="file" id="chat-photo" accept="image/*" multiple hidden><label for="chat-text" class="sr">Ton message</label><textarea id="chat-text" rows="2" placeholder="Écris à ton agent com…"></textarea><button type="button" class="btn primary" id="chat-send">Envoyer</button></div>
+    </div>
+    <p class="hint" id="chat-off">Connexion à ton agent com…</p>
   </section>
 
   <!-- STATS -->
@@ -284,4 +289,5 @@
   <button data-view="messages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H8l-4 4z"/><path d="M8 9h8M8 12h5"/></svg><span>To do<span class="count" id="msg-count" hidden></span></span></button>
   <button data-view="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Stats</button>
 </nav>
+<button type="button" class="fab" id="fab-agent" aria-label="Parler à ton agent com"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 10h8M8 13h5"/></svg></button>
 <div class="toast" id="toast" hidden role="status"></div>

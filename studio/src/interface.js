@@ -19,8 +19,8 @@ function draw(force){if($("v-atelier").hidden&&!force)return;var car=isCar();$("
 var feedTimer=null;window.__redraw=function(){draw();if(!$("feed-box").hidden&&!$("v-semaine").hidden){clearTimeout(feedTimer);feedTimer=setTimeout(renderFeed,300)}};
 
 /* ---------- Navigation ---------- */
-var VIEWS=["semaine","com","atelier","messages","stats","idees"];
-function show(v){VIEWS.forEach(function(x){$("v-"+x).hidden=x!==v});document.querySelectorAll(".tabs button").forEach(function(b){if(b.dataset.view===v)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});store("mcb-tab",v);window.scrollTo(0,0);if(v==="atelier")draw()}
+var VIEWS=["semaine","com","atelier","messages","stats","idees","agent"];
+function show(v){VIEWS.forEach(function(x){$("v-"+x).hidden=x!==v});var fab=$("fab-agent");if(fab)fab.hidden=v==="agent";if(v==="agent")setTimeout(function(){window.scrollTo(0,document.body.scrollHeight);var ta=$("chat-text");if(ta&&window.innerWidth>=900)ta.focus()},50);document.querySelectorAll(".tabs button").forEach(function(b){if(b.dataset.view===v)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});store("mcb-tab",v);window.scrollTo(0,0);if(v==="atelier")draw()}
 document.querySelectorAll(".tabs button").forEach(function(b){b.addEventListener("click",function(){show(b.dataset.view)})});
 (function(){var h=(location.hash||"").slice(1);show(VIEWS.indexOf(h)>=0?h:"semaine")})();
 Promise.all(["600 100px Fredoka","800 40px Nunito","400 40px Nunito","700 40px Nunito","600 40px Nunito"].map(function(f){return document.fonts.load(f)})).then(function(){draw()},function(){draw()});
@@ -146,10 +146,11 @@ function chatContext(){var t=todayIso(),r=S.strat||{},c=S.charte||{};
   return JSON.stringify(data).slice(0,30000)}
 function renderChat(){var log=$("chat-log");if(!log)return;var stick=log.scrollHeight-log.scrollTop-log.clientHeight<60;log.textContent="";
   var list=S.chat.slice().sort(function(a,b){return(a.at||"").localeCompare(b.at||"")}).slice(-60);
-  if(!list.length&&!chatCtl)log.appendChild(el("p",{class:"hint",style:"margin:0",text:"Pose ta première question, ou choisis une suggestion."}));
+  var sg=$("chat-sugg");if(sg)sg.hidden=!!list.length;if(!list.length&&!chatCtl)log.appendChild(el("p",{class:"hint",style:"margin:0",text:"Demande-lui ce que tu veux : un avis, un post, une modif, avec ou sans photo (📷)."}));
   list.forEach(function(m){var b=el("div",{class:"bub "+(m.role==="user"?"me":"ai"),text:m.text||""});if(m.photos&&m.photos.length)b.appendChild(el("div",{class:"bub-ph"},m.photos.map(function(id){return el("img",{src:"/_blob/"+id,alt:"Photo jointe",loading:"lazy"})})));log.appendChild(b)});
   if(chatCtl){log.appendChild(el("div",{class:"bub ai"+(S.chatLive?"":" wait"),id:"chat-live",text:S.chatLive||"Elle réfléchit…"}))}
-  if(stick||chatCtl)log.scrollTop=log.scrollHeight}
+  if(stick||chatCtl)log.scrollTop=log.scrollHeight;chatPageBottom()}
+function chatPageBottom(){if($("v-agent").hidden)return;window.scrollTo(0,document.body.scrollHeight)}
 function chatTools(){return[
   {name:"noter_consigne",description:"Enregistre une consigne durable d’Océane dans la charte du média (lue par toutes les routines : veille, météo, Point com, publication). Renvoie la liste des consignes.",inputSchema:{type:"object",properties:{consigne:{type:"string",description:"La consigne, en une phrase claire."}},required:["consigne"]},
    execute:function(a){var txt=String(a.consigne||"").trim();if(!txt)throw new Error("consigne vide");var ref=S.db.doc("reglages/charte");return ref.get().then(function(sn){var c=sn.exists?sn.data():{};var l=(c.consignes||[]).concat([{texte:txt,le:todayIso()}]).slice(-30);return ref.update({consignes:l,majLe:new Date().toISOString()}).then(function(){return l.map(function(x){return x.texte})})})}},
@@ -182,12 +183,12 @@ function chatSend(text){text=String(text||"").trim();var att=S.chatAtt.filter(fu
   var turns=[{role:"user",content:CHAT_RULES+"\n\nDONNÉES DU STUDIO (JSON) :\n"+chatContext()}].concat(hist);
   chatCtl=new AbortController();S.chatLive="";$("chat-send").textContent="Stop";renderChat();
   var done=function(t,note){chatCtl=null;S.chatLive="";$("chat-send").textContent="Envoyer";if(t){var at=new Date().toISOString();col.doc(at.replace(/[:.]/g,"-")+"-a").set({role:"assistant",text:t,at:at})}else renderChat();if(note)toast(note)};
-  S.sample.limits().catch(function(){return null}).then(function(lim){var opts={signal:chatCtl.signal,cache:false,onText:function(u){S.chatLive=u.text;var b=$("chat-live");if(b){b.textContent=u.text;b.classList.remove("wait");var lg=$("chat-log");lg.scrollTop=lg.scrollHeight}}};
+  S.sample.limits().catch(function(){return null}).then(function(lim){var opts={signal:chatCtl.signal,cache:false,onText:function(u){S.chatLive=u.text;var b=$("chat-live");if(b){b.textContent=u.text;b.classList.remove("wait");var lg=$("chat-log");lg.scrollTop=lg.scrollHeight;chatPageBottom()}}};
     if(lim&&lim.tools){opts.tools=chatTools().concat(atelierTools()).slice(0,lim.tools.maxCount||8);delete opts.cache}if(photoFiles.length&&lim&&lim.images)opts.images=photoFiles.slice(0,lim.images.maxCount||4);
     return S.sample(turns,opts)}).then(function(r){done(r.text.trim(),r.truncated?"Réponse coupée : demande-lui plus court":"")},function(e){var c=e&&e.code;
-      if(c==="not_granted"||c==="sampling_disabled"||c==="not_declared"||c==="capability_disabled"){$("chat-box").hidden=true;done("","");return}
+      if(c==="not_granted"||c==="sampling_disabled"||c==="not_declared"||c==="capability_disabled"){$("chat-box").hidden=true;$("chat-off").hidden=false;done("","");return}
       done(e&&e.text?e.text.trim():"",c==="cancelled"?"":c==="rate_limited"?"Trop de demandes, réessaie dans un moment":c==="refused"?"Elle n’a pas pu répondre à cette demande : reformule-la":"La réponse n’a pas pu arriver, réessaie")})}
-function setupChat(){if(!S.sample||!S.db)return;$("chat-box").hidden=false;var sg=$("chat-sugg");sg.textContent="";
+function setupChat(){if(!S.sample||!S.db)return;$("chat-box").hidden=false;$("chat-off").hidden=true;var sg=$("chat-sugg");sg.textContent="";
   CHAT_SUGG.forEach(function(q){sg.appendChild(el("button",{type:"button",class:"chip",text:q,onclick:function(){if(/…$/.test(q)){var ta=$("chat-text");ta.value=q.replace(/…$/," ");ta.focus()}else chatSend(q)}}))});
   $("chat-send").onclick=function(){if(chatCtl){chatCtl.abort();return}chatSend($("chat-text").value)};$("chat-photo").onchange=function(){addChatPhotos(this.files);this.value=""};
   $("chat-text").onkeydown=function(e){if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();$("chat-send").click()}};
@@ -478,7 +479,7 @@ function setConn(ok,txt){var b=$("conn");b.textContent="";b.append(el("span",{cl
 function snap(col,cb,q){return(q||S.db.collection(col)).onSnapshot(function(s){var docs=s.docs.map(function(d){return Object.assign({id:d.id},d.data())});cb(docs,!(s.metadata&&s.metadata.fromCache))},function(){setConn(false,"Reconnexion…")})}
 renderWeek();renderIdeas();renderAna();syncForm();
 var C=window.claude;
-if(!C||!C.use)setConn(false,"Hors ligne");
+if(!C||!C.use){setConn(false,"Hors ligne");$("chat-off").textContent="La discussion n’est pas disponible sur cette vue : ouvre le studio dans l’application Claude."}
 else{
   C.use("db").then(function(db){if(!db){setConn(false,"Base indisponible");return}S.db=db;setConn(true,"Synchronisé");
     snap("idees",function(d,live){S.ideas=d;renderIdeas();renderWeek();renderReseaux();if(live)purge("idees",d,function(i){return isPast(i)||oldUndated(i)})},db.collection("idees").limit(500));
@@ -496,10 +497,12 @@ else{
     db.doc("reglages/strategie").onSnapshot(function(s){S.strat=s.exists?s.data():null;renderStrat()});
   });
   C.use("assets").then(function(a){S.assets=a});C.use("downloads").then(function(d){S.downloads=d});
-  C.use("sample").then(function(s){S.sample=s;if(!s)$("btn-legende").hidden=true;else setupChat()});
+  C.use("sample").then(function(s){S.sample=s;if(!s){$("btn-legende").hidden=true;$("chat-off").textContent="La discussion n’est pas disponible sur cette vue : ouvre le studio dans l’application Claude."}else setupChat()});
 }
 // Rendu sans écran pour les routines (outils/rendu.mjs) : renvoie le PNG d'un visuel en data URL.
 window.MCBRendu=function(post,meteo,slide){var Q=Object.assign(blankPost(),post);render(Q,meteo,slide||0);return cv.toDataURL("image/png")};
 // Couverture de story « À la une » : l'icône de la marque (soleil et vague) dans la couleur de la rubrique.
 window.MCBAlaUne=function(ring,bg){cv.width=1080;cv.height=1920;ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle=bg;ctx.fillRect(0,0,1080,1920);var s=760/52;logo(540-26*s,960-26*s,760,ring);return cv.toDataURL("image/png")};
 window.MCBSlides=function(post){var Q=Object.assign(blankPost(),post);return Q.format==="carrousel"&&canCarousel(Q.type)?carCount(Q):1};
+
+$("fab-agent").onclick=function(){show("agent")};$("com-talk").onclick=function(){show("agent")};

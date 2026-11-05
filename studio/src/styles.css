@@ -343,3 +343,13 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
 .att.wait{opacity:.5}
 .bub-ph{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
 .bub-ph img{width:84px;height:84px;object-fit:cover;border-radius:8px;display:block}
+.talk-btn{align-self:flex-start}
+.fab{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:11;width:60px;height:60px;border-radius:50%;border:2px solid var(--ink);background:var(--sun);color:var(--sun-ink);box-shadow:4px 4px 0 var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.fab svg{width:28px;height:28px}
+.fab:hover{transform:translateY(-1px)}
+@media (min-width:900px){.fab{bottom:28px;right:28px}}
+#v-agent .chat{border:0;box-shadow:none;background:transparent;padding:0;min-height:calc(100vh - 240px)}
+#v-agent .chat-log{max-height:none;flex:1;overflow:visible}
+#v-agent .chat-in{position:sticky;bottom:calc(76px + env(safe-area-inset-bottom,0px));background:var(--bg);padding:8px 0}
+@media (min-width:900px){#v-agent .chat-in{bottom:0}}
+#v-agent .chat-att{position:sticky;bottom:calc(140px + env(safe-area-inset-bottom,0px));background:var(--bg)}
