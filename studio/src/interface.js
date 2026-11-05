@@ -67,7 +67,7 @@ function ideaToPost(i,format){P=blankPost();P.format=format;P.type=TYPES[i.type]
 function renderIdeas(){var list=$("idea-list");list.textContent="";
   var items=S.ideas.filter(inFilter).sort(function(a,b){return(a.quand||"9").localeCompare(b.quand||"9")||(b.date||"").localeCompare(a.date||"")});
   var live=S.ideas.filter(function(i){return!isPast(i)&&(i.statut||"nouvelle")==="nouvelle"});var nN=live.filter(function(i){return!i.aVerifier}).length,nV=live.length-nN;
-  $("n-nouvelle").textContent=nN||"";$("n-verifier").textContent=nV||"";$("idea-count").hidden=!(nN+nV);$("idea-count").textContent=nN+nV;
+  $("n-nouvelle").textContent=nN||"";$("n-verifier").textContent=nV||"";
   var nsel=Object.keys(S.sel).filter(function(k){return S.sel[k]}).length;$("selbar").hidden=!S.selecting;$("sel-count").textContent=nsel+(nsel>1?" idées cochées":" idée cochée");
   if(!items.length){var msg={nouvelle:"Rien à traiter pour l’instant.",verifier:"Aucune info en attente de vérification.",utilisee:"Aucune idée utilisée.",ecartee:"Aucune idée écartée."}[S.filter];list.appendChild(el("div",{class:"empty"},[el("b",{text:msg}),el("br"),S.filter==="nouvelle"?"Chaque matin, la veille dépose ses infos ici.":""]));return}
   items.forEach(function(i){var t=typ(i.type),v=vil(i.village),st=i.statut||"nouvelle",actions;

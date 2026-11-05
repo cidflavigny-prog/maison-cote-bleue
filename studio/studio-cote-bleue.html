@@ -51,7 +51,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 @media (max-width:560px){.hero-k{display:none}.create-btn span{display:none}.create-btn{padding:0 10px}.badge{display:none}}
 
 /* Rail d'outils (bas sur téléphone, gauche sur grand écran) */
-.tabs{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(6,1fr);padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
 .tabs button{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:3px;min-height:54px;justify-content:center;font-size:11.5px;font-weight:700;color:var(--faint);border-radius:10px;cursor:pointer}
 .tabs button svg{width:24px;height:24px;padding:4px;box-sizing:content-box;border-radius:10px}
 .tabs button:hover{color:var(--ink)}
@@ -619,7 +619,6 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
 
 <nav class="tabs" aria-label="Sections">
   <button data-view="semaine" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Planning</button>
-  <button data-view="idees"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.8V16h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0 0 12 3z"/></svg><span>Idées<span class="count" id="idea-count" hidden></span></span></button>
   <button data-view="atelier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 15l3-3 2 2 3-3"/><circle cx="9" cy="8" r="1.5"/></svg>Atelier</button>
   <button data-view="messages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H8l-4 4z"/><path d="M8 9h8M8 12h5"/></svg><span>Messages<span class="count" id="msg-count" hidden></span></span></button>
   <button data-view="com"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11v3a1 1 0 0 0 1 1h2l5 4V6L7 10H5a1 1 0 0 0-1 1zM16 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12"/></svg><span>Com<span class="count" id="com-count" hidden></span></span></button>
@@ -1021,7 +1020,7 @@ function ideaToPost(i,format){P=blankPost();P.format=format;P.type=TYPES[i.type]
 function renderIdeas(){var list=$("idea-list");list.textContent="";
   var items=S.ideas.filter(inFilter).sort(function(a,b){return(a.quand||"9").localeCompare(b.quand||"9")||(b.date||"").localeCompare(a.date||"")});
   var live=S.ideas.filter(function(i){return!isPast(i)&&(i.statut||"nouvelle")==="nouvelle"});var nN=live.filter(function(i){return!i.aVerifier}).length,nV=live.length-nN;
-  $("n-nouvelle").textContent=nN||"";$("n-verifier").textContent=nV||"";$("idea-count").hidden=!(nN+nV);$("idea-count").textContent=nN+nV;
+  $("n-nouvelle").textContent=nN||"";$("n-verifier").textContent=nV||"";
   var nsel=Object.keys(S.sel).filter(function(k){return S.sel[k]}).length;$("selbar").hidden=!S.selecting;$("sel-count").textContent=nsel+(nsel>1?" idées cochées":" idée cochée");
   if(!items.length){var msg={nouvelle:"Rien à traiter pour l’instant.",verifier:"Aucune info en attente de vérification.",utilisee:"Aucune idée utilisée.",ecartee:"Aucune idée écartée."}[S.filter];list.appendChild(el("div",{class:"empty"},[el("b",{text:msg}),el("br"),S.filter==="nouvelle"?"Chaque matin, la veille dépose ses infos ici.":""]));return}
   items.forEach(function(i){var t=typ(i.type),v=vil(i.village),st=i.statut||"nouvelle",actions;

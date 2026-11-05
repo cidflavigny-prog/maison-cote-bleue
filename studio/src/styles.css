@@ -48,7 +48,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 @media (max-width:560px){.hero-k{display:none}.create-btn span{display:none}.create-btn{padding:0 10px}.badge{display:none}}
 
 /* Rail d'outils (bas sur téléphone, gauche sur grand écran) */
-.tabs{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(6,1fr);padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
 .tabs button{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:3px;min-height:54px;justify-content:center;font-size:11.5px;font-weight:700;color:var(--faint);border-radius:10px;cursor:pointer}
 .tabs button svg{width:24px;height:24px;padding:4px;box-sizing:content-box;border-radius:10px}
 .tabs button:hover{color:var(--ink)}
