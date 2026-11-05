@@ -302,6 +302,17 @@ function drawCarousel(P,W,H,i){var items=carItems(P),n=items.length+2;i=Math.max
     var line=it.line,num=null,m=line.match(/^\*\*(\d+)\*\*\s*/);if(m){num=m[1];line=line.slice(m[0].length)}
     var emo=null,em=line.match(/^(\p{Extended_Pictographic}\uFE0F?)\s*/u);if(em){emo=em[1];line=line.slice(em[0].length)}
     var parts=line.split(/\s+·\s+/),head=parts.shift(),acc=P.village&&P.village!=="cotebleue"?vil(P.village).color:BLEU;
+    var sp=(P.slidePhotos||[])[i-1];
+    if(sp){/* Variante photo : grande photo en haut, puis autocollant, titre et une carte par info */
+      var tf=fitTitle(head,cw-150,180,88,60),tH=tf.lines.length*tf.size*1.04;
+      var pp=parts.map(function(t){var l=layout(t,"700 38px "+FB,"800 38px "+FB,cw-110);return{l:l,h:l.length*48+40}}),pH=pp.reduce(function(a,q){return a+q.h+16},0);
+      var phH=Math.max(380,Math.min(600,H-150-96-48-Math.max(tH,120)-36-pH)),yy=96;
+      photoFrame(imgFor(sp),M,yy,cw,phH,28,8,14,"");yy+=phH+48;
+      if(emo||num){ctx.save();ctx.translate(M+58,yy+Math.max(tH,120)/2);ctx.fillStyle=NUIT;ctx.beginPath();ctx.arc(6,6,56,0,Math.PI*2);ctx.fill();ctx.fillStyle=SOLEIL;ctx.beginPath();ctx.arc(0,0,56,0,Math.PI*2);ctx.fill();ctx.lineWidth=4;ctx.strokeStyle=NUIT;ctx.stroke();ctx.textAlign="center";ctx.textBaseline="middle";
+        if(emo){ctx.font="62px 'Apple Color Emoji','Noto Color Emoji','Segoe UI Emoji',sans-serif";ctx.fillText(emo,0,4)}else{ctx.fillStyle=NUIT;ctx.font="600 64px "+FD;ctx.fillText(num,0,4)}ctx.restore();ctx.textAlign="left"}
+      drawTitle(tf,M+150,yy+Math.max(0,(120-tH)/2),th.fg,th.shadow);yy+=Math.max(tH,120)+36;
+      pp.forEach(function(q){card(M,yy,cw,q.h,22);ctx.fillStyle=acc;ctx.beginPath();ctx.arc(M+40,yy+20+24,11,0,Math.PI*2);ctx.fill();drawLines(q.l,M+70,yy+20,48,"700 38px "+FB,"800 38px "+FB,NUIT);yy+=q.h+16});
+      carFooter(th);return n}
     if(num){ctx.save();ctx.globalAlpha=th.fg===BLANC?.14:.08;ctx.fillStyle=th.fg===BLANC?BLANC:NUIT;ctx.font="600 820px "+FD;ctx.textAlign="right";ctx.textBaseline="alphabetic";ctx.fillText(num,W-24,H-150);ctx.restore()}
     var top=(emo||num)?300:0,f3=fitTitle(head,cw,330,124,72),fh3=f3.lines.length*f3.size*1.04;
     var pts=parts.map(function(t){var l=layout(t,"700 44px "+FB,"800 44px "+FB,cw-120);return{l:l,h:l.length*56+46}});
